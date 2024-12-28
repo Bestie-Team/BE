@@ -38,6 +38,7 @@ model User {
   ownedGroups Group[]
   groupParticipation GroupParticipation[]
   feedComments FeedComment[]
+  blockedFeeds BlockedFeed[]
 
   @@unique([email, deletedAt])
   @@unique([serviceId, deletedAt])
@@ -100,6 +101,7 @@ model Feed {
   writer User @relation(fields: [writerId], references: [id])
   images FeedImage[]
   comments FeedComment[]
+  blockedFeeds BlockedFeed[]
 
   @@map("feed")
 }
@@ -131,7 +133,15 @@ model FeedComment {
 }
 
 model BlockedFeed {
-  id String @id
+  userId    String
+  feedId    String
+  createdAt DateTime @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+  feed Feed @relation(fields: [feedId], references: [id])
+
+  @@unique([userId, feedId])
+  @@map("blocked_feed")
 }
 
 model Friend {

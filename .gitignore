@@ -37,3 +37,6 @@ lerna-debug.log*
 # ENV
 .env
 .env.*
+
+# ERD
+ERD.md

@@ -16,7 +16,6 @@ enum OAuthProvider {
 enum FriendStatus {
   PENDING
   ACCEPTED
-  REMOVED
 }
 
 model User {
@@ -40,6 +39,8 @@ model User {
   groupParticipation GroupParticipation[]
   feedComments FeedComment[]
 
+  @@unique([email, deletedAt])
+  @@unique([serviceId, deletedAt])
   @@map("user")
 }
 
@@ -129,17 +130,21 @@ model FeedComment {
   @@map("feed_comment")
 }
 
+model BlockedFeed {
+  id String @id
+}
+
 model Friend {
   id String @id
   senderId String
   receiverId String
   status FriendStatus
   createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
 
   sender User @relation(name: "SenderUser", fields: [senderId], references: [id])
   receiver User @relation(name: "ReceiverUser", fields: [receiverId], references: [id])
 
+  @@unique([senderId, receiverId])
   @@map("friend")
 }
 
@@ -150,7 +155,6 @@ model Group {
   groupImageUrl String @map("group_image_url")
   ownerId String @map("owner_id")
   createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
 
   owner User @relation(fields: [ownerId], references: [id])
   groupParticipation GroupParticipation[]
@@ -168,5 +172,6 @@ model GroupParticipation {
   group Group @relation(fields: [groupId], references: [id])
   participant User @relation(fields: [participantId], references: [id])
 
+  @@unique([groupId, participantId])
   @@map("group_participation")
 }

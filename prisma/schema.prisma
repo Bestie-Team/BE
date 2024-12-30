@@ -183,6 +183,7 @@ model Group {
   name String @db.VarChar(20)
   description String @db.VarChar(40)
   groupImageUrl String @map("group_image_url")
+  gatheringCount Int @default(0) @map("gathering_count")
   ownerId String @map("owner_id")
   createdAt DateTime @map("created_at")
 

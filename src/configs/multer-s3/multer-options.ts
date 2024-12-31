@@ -15,7 +15,7 @@ const fileFilter = (req: any, file: any, cb: any) => {
   return cb(null, true);
 };
 
-const CreateOptions = (resource: string, path: string): MulterOptions => {
+const CreateMulterOptions = (resource: string, path: string): MulterOptions => {
   return {
     fileFilter,
     storage: new MulterBuilder()
@@ -28,5 +28,5 @@ const CreateOptions = (resource: string, path: string): MulterOptions => {
 };
 
 export const CreateProfileImageMulterOptions = (): MulterOptions => {
-  return CreateOptions('user', 'profile');
+  return CreateMulterOptions('user', 'profile');
 };

@@ -6,17 +6,15 @@ export class GoogleStrategy implements OauthStrategy {
   async getUserInfo(token: string): Promise<OauthUserInfo> {
     const response = await fetch(GOOGLE_USER_INFO_URL, {
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
       throw new InternalServerErrorException(
-        `Google API 에러 ${response.status} ${response.statusText}`,
+        `Google API 에러: ${response.status} ${response.statusText}`,
       );
     }
-
     const body: GoogleUserInfo = await response.json();
     const { name, email } = body;
 

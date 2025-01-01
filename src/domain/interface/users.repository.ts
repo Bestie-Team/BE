@@ -1,10 +1,7 @@
-import { Provider } from '../../shared/types';
+import { UserBasicInfo } from '../types/user.types';
 
 export interface UsersRepository {
-  findOneByEmail(email: string): Promise<{
-    email: string;
-    provider: Provider;
-  } | null>;
+  findOneByEmail(email: string): Promise<UserBasicInfo | null>;
 }
 
 export const UsersRepository = Symbol('UsersRepository');

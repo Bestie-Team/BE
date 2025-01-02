@@ -4,6 +4,7 @@ import { AuthService } from '../../../domain/services/auth/auth.service';
 import { Provider } from '../../../shared/types/index';
 import { ValidateProviderPipe } from '../../../common/pipes/validate-provider.pipe';
 import { LoginResponse } from '../../dto/auth/login.response';
+import { RegisterRequest } from '../../dto/auth/register.request';
 
 @Controller('auth')
 export class AuthController {
@@ -16,5 +17,10 @@ export class AuthController {
   ): Promise<LoginResponse> {
     const { accessToken } = dto;
     return await this.authService.login(provider, accessToken);
+  }
+
+  @Post('register')
+  async register(@Body() dto: RegisterRequest) {
+    return await this.authService.register(dto);
   }
 }

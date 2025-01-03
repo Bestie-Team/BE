@@ -32,7 +32,10 @@
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.7",
     "joi": "^17.13.3",
+    "kysely": "^0.27.5",
     "multer-s3": "^3.0.1",
+    "prisma-extension-kysely": "^3.0.0",
+    "prisma-kysely": "^1.8.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "uuid": "^11.0.3"

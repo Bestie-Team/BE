@@ -26,6 +26,12 @@ enum FriendStatus {
   REPORTED
 }
 
+enum GatheringParticipationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model User {
   id String @id
   email String @db.VarChar(255) @unique
@@ -37,8 +43,6 @@ model User {
   deletedAt DateTime? @map("deleted_at")
 
   gatherings Gathering[]
-  receivedInvitations GatheringInvitation[] @relation("InviterUser")
-  sentInvitations GatheringInvitation[] @relation("InviteeUser")
   gatheringParticipant GatheringParticipation[]
   feeds Feed[]
   ownedGroups Group[]
@@ -66,31 +70,18 @@ model Gathering {
   deletedAt DateTime? @map("deleted_at")
 
   user User @relation(fields: [hostUserId], references: [id])
-  invitations GatheringInvitation[]
-  participation GatheringParticipation[]
+  participations GatheringParticipation[]
 
   @@map("gathering")
-}
-model GatheringInvitation {
-  id String @id
-  gatheringId String @map("gathering_id")
-  inviterId String @map("inviter_id")
-  inviteeId String @map("invitee_id")
-  createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  gathering Gathering @relation(fields: [gatheringId], references: [id])
-  inviter User @relation(name: "InviterUser", fields: [inviterId], references: [id])
-  invitee User @relation(name: "InviteeUser", fields: [inviteeId], references: [id])
-
-  @@map("gathering_invitation")
 }
 
 model GatheringParticipation {
   id String @id
   gatheringId String @map("gathering_id")
   participantId String @map("participant_id")
+  status GatheringParticipationStatus
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at") 
   deletedAt DateTime? @map("deleted_at")
 
   gathering Gathering @relation(fields: [gatheringId], references: [id])

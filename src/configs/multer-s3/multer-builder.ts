@@ -33,7 +33,6 @@ export class MulterBuilder {
   }
 
   allowImageMimeTypes() {
-    console.log(String(process.env.AWS_BUCKET_REGION));
     this.allowedMimeTypes.push(...imageMimeTypes);
     return this;
   }

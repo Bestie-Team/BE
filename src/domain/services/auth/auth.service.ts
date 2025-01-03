@@ -5,12 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { UserEntity } from 'src/domain/entities/user/user.entity';
+import { UsersRepository } from 'src/domain/interface/users.repository';
+import { UserPrototype } from 'src/domain/types/user.types';
+import { OauthContext } from 'src/infrastructure/auth/context/oauth-context';
+import { Provider } from 'src/shared/types';
 import { v4 } from 'uuid';
-import { OauthContext } from '../../../infrastructure/auth/context/oauth-context';
-import { UsersRepository } from '../../interface/users.repository';
-import { Provider } from '../../../shared/types';
-import { UserEntity } from '../../entities/user/user.entity';
-import { UserPrototype } from '../../types/user.types';
 
 @Injectable()
 export class AuthService {

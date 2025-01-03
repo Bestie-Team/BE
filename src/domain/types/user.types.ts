@@ -1,4 +1,4 @@
-import { Provider } from '../../shared/types';
+import { Provider } from 'src/shared/types';
 
 export interface UserPrototype {
   readonly email: string;

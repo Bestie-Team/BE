@@ -1,5 +1,5 @@
-import { UserEntity } from '../entities/user/user.entity';
-import { UserBasicInfo } from '../types/user.types';
+import { UserEntity } from 'src/domain/entities/user/user.entity';
+import { UserBasicInfo } from 'src/domain/types/user.types';
 
 export interface UsersRepository {
   save(data: UserEntity): Promise<void>;

@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { GOOGLE_USER_INFO_URL } from '../../../common/constant';
+import { GOOGLE_USER_INFO_URL } from 'src/common/constant';
 import { OauthStrategy, OauthUserInfo } from './oauth-strategy';
 
 export class GoogleStrategy implements OauthStrategy {

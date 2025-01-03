@@ -1,5 +1,5 @@
-import { Provider } from '../../../shared/types';
-import { UserPrototype } from '../../types/user.types';
+import { UserPrototype } from 'src/domain/types/user.types';
+import { Provider } from 'src/shared/types';
 
 export class UserEntity {
   constructor(
@@ -10,6 +10,7 @@ export class UserEntity {
     readonly provider: Provider,
     readonly profileImageUrl: string,
     readonly createdAt: Date,
+    readonly updatedAt: Date,
   ) {}
 
   static create(
@@ -24,6 +25,7 @@ export class UserEntity {
       input.accountId,
       input.provider,
       input.profileImageUrl,
+      stdDate,
       stdDate,
     );
   }

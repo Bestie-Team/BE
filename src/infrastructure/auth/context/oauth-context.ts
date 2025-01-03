@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Provider } from 'src/shared/types';
 import { GoogleStrategy } from '../strategies/google-strategy';
-import { Provider } from '../../../shared/types';
-
 @Injectable()
 export class OauthContext {
   constructor(private readonly googleStrategy: GoogleStrategy) {}

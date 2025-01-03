@@ -1,6 +1,6 @@
 import { IsEmail, IsIn, IsUrl, Length } from 'class-validator';
-import { Provider } from '../../../shared/types';
 import { Transform } from 'class-transformer';
+import { Provider } from 'src/shared/types';
 
 export class RegisterRequest {
   @IsEmail({}, { message: '이메일 형식이 아닙니다.' })

@@ -152,8 +152,8 @@ model BlockedFeed {
 
 model Friend {
   id String @id
-  senderId String
-  receiverId String
+  senderId String @map("sender_id")
+  receiverId String @map("receiver_id")
   status FriendStatus
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")

@@ -1,5 +1,4 @@
-import { IMAGE_BASE_URL } from '../../../common/constant';
-
+import { IMAGE_BASE_URL } from 'src/common/constant';
 export class UploadProfileImageResponse {
   readonly imageUrl: string;
 

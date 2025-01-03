@@ -1,10 +1,10 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
-import { LoginRequest } from '../../dto/auth/login.request';
-import { AuthService } from '../../../domain/services/auth/auth.service';
-import { Provider } from '../../../shared/types/index';
-import { ValidateProviderPipe } from '../../../common/pipes/validate-provider.pipe';
-import { LoginResponse } from '../../dto/auth/login.response';
-import { RegisterRequest } from '../../dto/auth/register.request';
+import { ValidateProviderPipe } from 'src/common/pipes/validate-provider.pipe';
+import { AuthService } from 'src/domain/services/auth/auth.service';
+import { LoginRequest } from 'src/presentation/dto/auth/login.request';
+import { LoginResponse } from 'src/presentation/dto/auth/login.response';
+import { RegisterRequest } from 'src/presentation/dto/auth/register.request';
+import { Provider } from 'src/shared/types';
 
 @Controller('auth')
 export class AuthController {

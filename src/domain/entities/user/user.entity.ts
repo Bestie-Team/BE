@@ -1,5 +1,5 @@
-import { Provider } from '../../../shared/types';
-import { UserPrototype } from '../../types/user.types';
+import { UserPrototype } from 'src/domain/types/user.types';
+import { Provider } from 'src/shared/types';
 
 export class UserEntity {
   constructor(

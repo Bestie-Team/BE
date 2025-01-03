@@ -1,5 +1,4 @@
-import { Provider } from '../../../shared/types';
-
+import { Provider } from 'src/shared/types';
 export interface OauthStrategy {
   getUserInfo(token: string): Promise<OauthUserInfo>;
 }

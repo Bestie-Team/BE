@@ -73,6 +73,7 @@ model Gathering {
 
   user User @relation(fields: [hostUserId], references: [id])
   participations GatheringParticipation[]
+  feeds Feed[]
 
   @@map("gathering")
 }
@@ -95,12 +96,14 @@ model GatheringParticipation {
 model Feed {
   id String @id
   writerId String @map("writer_id")
+  gatheringId String @map("gathering_id")
   content String @db.VarChar(150)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   writer User @relation(fields: [writerId], references: [id])
+  gathering Gathering @relation(fields: [gatheringId], references: [id])
   images FeedImage[]
   comments FeedComment[]
   blockedFeeds BlockedFeed[]

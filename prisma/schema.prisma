@@ -40,6 +40,7 @@ model User {
   accountId String @db.VarChar(15) @map("account_id") @unique
   profileImageUrl String @map("avatar_url")
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   gatherings Gathering[]
@@ -67,6 +68,7 @@ model Gathering {
   invitationImageUrl String @map("invitation_image_url")
   isDone Boolean @default(false) @map("is_done")
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   user User @relation(fields: [hostUserId], references: [id])
@@ -81,7 +83,7 @@ model GatheringParticipation {
   participantId String @map("participant_id")
   status GatheringParticipationStatus
   createdAt DateTime @map("created_at")
-  updatedAt DateTime @map("updated_at") 
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   gathering Gathering @relation(fields: [gatheringId], references: [id])
@@ -95,6 +97,7 @@ model Feed {
   writerId String @map("writer_id")
   content String @db.VarChar(150)
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   writer User @relation(fields: [writerId], references: [id])
@@ -123,6 +126,7 @@ model FeedComment {
   writerId String @map("writer_id")
   content String
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   feed Feed @relation(fields: [feedId], references: [id])
@@ -166,6 +170,7 @@ model Group {
   gatheringCount Int @default(0) @map("gathering_count")
   ownerId String @map("owner_id")
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
 
   owner User @relation(fields: [ownerId], references: [id])
   groupParticipation GroupParticipation[]

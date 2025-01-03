@@ -22,6 +22,14 @@ enum OAuthProvider {
 enum FriendStatus {
   PENDING
   ACCEPTED
+  REJECTED
+  REPORTED
+}
+
+enum GatheringParticipationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 model User {
@@ -32,21 +40,18 @@ model User {
   accountId String @db.VarChar(15) @map("account_id") @unique
   profileImageUrl String @map("avatar_url")
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   gatherings Gathering[]
-  receivedInvitations GatheringInvitation[] @relation("InviterUser")
-  sentInvitations GatheringInvitation[] @relation("InviteeUser")
   gatheringParticipant GatheringParticipation[]
   feeds Feed[]
-  friends1 Friend[] @relation("Friend1User")
-  friends2 Friend[] @relation("Friend2User")
   ownedGroups Group[]
   groupParticipation GroupParticipation[]
   feedComments FeedComment[]
   blockedFeeds BlockedFeed[]
-  sentFriendRequest FriendRequest[] @relation("SenderUser")
-  receivedFriendRequests FriendRequest[] @relation("ReceiverUser")
+  sentFriendRequest Friend[] @relation("SenderUser")
+  receivedFriendRequests Friend[] @relation("ReceiverUser")
 
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
@@ -63,34 +68,23 @@ model Gathering {
   invitationImageUrl String @map("invitation_image_url")
   isDone Boolean @default(false) @map("is_done")
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   user User @relation(fields: [hostUserId], references: [id])
-  invitations GatheringInvitation[]
-  participation GatheringParticipation[]
+  participations GatheringParticipation[]
+  feeds Feed[]
 
   @@map("gathering")
-}
-model GatheringInvitation {
-  id String @id
-  gatheringId String @map("gathering_id")
-  inviterId String @map("inviter_id")
-  inviteeId String @map("invitee_id")
-  createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  gathering Gathering @relation(fields: [gatheringId], references: [id])
-  inviter User @relation(name: "InviterUser", fields: [inviterId], references: [id])
-  invitee User @relation(name: "InviteeUser", fields: [inviteeId], references: [id])
-
-  @@map("gathering_invitation")
 }
 
 model GatheringParticipation {
   id String @id
   gatheringId String @map("gathering_id")
   participantId String @map("participant_id")
+  status GatheringParticipationStatus
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   gathering Gathering @relation(fields: [gatheringId], references: [id])
@@ -102,11 +96,14 @@ model GatheringParticipation {
 model Feed {
   id String @id
   writerId String @map("writer_id")
+  gatheringId String @map("gathering_id")
   content String @db.VarChar(150)
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   writer User @relation(fields: [writerId], references: [id])
+  gathering Gathering @relation(fields: [gatheringId], references: [id])
   images FeedImage[]
   comments FeedComment[]
   blockedFeeds BlockedFeed[]
@@ -132,6 +129,7 @@ model FeedComment {
   writerId String @map("writer_id")
   content String
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   feed Feed @relation(fields: [feedId], references: [id])
@@ -154,28 +152,17 @@ model BlockedFeed {
 
 model Friend {
   id String @id
-  friend1Id String
-  friend2Id String
-  createdAt DateTime @map("created_at")
-
-  friend1 User @relation(name: "Friend1User", fields: [friend1Id], references: [id])
-  friend2 User @relation(name: "Friend2User", fields: [friend2Id], references: [id])
-
-  @@unique([friend1Id, friend2Id])
-  @@map("friend")
-}
-
-model FriendRequest {
-  id String @id
   senderId String @map("sender_id")
   receiverId String @map("receiver_id")
+  status FriendStatus
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
 
   sender User @relation(name: "SenderUser", fields: [senderId], references: [id])
   receiver User @relation(name: "ReceiverUser", fields: [receiverId], references: [id])
 
   @@unique([senderId, receiverId])
-  @@map("friend_request")
+  @@map("friend")
 }
 
 model Group {
@@ -186,6 +173,7 @@ model Group {
   gatheringCount Int @default(0) @map("gathering_count")
   ownerId String @map("owner_id")
   createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
 
   owner User @relation(fields: [ownerId], references: [id])
   groupParticipation GroupParticipation[]

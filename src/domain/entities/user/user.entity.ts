@@ -10,6 +10,7 @@ export class UserEntity {
     readonly provider: Provider,
     readonly profileImageUrl: string,
     readonly createdAt: Date,
+    readonly updatedAt: Date,
   ) {}
 
   static create(
@@ -24,6 +25,7 @@ export class UserEntity {
       input.accountId,
       input.provider,
       input.profileImageUrl,
+      stdDate,
       stdDate,
     );
   }

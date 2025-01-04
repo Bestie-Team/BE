@@ -1,8 +1,18 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { FriendsService } from 'src/domain/services/friend/friends.service';
 import { CreateFriendRequest } from 'src/presentation/dto/friend/create-friend.request';
+import { FriendListResponse } from 'src/presentation/dto/friend/friend-list.response';
+import { UserPaginationRequest } from 'src/presentation/dto/user/user-pagination.request';
 
 @UseGuards(AuthGuard)
 @Controller('friends')
@@ -32,5 +42,16 @@ export class FriendsController {
     @CurrentUser() userId: string,
   ) {
     await this.friendsService.reject(friendId, userId);
+  }
+
+  @Get()
+  async getAllFriend(
+    @Query() paginationDto: UserPaginationRequest,
+    @CurrentUser() userId: string,
+  ): Promise<FriendListResponse> {
+    return await this.friendsService.getAllFriendByUserId(
+      userId,
+      paginationDto,
+    );
   }
 }

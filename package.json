@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/e2e/jest-e2e.json"
+    "test:e2e": "dotenv -e .env.test -- jest --config ./test/e2e/jest-e2e.json",
+    "prisma-push:test": "dotenv -e .env.test -- npx prisma db push"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.717.0",
@@ -52,6 +53,7 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "^5.59.11",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",

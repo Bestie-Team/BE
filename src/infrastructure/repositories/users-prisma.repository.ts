@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/domain/entities/user/user.entity';
 import { UsersRepository } from 'src/domain/interface/users.repository';
-import { UserBasicInfo } from 'src/domain/types/user.types';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
+import type { User, UserBasicInfo } from 'src/domain/types/user.types';
+import { SearchInput } from 'src/infrastructure/types/user.types';
 
 @Injectable()
 export class UsersPrismaRepository implements UsersRepository {
@@ -34,5 +35,41 @@ export class UsersPrismaRepository implements UsersRepository {
       },
       where: { accountId },
     });
+  }
+
+  async findByAccountIdContaining(
+    userId: string,
+    searchInput: SearchInput,
+  ): Promise<User[]> {
+    const { search, paginationInput } = searchInput;
+    const rows = await this.prisma.$kysely
+      .selectFrom('user as u')
+      .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
+      .where('u.account_id', 'like', `%${search}%`)
+      .where('u.id', '!=', userId)
+      .where('u.name', '>', paginationInput.cursor)
+      .where('u.id', 'not in', (qb) =>
+        qb
+          .selectFrom('friend as f')
+          .select('f.sender_id as friend_id')
+          .where('f.receiver_id', '=', userId)
+          .union((qb) =>
+            qb
+              .selectFrom('friend as f')
+              .select('f.receiver_id as friend_id')
+              .where('f.sender_id', '=', userId),
+          ),
+      )
+      .orderBy('u.name')
+      .orderBy('u.account_id')
+      .limit(paginationInput.limit)
+      .execute();
+
+    return rows.map((row) => ({
+      id: row.id,
+      accountId: row.account_id,
+      name: row.name,
+      profileImageUrl: row.profile_image_url,
+    }));
   }
 }

@@ -7,6 +7,7 @@ export interface UsersRepository {
   findOneByEmail(email: string): Promise<UserBasicInfo | null>;
   // 현재는 존재 유무만 판별하면 돼서 id만 조회.
   findOneByAccountId(accountId: string): Promise<{ id: string } | null>;
+  findOneById(id: string): Promise<{ id: string } | null>;
   findByAccountIdContaining(
     userId: string,
     searchInput: SearchInput,

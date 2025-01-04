@@ -37,6 +37,17 @@ export class UsersPrismaRepository implements UsersRepository {
     });
   }
 
+  async findOneById(id: string): Promise<{ id: string } | null> {
+    return await this.prisma.user.findUnique({
+      select: {
+        id: true,
+      },
+      where: {
+        id,
+      },
+    });
+  }
+
   async findByAccountIdContaining(
     userId: string,
     searchInput: SearchInput,

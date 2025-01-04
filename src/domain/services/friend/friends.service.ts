@@ -25,11 +25,9 @@ export class FriendsService {
 
   async accept(friendId: string, receiverId: string) {
     await this.checkReceiver(friendId, receiverId);
-
-    const stdDate = new Date();
     await this.friendsRepository.update(friendId, {
       status: 'ACCEPTED',
-      updatedAt: stdDate,
+      updatedAt: new Date(),
     });
   }
 

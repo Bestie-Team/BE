@@ -102,4 +102,31 @@ describe('FriendsController (e2e)', () => {
       expect(status).toEqual(201);
     });
   });
+
+  describe('(POST) /friends/{friendId}/reject - 친구 요청 거절', () => {
+    it('친구 요청 거절 정상 동작', async () => {
+      const { accessToken: receiverToken, accountId: receiverAccountId } =
+        await login(app);
+
+      const sender = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'),
+      });
+      const receiver = await prisma.user.findUnique({
+        where: {
+          accountId: receiverAccountId,
+        },
+      });
+      const friendRequest = await prisma.friend.create({
+        data: generateFriendEntity(sender.id, receiver!.id),
+      });
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post(`/friends/${friendRequest.id}/reject`)
+        .set('Authorization', receiverToken);
+      const { status } = response;
+
+      expect(status).toEqual(201);
+    });
+  });
 });

@@ -13,8 +13,17 @@ export type OAuthProvider = (typeof OAuthProvider)[keyof typeof OAuthProvider];
 export const FriendStatus = {
   PENDING: 'PENDING',
   ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+  REPORTED: 'REPORTED',
 } as const;
 export type FriendStatus = (typeof FriendStatus)[keyof typeof FriendStatus];
+export const GatheringParticipationStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+} as const;
+export type GatheringParticipationStatus =
+  (typeof GatheringParticipationStatus)[keyof typeof GatheringParticipationStatus];
 export type BlockedFeed = {
   userId: string;
   feedId: string;
@@ -23,8 +32,10 @@ export type BlockedFeed = {
 export type Feed = {
   id: string;
   writer_id: string;
+  gathering_id: string;
   content: string;
   created_at: Timestamp;
+  updated_at: Timestamp;
   deleted_at: Timestamp | null;
 };
 export type FeedComment = {
@@ -33,6 +44,7 @@ export type FeedComment = {
   writer_id: string;
   content: string;
   created_at: Timestamp;
+  updated_at: Timestamp;
   deleted_at: Timestamp | null;
 };
 export type FeedImage = {
@@ -44,15 +56,11 @@ export type FeedImage = {
 };
 export type Friend = {
   id: string;
-  friend1Id: string;
-  friend2Id: string;
-  created_at: Timestamp;
-};
-export type FriendRequest = {
-  id: string;
   sender_id: string;
   receiver_id: string;
+  status: FriendStatus;
   created_at: Timestamp;
+  updated_at: Timestamp;
 };
 export type Gathering = {
   id: string;
@@ -64,21 +72,16 @@ export type Gathering = {
   invitation_image_url: string;
   is_done: Generated<boolean>;
   created_at: Timestamp;
-  deleted_at: Timestamp | null;
-};
-export type GatheringInvitation = {
-  id: string;
-  gathering_id: string;
-  inviter_id: string;
-  invitee_id: string;
-  created_at: Timestamp;
+  updated_at: Timestamp;
   deleted_at: Timestamp | null;
 };
 export type GatheringParticipation = {
   id: string;
   gathering_id: string;
   participant_id: string;
+  status: GatheringParticipationStatus;
   created_at: Timestamp;
+  updated_at: Timestamp;
   deleted_at: Timestamp | null;
 };
 export type Group = {
@@ -89,6 +92,7 @@ export type Group = {
   gathering_count: Generated<number>;
   owner_id: string;
   created_at: Timestamp;
+  updated_at: Timestamp;
 };
 export type GroupParticipation = {
   id: string;
@@ -103,8 +107,9 @@ export type User = {
   provider: OAuthProvider;
   name: string;
   account_id: string;
-  avatar_url: string;
+  profile_image_url: string;
   created_at: Timestamp;
+  updated_at: Timestamp;
   deleted_at: Timestamp | null;
 };
 export type DB = {
@@ -113,9 +118,7 @@ export type DB = {
   feed_comment: FeedComment;
   feed_image: FeedImage;
   friend: Friend;
-  friend_request: FriendRequest;
   gathering: Gathering;
-  gathering_invitation: GatheringInvitation;
   gathering_participation: GatheringParticipation;
   group: Group;
   group_participation: GroupParticipation;

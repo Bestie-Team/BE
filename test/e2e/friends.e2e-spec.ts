@@ -98,24 +98,25 @@ describe('FriendsController (e2e)', () => {
 
   describe('(POST) /friend/{friendId}/accept - 친구 요청 수락', () => {
     it('친구 요청 수락 정상 동작', async () => {
-      const { accessToken, accountId } = await login(app);
+      const { accessToken: receiverToken, accountId: receiverAccountId } =
+        await login(app);
 
-      const user1 = await prisma.user.findUnique({
-        where: {
-          accountId,
-        },
-      });
-      const user2 = await prisma.user.create({
+      const sender = await prisma.user.create({
         data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'),
       });
+      const receiver = await prisma.user.findUnique({
+        where: {
+          accountId: receiverAccountId,
+        },
+      });
       const friendRequest = await prisma.friend.create({
-        data: generateFriendEntity(user1!.id, user2.id),
+        data: generateFriendEntity(sender.id, receiver!.id),
       });
 
       // when
       const response = await request(app.getHttpServer())
         .post(`/friends/${friendRequest.id}/accept`)
-        .set('Authorization', accessToken);
+        .set('Authorization', receiverToken);
       const { status } = response;
 
       expect(status).toEqual(201);

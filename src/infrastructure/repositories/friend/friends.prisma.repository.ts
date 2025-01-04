@@ -24,4 +24,11 @@ export class FriendsPrismaRepository implements FriendsRepository {
       throw e;
     }
   }
+
+  async update(friendId: string, data: Partial<FriendEntity>): Promise<void> {
+    await this.prisma.friend.update({
+      data,
+      where: { id: friendId },
+    });
+  }
 }

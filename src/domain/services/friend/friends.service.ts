@@ -23,6 +23,14 @@ export class FriendsService {
     await this.friendsRepository.save(friend);
   }
 
+  async accept(friendId: string) {
+    const stdDate = new Date();
+    await this.friendsRepository.update(friendId, {
+      status: 'ACCEPTED',
+      updatedAt: stdDate,
+    });
+  }
+
   async getUserByIdOrThrow(userId: string) {
     const exist = await this.usersRepository.findOneById(userId);
     if (!exist) {

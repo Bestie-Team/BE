@@ -25,10 +25,32 @@ export class FriendsPrismaRepository implements FriendsRepository {
     }
   }
 
-  async update(friendId: string, data: Partial<FriendEntity>): Promise<void> {
+  async findOneById(
+    id: string,
+  ): Promise<{ id: string; receiverId: string } | null> {
+    return await this.prisma.friend.findUnique({
+      select: {
+        id: true,
+        receiverId: true,
+      },
+      where: {
+        id,
+      },
+    });
+  }
+
+  async update(id: string, data: Partial<FriendEntity>): Promise<void> {
     await this.prisma.friend.update({
       data,
-      where: { id: friendId },
+      where: { id },
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.friend.delete({
+      where: {
+        id,
+      },
     });
   }
 }

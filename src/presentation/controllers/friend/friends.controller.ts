@@ -22,4 +22,12 @@ export class FriendsController {
   async accept(@Param('friendId') friendId: string) {
     await this.friendsService.accept(friendId);
   }
+
+  @Post(':friendId/reject')
+  async reject(
+    @Param('friendId') friendId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.friendsService.reject(friendId, userId);
+  }
 }

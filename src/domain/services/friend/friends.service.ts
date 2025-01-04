@@ -1,10 +1,15 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { v4 } from 'uuid';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { NOT_FOUND_USER_MESSAGE } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { UsersRepository } from 'src/domain/interface/users.repository';
 import { FriendPrototype } from 'src/domain/types/friend.types';
-import { v4 } from 'uuid';
 
 @Injectable()
 export class FriendsService {
@@ -29,6 +34,23 @@ export class FriendsService {
       status: 'ACCEPTED',
       updatedAt: stdDate,
     });
+  }
+
+  async reject(friendId: string, receiverId: string) {
+    const friendRequest = await this.getFriendByIdOrThrow(friendId);
+    if (friendRequest.receiverId !== receiverId) {
+      throw new ForbiddenException();
+    }
+    await this.friendsRepository.delete(friendId);
+  }
+
+  async getFriendByIdOrThrow(friendId: string) {
+    const friend = await this.friendsRepository.findOneById(friendId);
+    if (!friend) {
+      throw new NotFoundException();
+    }
+
+    return friend;
   }
 
   async getUserByIdOrThrow(userId: string) {

@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
-import { FRIEND_REQUEST_ALREADY_EXIST } from 'src/domain/error/messages';
+import { FRIEND_REQUEST_ALREADY_EXIST_MESSAGE } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
@@ -17,7 +17,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     } catch (e: unknown) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2002') {
-          throw new ConflictException(FRIEND_REQUEST_ALREADY_EXIST);
+          throw new ConflictException(FRIEND_REQUEST_ALREADY_EXIST_MESSAGE);
         }
         throw e;
       }

@@ -5,6 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { v4 } from 'uuid';
+import {
+  FORBIDDEN_MESSAGE,
+  NOT_FOUND_FRIEND_MESSAGE,
+} from 'src/domain/error/messages';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { FriendPrototype } from 'src/domain/types/friend.types';
@@ -39,11 +43,11 @@ export class FriendsService {
   async checkReceiver(friendId: string, receiverId: string) {
     const friendRequest = await this.friendsRepository.findOneById(friendId);
     if (!friendRequest) {
-      throw new NotFoundException();
+      throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
     }
 
     if (friendRequest.receiverId !== receiverId) {
-      throw new ForbiddenException();
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
   }
 }

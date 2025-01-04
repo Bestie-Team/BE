@@ -24,17 +24,13 @@ describe('UsersController (e2e)', () => {
     await app.init();
   });
 
-  beforeEach(async () => {
-    await prisma.user.deleteMany();
-  });
-
   afterEach(async () => {
     await prisma.user.deleteMany();
   });
 
   describe('(GET) /users/search?search={} - 회원 검색', () => {
     it('회원 검색 정상 동작', async () => {
-      const accessToken = await login(app);
+      const { accessToken } = await login(app);
 
       const user1 = await prisma.user.create({
         data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 3

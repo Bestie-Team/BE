@@ -23,5 +23,8 @@ export const login = async (app: INestApplication) => {
     .send(dto);
   const { body }: ResponseResult<LoginResponse> = response;
 
-  return `Bearer ${body.accessToken}`;
+  return {
+    accessToken: `Bearer ${body.accessToken}`,
+    accountId: dto.accountId,
+  };
 };

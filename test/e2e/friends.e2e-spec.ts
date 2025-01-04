@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
@@ -8,7 +9,10 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { SearchUserResponse } from 'src/presentation/dto/user/search-user.response';
 import { CreateFriendRequest } from 'src/presentation/dto/friend/create-friend.request';
 import { login } from 'test/helpers/login';
-import { generateUserEntity } from 'test/helpers/generators';
+import {
+  generateFriendEntity,
+  generateUserEntity,
+} from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
 
 describe('FriendsController (e2e)', () => {
@@ -89,6 +93,32 @@ describe('FriendsController (e2e)', () => {
       const { status } = response;
 
       expect(status).toEqual(404);
+    });
+  });
+
+  describe('(POST) /friend/{friendId}/accept - 친구 요청 수락', () => {
+    it('친구 요청 수락 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const user1 = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'),
+      });
+      const friendRequest = await prisma.friend.create({
+        data: generateFriendEntity(user1!.id, user2.id),
+      });
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post(`/friends/${friendRequest.id}/accept`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(201);
     });
   });
 });

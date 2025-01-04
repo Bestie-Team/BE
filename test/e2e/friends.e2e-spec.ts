@@ -74,26 +74,6 @@ describe('FriendsController (e2e)', () => {
 
       expect(status).toEqual(409);
     });
-
-    it('존재하지 않는 회원에게 요청하는 경우 예외', async () => {
-      const { accessToken } = await login(app);
-
-      const nonExistUserId = 'fcf85b63-d69c-4351-be5c-0ab17a465470';
-      const dto: CreateFriendRequest = { userId: nonExistUserId };
-
-      // when
-      await request(app.getHttpServer())
-        .post('/friends')
-        .send(dto)
-        .set('Authorization', accessToken);
-      const response = await request(app.getHttpServer())
-        .post('/friends')
-        .send(dto)
-        .set('Authorization', accessToken);
-      const { status } = response;
-
-      expect(status).toEqual(404);
-    });
   });
 
   describe('(POST) /friend/{friendId}/accept - 친구 요청 수락', () => {

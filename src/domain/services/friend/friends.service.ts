@@ -28,7 +28,12 @@ export class FriendsService {
     await this.friendsRepository.save(friend);
   }
 
-  async accept(friendId: string) {
+  async accept(friendId: string, receiverId: string) {
+    const friendRequest = await this.getFriendByIdOrThrow(friendId);
+    if (friendRequest.receiverId !== receiverId) {
+      throw new ForbiddenException();
+    }
+
     const stdDate = new Date();
     await this.friendsRepository.update(friendId, {
       status: 'ACCEPTED',

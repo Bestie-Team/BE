@@ -19,8 +19,11 @@ export class FriendsController {
   }
 
   @Post(':friendId/accept')
-  async accept(@Param('friendId') friendId: string) {
-    await this.friendsService.accept(friendId);
+  async accept(
+    @Param('friendId') friendId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.friendsService.accept(friendId, userId);
   }
 
   @Post(':friendId/reject')

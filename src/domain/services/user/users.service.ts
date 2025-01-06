@@ -10,11 +10,12 @@ export class UsersService {
   ) {}
 
   async search(userId: string, searchInput: SearchInput) {
+    const { search, paginationInput } = searchInput;
     const searchedUsers = await this.usersRepository.findByAccountIdContaining(
       userId,
-      searchInput,
+      { search, paginationInput },
     );
-    const nextCursor = this.getCursor(searchedUsers);
+    const nextCursor = this.getCursor(searchedUsers, paginationInput.limit);
 
     return {
       users: searchedUsers,
@@ -22,7 +23,7 @@ export class UsersService {
     };
   }
 
-  getCursor(users: User[]) {
-    return users.at(-1)?.name || null;
+  getCursor(users: User[], limit: number): string | null {
+    return users[limit - 1]?.name || null;
   }
 }

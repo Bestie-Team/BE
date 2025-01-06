@@ -30,7 +30,7 @@ export class FriendsService {
       userId,
       paginationInput,
     );
-    const nextCursor = this.getCursor(users);
+    const nextCursor = this.getCursor(users, paginationInput.limit);
 
     return {
       users,
@@ -69,7 +69,7 @@ export class FriendsService {
     }
   }
 
-  getCursor(users: User[]): string | null {
-    return users.at(-1)?.name || null;
+  getCursor(users: User[], limit: number): string | null {
+    return users[limit - 1]?.name || null;
   }
 }

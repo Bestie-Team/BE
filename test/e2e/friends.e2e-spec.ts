@@ -141,16 +141,19 @@ describe('FriendsController (e2e)', () => {
         },
       });
       const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'),
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
       });
       const user2 = await prisma.user.create({
-        data: generateUserEntity('test2@test.com', 'lighty_2', 'kkiri'),
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
       });
       const user3 = await prisma.user.create({
-        data: generateUserEntity('test3@test.com', 'lighty_3', '김진수'),
+        data: generateUserEntity('test3@test.com', 'lighty_3', '김진수'), // 2
+      });
+      const user4 = await prisma.user.create({
+        data: generateUserEntity('test4@test.com', 'lighty_4', '김진수'), // 3
       });
       const nonFriend = await prisma.user.create({
-        data: generateUserEntity('test4@test.com', 'lighty_4', '박김수'),
+        data: generateUserEntity('test5@test.com', 'lighty_5', '박김수'),
       });
       const friendRealtion1 = await prisma.friend.create({
         data: generateFriendEntity(loginedUser!.id, user1.id),
@@ -161,17 +164,25 @@ describe('FriendsController (e2e)', () => {
       const friendRealtion3 = await prisma.friend.create({
         data: generateFriendEntity(loginedUser!.id, user3.id),
       });
-      const expectedUsers = [user3, user1, user2];
-      const cursor = '가가';
+      const friendRealtion4 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user4.id),
+      });
+      const expectedUsers = [user3, user4, user1];
+      const cursor = {
+        name: user2.name,
+        accountId: user2.accountId,
+      };
       const limit = 3;
 
       // when
+      const url = encodeURI(
+        `/friends?cursor=${JSON.stringify(cursor)}&limit=${limit}`,
+      );
       const response = await request(app.getHttpServer())
-        .get(encodeURI(`/friends?cursor=${cursor}&limit=${limit}`))
+        .get(url)
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<FriendListResponse> = response;
       console.log(body);
-
       expect(status).toEqual(200);
       expect(body.nextCursor).toEqual(expectedUsers.at(-1)?.name);
       body.users.forEach((user, i) => {

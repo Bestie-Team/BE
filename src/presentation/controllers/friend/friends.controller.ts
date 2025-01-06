@@ -13,6 +13,7 @@ import { FriendsService } from 'src/domain/services/friend/friends.service';
 import { CreateFriendRequest } from 'src/presentation/dto/friend/create-friend.request';
 import { FriendListResponse } from 'src/presentation/dto/friend/friend-list.response';
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/friend-request-list.response';
+import { SearchFriendRequest } from 'src/presentation/dto/friend/search-friend.request';
 import { UserPaginationRequest } from 'src/presentation/dto/user/user-pagination.request';
 
 @UseGuards(AuthGuard)
@@ -73,5 +74,17 @@ export class FriendsController {
       userId,
       paginationDto,
     );
+  }
+
+  @Get('search')
+  async search(
+    @Query() dto: SearchFriendRequest,
+    @CurrentUser() userId: string,
+  ) {
+    const { search, ...paginationInput } = dto;
+    return await this.friendsService.search(userId, {
+      search,
+      paginationInput,
+    });
   }
 }

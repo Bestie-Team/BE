@@ -17,6 +17,7 @@ import {
   getFriendRequestCursor,
   getUserCursor,
 } from 'src/domain/shared/get-cursor';
+import { SearchInput } from 'src/domain/types/user.types';
 
 @Injectable()
 export class FriendsService {
@@ -37,6 +38,21 @@ export class FriendsService {
 
     return {
       users,
+      nextCursor,
+    };
+  }
+
+  async search(userId: string, searchInput: SearchInput) {
+    const { search, paginationInput } = searchInput;
+    const searchedUsers =
+      await this.friendsRepository.findFriendsByAccountIdAndNameContaining(
+        userId,
+        { search, paginationInput },
+      );
+    const nextCursor = getUserCursor(searchedUsers, paginationInput.limit);
+
+    return {
+      users: searchedUsers,
       nextCursor,
     };
   }

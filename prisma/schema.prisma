@@ -158,7 +158,7 @@ model Friend {
   id String @id
   senderId String @map("sender_id")
   receiverId String @map("receiver_id")
-  status FriendStatus
+  status FriendStatus @default(PENDING)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
 

@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { FiltersModule } from './common/filters/filters.module';
 import { PipesModule } from './common/pipes/pipes.module';
+import { FriendsModule } from 'src/modules/friend/friends.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PipesModule } from './common/pipes/pipes.module';
     PipesModule,
     UsersModule,
     AuthModule,
+    FriendsModule,
   ],
   controllers: [AppController],
 })

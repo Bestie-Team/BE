@@ -58,7 +58,7 @@ export type Friend = {
   id: string;
   sender_id: string;
   receiver_id: string;
-  status: FriendStatus;
+  status: Generated<FriendStatus>;
   created_at: Timestamp;
   updated_at: Timestamp;
 };

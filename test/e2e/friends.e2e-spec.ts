@@ -158,16 +158,16 @@ describe('FriendsController (e2e)', () => {
         data: generateUserEntity('test5@test.com', 'lighty_5', '박김수'),
       });
       const friendRealtion1 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user1.id),
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
       });
       const friendRealtion2 = await prisma.friend.create({
-        data: generateFriendEntity(user2.id, loginedUser!.id),
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
       });
       const friendRealtion3 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user3.id),
+        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
       });
       const friendRealtion4 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user4.id),
+        data: generateFriendEntity(loginedUser!.id, user4.id, 'ACCEPTED'),
       });
       const expectedUsers = [user3, user4, user1];
       const cursor = {

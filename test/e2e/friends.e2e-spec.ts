@@ -268,4 +268,74 @@ describe('FriendsController (e2e)', () => {
       });
     });
   });
+
+  describe('(GET) /friends/requests/sent?cursor={}&limit={} - 보낸 친구 요청 목록 조회', () => {
+    it('친구 요청 목록 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 1
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김민수'), // 2
+      });
+      const user3 = await prisma.user.create({
+        data: generateUserEntity('test3@test.com', 'lighty_3', '이수진'), // 3
+      });
+      const user4 = await prisma.user.create({
+        data: generateUserEntity('test4@test.com', 'lighty_4', '이수진'),
+      });
+      const receivedRequest = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user3.id),
+      });
+      const sentRequest1 = await prisma.friend.create({
+        data: generateFriendEntity(user1.id, loginedUser!.id),
+      });
+      const sentRequest2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id),
+      });
+      const sentRequest3 = await prisma.friend.create({
+        data: generateFriendEntity(user3.id, loginedUser!.id),
+      });
+      const expectedFriendRequests = [sentRequest2, sentRequest3];
+      const expectedUsers = [user2, user3];
+
+      const cursor: UserCursor = {
+        name: user1.name,
+        accountId: user1.accountId,
+      };
+      const limit = 2;
+
+      const url = encodeURI(
+        `/friends/requests/sent?cursor=${JSON.stringify(
+          cursor,
+        )}&limit=${limit}`,
+      );
+      const response = await request(app.getHttpServer())
+        .get(url)
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<FriendRequestListResponse> =
+        response;
+
+      expect(status).toEqual(200);
+      expect(body.nextCursor).toEqual({
+        name: expectedUsers.at(-1)?.name,
+        accountId: expectedUsers.at(-1)?.accountId,
+      });
+      body.requests.forEach((request, i) => {
+        expect(request.id).toEqual(expectedFriendRequests[i].id);
+        expect(request.sender.id).toEqual(expectedUsers[i].id);
+        expect(request.sender.name).toEqual(expectedUsers[i].name);
+        expect(request.sender.accountId).toEqual(expectedUsers[i].accountId);
+        expect(request.sender.profileImageUrl).toEqual(
+          expectedUsers[i].profileImageUrl,
+        );
+      });
+    });
+  });
 });

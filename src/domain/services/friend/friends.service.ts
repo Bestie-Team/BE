@@ -58,6 +58,23 @@ export class FriendsService {
     };
   }
 
+  async getSentRequestsByUserId(
+    userId: string,
+    paginationInput: UserPaginationInput,
+  ) {
+    const requests =
+      await this.friendsRepository.findAllReceivedRequestByUserId(
+        userId,
+        paginationInput,
+      );
+    const nextCursor = getFriendRequestCursor(requests, paginationInput.limit);
+
+    return {
+      requests,
+      nextCursor,
+    };
+  }
+
   async request(prototype: FriendPrototype) {
     const stdDate = new Date();
     const friend = FriendEntity.create(prototype, v4, stdDate);

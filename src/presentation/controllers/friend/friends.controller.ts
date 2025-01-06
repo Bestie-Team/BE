@@ -63,4 +63,15 @@ export class FriendsController {
       paginationDto,
     );
   }
+
+  @Get('requests/sent')
+  async getSentRequests(
+    @Query() paginationDto: UserPaginationRequest,
+    @CurrentUser() userId: string,
+  ): Promise<FriendRequestListResponse> {
+    return await this.friendsService.getSentRequestsByUserId(
+      userId,
+      paginationDto,
+    );
+  }
 }

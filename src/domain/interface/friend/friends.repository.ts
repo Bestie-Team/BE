@@ -14,6 +14,10 @@ export interface FriendsRepository {
     userId: string,
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]>;
+  findAllSentRequestByUserId(
+    userId: string,
+    paginationInput: UserPaginationInput,
+  ): Promise<FriendRequest[]>;
   update(id: string, data: Partial<FriendEntity>): Promise<void>;
   delete(id: string): Promise<void>;
 }

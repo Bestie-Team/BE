@@ -132,6 +132,52 @@ export class FriendsPrismaRepository implements FriendsRepository {
     }));
   }
 
+  async findAllSentRequestByUserId(
+    userId: string,
+    paginationInput: UserPaginationInput,
+  ): Promise<FriendRequest[]> {
+    const { cursor, limit } = paginationInput;
+    const rows = await this.prisma.$kysely
+      .selectFrom('friend as f')
+      .innerJoin('user as u', 'f.receiver_id', 'u.id')
+      .select([
+        'f.id',
+        'u.id as user_id',
+        'u.account_id',
+        'u.name',
+        'u.profile_image_url',
+      ])
+      .where('f.sender_id', '=', userId)
+      .where(
+        'f.status',
+        '=',
+        sql<FriendStatus>`${FriendStatus.PENDING}::"FriendStatus"`,
+      )
+      .where(({ eb, or, and }) =>
+        or([
+          eb('u.name', '>', cursor.name),
+          and([
+            eb('u.name', '=', cursor.name),
+            eb('u.account_id', '>', cursor.accountId),
+          ]),
+        ]),
+      )
+      .orderBy('u.name')
+      .orderBy('u.account_id')
+      .limit(limit)
+      .execute();
+
+    return rows.map((row) => ({
+      id: row.id,
+      sender: {
+        id: row.user_id,
+        accountId: row.account_id,
+        name: row.name,
+        profileImageUrl: row.profile_image_url,
+      },
+    }));
+  }
+
   async update(id: string, data: Partial<FriendEntity>): Promise<void> {
     await this.prisma.friend.update({
       data,

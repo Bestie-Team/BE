@@ -43,7 +43,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     });
   }
 
-  async findAllFriendByUserId(
+  async findFriendsByUserId(
     userId: string,
     paginationInput: UserPaginationInput,
   ): Promise<User[]> {
@@ -96,7 +96,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     }));
   }
 
-  async findAllReceivedRequestByUserId(
+  async findReceivedRequestsByUserId(
     userId: string,
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]> {
@@ -142,7 +142,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     }));
   }
 
-  async findAllSentRequestByUserId(
+  async findSentRequestsByUserId(
     userId: string,
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]> {

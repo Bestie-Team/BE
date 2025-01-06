@@ -6,15 +6,15 @@ import { UserPaginationInput } from 'src/shared/types';
 export interface FriendsRepository {
   save(data: FriendEntity): Promise<void>;
   findOneById(id: string): Promise<{ id: string; receiverId: string } | null>;
-  findAllFriendByUserId(
+  findFriendsByUserId(
     userId: string,
     paginationInput: UserPaginationInput,
   ): Promise<User[]>;
-  findAllReceivedRequestByUserId(
+  findReceivedRequestsByUserId(
     userId: string,
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]>;
-  findAllSentRequestByUserId(
+  findSentRequestsByUserId(
     userId: string,
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]>;

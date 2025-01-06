@@ -29,7 +29,7 @@ export class FriendsService {
     userId: string,
     paginationInput: UserPaginationInput,
   ) {
-    const users = await this.friendsRepository.findAllFriendByUserId(
+    const users = await this.friendsRepository.findFriendsByUserId(
       userId,
       paginationInput,
     );
@@ -45,11 +45,10 @@ export class FriendsService {
     userId: string,
     paginationInput: UserPaginationInput,
   ) {
-    const requests =
-      await this.friendsRepository.findAllReceivedRequestByUserId(
-        userId,
-        paginationInput,
-      );
+    const requests = await this.friendsRepository.findReceivedRequestsByUserId(
+      userId,
+      paginationInput,
+    );
     const nextCursor = getFriendRequestCursor(requests, paginationInput.limit);
 
     return {
@@ -62,11 +61,10 @@ export class FriendsService {
     userId: string,
     paginationInput: UserPaginationInput,
   ) {
-    const requests =
-      await this.friendsRepository.findAllReceivedRequestByUserId(
-        userId,
-        paginationInput,
-      );
+    const requests = await this.friendsRepository.findReceivedRequestsByUserId(
+      userId,
+      paginationInput,
+    );
     const nextCursor = getFriendRequestCursor(requests, paginationInput.limit);
 
     return {

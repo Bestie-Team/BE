@@ -15,9 +15,7 @@ export class UserPaginationRequest {
   @Transform(({ value }) => {
     try {
       const json = JSON.parse(value); // JSON 문자열을 객체로 변환;
-      const instnace = plainToInstance(UserCursor, json);
-      console.log(instnace);
-      return instnace;
+      return plainToInstance(UserCursor, json);
     } catch {
       throw new Error('Invalid cursor format');
     }

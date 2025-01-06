@@ -12,9 +12,9 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateProfileImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { UsersService } from 'src/domain/services/user/users.service';
-import { SearchUserRequest } from 'src/presentation/dto/user/search-user.request';
-import { SearchUserResponse } from 'src/presentation/dto/user/search-user.response';
-import { UploadProfileImageResponse } from 'src/presentation/dto/user/upload-image.response';
+import { SearchUserRequest } from 'src/presentation/dto/user/request/search-user.request';
+import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
+import { UploadProfileImageResponse } from 'src/presentation/dto/user/response/upload-image.response';
 
 @UseGuards(AuthGuard)
 @Controller('users')

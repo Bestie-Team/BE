@@ -5,7 +5,7 @@ import { AuthService } from 'src/domain/services/auth/auth.service';
 import { LoginRequest } from 'src/presentation/dto/auth/login.request';
 import { LoginResponse } from 'src/presentation/dto/auth/login.response';
 import { RegisterRequest } from 'src/presentation/dto/auth/register.request';
-import { LoginFailResponse } from 'src/presentation/dto/user/login-fail.response';
+import { LoginFailResponse } from 'src/presentation/dto/user/response/login-fail.response';
 import { Provider } from 'src/shared/types';
 
 @ApiTags('/auth')

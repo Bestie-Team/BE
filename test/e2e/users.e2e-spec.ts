@@ -73,7 +73,10 @@ describe('UsersController (e2e)', () => {
       const { status, body }: ResponseResult<SearchUserResponse> = response;
 
       expect(status).toEqual(200);
-      expect(body.nextCursor).toEqual(expectedUsers.at(-1)?.name);
+      expect(body.nextCursor).toEqual({
+        name: expectedUsers.at(-1)?.name,
+        accountId: expectedUsers.at(-1)?.accountId,
+      });
       body.users.forEach((user, i) => {
         expect(user.id).toEqual(expectedUsers[i].id);
         expect(user.accountId).toEqual(expectedUsers[i].accountId);

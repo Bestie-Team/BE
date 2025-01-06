@@ -53,12 +53,21 @@ export class UsersPrismaRepository implements UsersRepository {
     searchInput: SearchInput,
   ): Promise<User[]> {
     const { search, paginationInput } = searchInput;
+    const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
       .selectFrom('user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .where('u.account_id', 'like', `%${search}%`)
       .where('u.id', '!=', userId)
-      .where('u.name', '>', paginationInput.cursor)
+      .where(({ eb, or, and }) =>
+        or([
+          eb('u.name', '>', cursor.name),
+          and([
+            eb('u.name', '=', cursor.name),
+            eb('u.account_id', '>', cursor.accountId),
+          ]),
+        ]),
+      )
       .where('u.id', 'not in', (qb) =>
         qb
           .selectFrom('friend as f')
@@ -73,7 +82,7 @@ export class UsersPrismaRepository implements UsersRepository {
       )
       .orderBy('u.name')
       .orderBy('u.account_id')
-      .limit(paginationInput.limit)
+      .limit(limit)
       .execute();
 
     return rows.map((row) => ({

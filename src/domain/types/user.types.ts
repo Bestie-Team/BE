@@ -1,4 +1,4 @@
-import { PaginationInput, Provider } from 'src/shared/types';
+import { UserPaginationInput, Provider } from 'src/shared/types';
 
 export interface UserPrototype {
   readonly email: string;
@@ -22,6 +22,6 @@ export interface User {
 }
 
 export interface SearchInput {
-  paginationInput: PaginationInput;
+  paginationInput: UserPaginationInput;
   search: string;
 }

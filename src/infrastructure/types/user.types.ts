@@ -1,6 +1,6 @@
-import { PaginationInput } from 'src/shared/types';
+import { UserPaginationInput } from 'src/shared/types';
 
 export interface SearchInput {
-  paginationInput: PaginationInput;
+  paginationInput: UserPaginationInput;
   search: string;
 }

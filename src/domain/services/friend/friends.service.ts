@@ -12,7 +12,7 @@ import {
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { FriendPrototype } from 'src/domain/types/friend.types';
-import { PaginationInput } from 'src/shared/types';
+import { UserPaginationInput } from 'src/shared/types';
 import { User } from 'src/domain/types/user.types';
 
 @Injectable()
@@ -22,7 +22,10 @@ export class FriendsService {
     private readonly friendsRepository: FriendsRepository,
   ) {}
 
-  async getAllFriendByUserId(userId: string, paginationInput: PaginationInput) {
+  async getAllFriendByUserId(
+    userId: string,
+    paginationInput: UserPaginationInput,
+  ) {
     const users = await this.friendsRepository.findAllFriendByUserId(
       userId,
       paginationInput,

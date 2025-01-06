@@ -5,7 +5,7 @@ import { FRIEND_REQUEST_ALREADY_EXIST_MESSAGE } from 'src/domain/error/messages'
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { User } from 'src/domain/types/user.types';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
-import { PaginationInput } from 'src/shared/types';
+import { UserPaginationInput } from 'src/shared/types';
 
 @Injectable()
 export class FriendsPrismaRepository implements FriendsRepository {
@@ -43,13 +43,22 @@ export class FriendsPrismaRepository implements FriendsRepository {
 
   async findAllFriendByUserId(
     userId: string,
-    paginationInput: PaginationInput,
+    paginationInput: UserPaginationInput,
   ): Promise<User[]> {
+    const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
       .selectFrom('user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .where('u.id', '!=', userId)
-      .where('u.name', '>', paginationInput.cursor)
+      .where(({ eb, or, and }) =>
+        or([
+          eb('u.name', '>', cursor.name),
+          and([
+            eb('u.name', '=', cursor.name),
+            eb('u.account_id', '>', cursor.accountId),
+          ]),
+        ]),
+      )
       .where('u.id', 'in', (qb) =>
         qb
           .selectFrom('friend as f')
@@ -63,7 +72,8 @@ export class FriendsPrismaRepository implements FriendsRepository {
           ),
       )
       .orderBy('u.name')
-      .limit(paginationInput.limit)
+      .orderBy('u.account_id')
+      .limit(limit)
       .execute();
 
     return rows.map((row) => ({

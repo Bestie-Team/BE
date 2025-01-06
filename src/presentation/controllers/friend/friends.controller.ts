@@ -45,7 +45,7 @@ export class FriendsController {
   }
 
   @Get()
-  async getAllFriend(
+  async getFriends(
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendListResponse> {

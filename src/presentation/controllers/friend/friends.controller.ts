@@ -11,6 +11,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -22,6 +23,7 @@ import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 import { SearchFriendRequest } from 'src/presentation/dto/friend/request/search-friend.request';
 import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
+import { ApiUserPaginationQuery } from 'src/common/decorators/swagger';
 
 @ApiTags('/friends')
 @UseGuards(AuthGuard)
@@ -91,6 +93,7 @@ export class FriendsController {
   }
 
   @ApiOperation({ summary: '친구 목록 조회' })
+  @ApiUserPaginationQuery()
   @ApiResponse({
     status: 200,
     description: '친구 목록 조회 성공',
@@ -108,6 +111,17 @@ export class FriendsController {
     return await this.friendsService.getFriendsByUserId(userId, paginationDto);
   }
 
+  @ApiOperation({ summary: '받은 친구 요청 목록 조회' })
+  @ApiUserPaginationQuery()
+  @ApiResponse({
+    status: 200,
+    description: '받은 친구 요청 목록 조회 성공',
+    type: FriendRequestListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
   @Get('requests/received')
   async getReceivedRequests(
     @Query() paginationDto: UserPaginationRequest,
@@ -119,6 +133,17 @@ export class FriendsController {
     );
   }
 
+  @ApiOperation({ summary: '보낸 친구 요청 목록 조회' })
+  @ApiUserPaginationQuery()
+  @ApiResponse({
+    status: 200,
+    description: '보낸 친구 요청 목록 조회 성공',
+    type: FriendRequestListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
   @Get('requests/sent')
   async getSentRequests(
     @Query() paginationDto: UserPaginationRequest,
@@ -130,6 +155,23 @@ export class FriendsController {
     );
   }
 
+  @ApiOperation({ summary: '친구 검색' })
+  @ApiQuery({
+    name: 'search',
+    description: '계정 아이디 검색어',
+    type: 'string',
+    example: 'lighty_id',
+  })
+  @ApiUserPaginationQuery()
+  @ApiResponse({
+    status: 200,
+    description: '검색된 친구 목록',
+    type: FriendRequestListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
   @Get('search')
   async search(
     @Query() dto: SearchFriendRequest,

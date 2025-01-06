@@ -1,5 +1,5 @@
-import { User } from 'src/domain/types/user.types';
 import { UserCursor } from 'src/presentation/dto/shared/indexs';
+import { User } from 'src/presentation/dto/user/response/data.types';
 
 export class SearchUserResponse {
   readonly users: User[];

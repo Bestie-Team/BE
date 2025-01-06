@@ -10,7 +10,7 @@ export const getUserCursor = (users: User[], limit: number) => {
     : null;
 };
 
-export const getFriendCursor = (
+export const getFriendRequestCursor = (
   friendRequests: FriendRequest[],
   limit: number,
 ) => {

@@ -1,8 +1,10 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { FriendStatus, Prisma } from '@prisma/client';
+import { sql } from 'kysely';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FRIEND_REQUEST_ALREADY_EXIST_MESSAGE } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
+import { FriendRequest } from 'src/domain/types/friend.types';
 import { User } from 'src/domain/types/user.types';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { UserPaginationInput } from 'src/shared/types';
@@ -81,6 +83,52 @@ export class FriendsPrismaRepository implements FriendsRepository {
       accountId: row.account_id,
       name: row.name,
       profileImageUrl: row.profile_image_url,
+    }));
+  }
+
+  async findAllReceivedRequestByUserId(
+    userId: string,
+    paginationInput: UserPaginationInput,
+  ): Promise<FriendRequest[]> {
+    const { cursor, limit } = paginationInput;
+    const rows = await this.prisma.$kysely
+      .selectFrom('friend as f')
+      .innerJoin('user as u', 'f.sender_id', 'u.id')
+      .select([
+        'f.id',
+        'u.id as user_id',
+        'u.account_id',
+        'u.name',
+        'u.profile_image_url',
+      ])
+      .where('f.receiver_id', '=', userId)
+      .where(
+        'f.status',
+        '=',
+        sql<FriendStatus>`${FriendStatus.PENDING}::"FriendStatus"`,
+      )
+      .where(({ eb, or, and }) =>
+        or([
+          eb('u.name', '>', cursor.name),
+          and([
+            eb('u.name', '=', cursor.name),
+            eb('u.account_id', '>', cursor.accountId),
+          ]),
+        ]),
+      )
+      .orderBy('u.name')
+      .orderBy('u.account_id')
+      .limit(limit)
+      .execute();
+
+    return rows.map((row) => ({
+      id: row.id,
+      sender: {
+        id: row.user_id,
+        accountId: row.account_id,
+        name: row.name,
+        profileImageUrl: row.profile_image_url,
+      },
     }));
   }
 

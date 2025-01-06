@@ -12,6 +12,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { FriendsService } from 'src/domain/services/friend/friends.service';
 import { CreateFriendRequest } from 'src/presentation/dto/friend/create-friend.request';
 import { FriendListResponse } from 'src/presentation/dto/friend/friend-list.response';
+import { FriendRequestListResponse } from 'src/presentation/dto/friend/friend-request-list.response';
 import { UserPaginationRequest } from 'src/presentation/dto/user/user-pagination.request';
 
 @UseGuards(AuthGuard)
@@ -49,7 +50,15 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendListResponse> {
-    return await this.friendsService.getAllFriendByUserId(
+    return await this.friendsService.getFriendsByUserId(userId, paginationDto);
+  }
+
+  @Get('requests/received')
+  async getReceivedRequests(
+    @Query() paginationDto: UserPaginationRequest,
+    @CurrentUser() userId: string,
+  ): Promise<FriendRequestListResponse> {
+    return await this.friendsService.getReceivedRequestsByUserId(
       userId,
       paginationDto,
     );

@@ -199,6 +199,109 @@ describe('FriendsController (e2e)', () => {
     });
   });
 
+  describe('(GET) /friends/search?search={}&cursor={}&limit={} - 친구 검색', () => {
+    it('검색 정상 동작 (이름, 계정 아이디)', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
+      });
+      const user3 = await prisma.user.create({
+        data: generateUserEntity('test3@test.com', 'lighty_3', '김진수'), // 2
+      });
+      const user4 = await prisma.user.create({
+        data: generateUserEntity('test4@test.com', 'lighty_4', '김진수'), // 3
+      });
+      const nonFriend = await prisma.user.create({
+        data: generateUserEntity('test5@test.com', 'lighty_5', '박김수'),
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
+      });
+      const friendRealtion3 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
+      });
+      const friendRealtion4 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user4.id, 'ACCEPTED'),
+      });
+      const friendRealtion5 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, nonFriend.id, 'PENDING'),
+      });
+      const expectedNameUsers = [user3, user4];
+      const expectedAccountIdUsers = [user3, user4, user1];
+      const searchName = '김진';
+      const searchAccountId = 'ght';
+      const cursor = {
+        name: user2.name,
+        accountId: user2.accountId,
+      };
+      const limit = 3;
+
+      // when
+      const nameResponse = await request(app.getHttpServer())
+        .get(
+          encodeURI(
+            `/friends/search?search=${searchName}&cursor=${JSON.stringify(
+              cursor,
+            )}&limit=${limit}`,
+          ),
+        )
+        .set('Authorization', accessToken);
+      const accountIdResponse = await request(app.getHttpServer())
+        .get(
+          encodeURI(
+            `/friends/search?search=${searchAccountId}&cursor=${JSON.stringify(
+              cursor,
+            )}&limit=${limit}`,
+          ),
+        )
+        .set('Authorization', accessToken);
+      const {
+        status: nameStatus,
+        body: nameBody,
+      }: ResponseResult<FriendListResponse> = nameResponse;
+      const {
+        status: accountIdStaus,
+        body: accountIdBody,
+      }: ResponseResult<FriendListResponse> = accountIdResponse;
+
+      expect(nameStatus).toEqual(200);
+      expect(accountIdStaus).toEqual(200);
+      expect(nameBody.nextCursor).toBeNull();
+      expect(accountIdBody.nextCursor).toEqual({
+        name: expectedAccountIdUsers.at(-1)?.name,
+        accountId: expectedAccountIdUsers.at(-1)?.accountId,
+      });
+      nameBody.users.forEach((user, i) => {
+        expect(user.id).toEqual(expectedNameUsers[i].id);
+        expect(user.accountId).toEqual(expectedNameUsers[i].accountId);
+        expect(user.name).toEqual(expectedNameUsers[i].name);
+        expect(user.profileImageUrl).toEqual(
+          expectedNameUsers[i].profileImageUrl,
+        );
+      });
+      accountIdBody.users.forEach((user, i) => {
+        expect(user.id).toEqual(expectedAccountIdUsers[i].id);
+        expect(user.accountId).toEqual(expectedAccountIdUsers[i].accountId);
+        expect(user.name).toEqual(expectedAccountIdUsers[i].name);
+        expect(user.profileImageUrl).toEqual(
+          expectedAccountIdUsers[i].profileImageUrl,
+        );
+      });
+    });
+  });
+
   describe('(GET) /friends/requests/received?cursor={}&limit={} - 받은 친구 요청 목록 조회', () => {
     it('친구 요청 목록 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);

@@ -13,7 +13,7 @@ import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { FriendPrototype } from 'src/domain/types/friend.types';
 import { UserPaginationInput } from 'src/shared/types';
-import { User } from 'src/domain/types/user.types';
+import { getUserCursor } from 'src/domain/shared/get-cursor';
 
 @Injectable()
 export class FriendsService {
@@ -22,7 +22,7 @@ export class FriendsService {
     private readonly friendsRepository: FriendsRepository,
   ) {}
 
-  async getAllFriendByUserId(
+  async getFriendsByUserId(
     userId: string,
     paginationInput: UserPaginationInput,
   ) {
@@ -30,7 +30,7 @@ export class FriendsService {
       userId,
       paginationInput,
     );
-    const nextCursor = this.getCursor(users, paginationInput.limit);
+    const nextCursor = getUserCursor(users, paginationInput.limit);
 
     return {
       users,
@@ -67,9 +67,5 @@ export class FriendsService {
     if (friendRequest.receiverId !== receiverId) {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
-  }
-
-  getCursor(users: User[], limit: number): string | null {
-    return users[limit - 1]?.name || null;
   }
 }

@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UsersRepository } from 'src/domain/interface/users.repository';
-import { SearchInput, User } from 'src/domain/types/user.types';
+import { getUserCursor } from 'src/domain/shared/get-cursor';
+import { SearchInput } from 'src/domain/types/user.types';
 
 @Injectable()
 export class UsersService {
@@ -15,15 +16,11 @@ export class UsersService {
       userId,
       { search, paginationInput },
     );
-    const nextCursor = this.getCursor(searchedUsers, paginationInput.limit);
+    const nextCursor = getUserCursor(searchedUsers, paginationInput.limit);
 
     return {
       users: searchedUsers,
       nextCursor,
     };
-  }
-
-  getCursor(users: User[], limit: number): string | null {
-    return users[limit - 1]?.name || null;
   }
 }

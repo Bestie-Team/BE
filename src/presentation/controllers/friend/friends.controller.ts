@@ -165,7 +165,7 @@ export class FriendsController {
   @ApiUserPaginationQuery()
   @ApiResponse({
     status: 200,
-    description: '검색된 친구 목록',
+    description: '검색 성공',
     type: FriendRequestListResponse,
   })
   @ApiResponse({

@@ -23,7 +23,11 @@ const CreateMulterOptions = (resource: string, path: string): MulterOptions => {
       .setResource(resource)
       .setPath(path)
       .build(),
-    limits: { fieldSize: 1024 * 1024 * 20 },
+    limits: {
+      fieldSize: 1024 * 1024 * 20,
+      fileSize: 1024 * 1024 * 4,
+      files: 5,
+    },
   };
 };
 

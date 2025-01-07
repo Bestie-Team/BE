@@ -32,7 +32,11 @@ export class GroupsController {
   })
   @ApiResponse({
     status: 400,
-    description: '파일 형식 호환 x, 파일 사이즈 초과',
+    description: '파일 형식 호환 x',
+  })
+  @ApiResponse({
+    status: 413,
+    description: '파일 사이즈 초과',
   })
   @HttpCode(200)
   @UseInterceptors(

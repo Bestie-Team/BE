@@ -1,7 +1,7 @@
 import { User } from 'src/domain/types/user.types';
 import { UserCursor } from 'src/presentation/dto/shared/indexs';
 
-export class SearchUserResponse {
+export class FriendListResponse {
   readonly users: User[];
   readonly nextCursor: UserCursor | null;
 }

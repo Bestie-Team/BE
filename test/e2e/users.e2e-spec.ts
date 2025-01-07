@@ -33,44 +33,50 @@ describe('UsersController (e2e)', () => {
       const { accessToken } = await login(app);
 
       const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 3
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 4
       });
       const user2 = await prisma.user.create({
-        data: generateUserEntity('test2@test.com', 'lighty_2', '김기수'), // 2
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김기수'), // 3
       });
       const user3 = await prisma.user.create({
-        data: generateUserEntity('test3@test.com', 'lighty_3', '박민수'), //4
+        data: generateUserEntity('test3@test.com', 'lighty_3', '박민수'), //5
       });
       const user4 = await prisma.user.create({
         data: generateUserEntity('test4@test.com', 'lighty_4', '강민수'), // 1
       });
       const user5 = await prisma.user.create({
-        data: generateUserEntity('test5@test.com', 'lighty_5', '조민수'), //5
+        data: generateUserEntity('test5@test.com', 'lighty_5', '조민수'), //6
       });
       const user6 = await prisma.user.create({
-        data: generateUserEntity('test6@test.com', 'lighty_6', '조민수'), // 6
+        data: generateUserEntity('test6@test.com', 'lighty_6', '강민수'), // 2
       });
       const nonSearchedUser = await prisma.user.create({
         data: generateUserEntity('test7@test.com', 'righty', '이민수'),
       });
 
       const searchKeyword = 'lig';
-      const cursor = user4.name;
+      const cursor = {
+        name: user4.name, // 강민수
+        accountId: user4.accountId,
+      };
       const limit = 4;
-      const expectedUsers = [user2, user1, user3, user5];
-
+      const expectedUsers = [user6, user2, user1, user3];
+      const url = encodeURI(
+        `/users/search?search=${searchKeyword}&cursor=${JSON.stringify(
+          cursor,
+        )}&limit=${limit}`,
+      );
       // when
       const response = await request(app.getHttpServer())
-        .get(
-          encodeURI(
-            `/users/search?search=${searchKeyword}&cursor=${cursor}&limit=${limit}`,
-          ),
-        )
+        .get(url)
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<SearchUserResponse> = response;
 
       expect(status).toEqual(200);
-      expect(body.nextCursor).toEqual(expectedUsers.at(-1)?.name);
+      expect(body.nextCursor).toEqual({
+        name: expectedUsers.at(-1)?.name,
+        accountId: expectedUsers.at(-1)?.accountId,
+      });
       body.users.forEach((user, i) => {
         expect(user.id).toEqual(expectedUsers[i].id);
         expect(user.accountId).toEqual(expectedUsers[i].accountId);

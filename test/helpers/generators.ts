@@ -2,6 +2,7 @@ import { v4 } from 'uuid';
 import { UserEntity } from 'src/domain/entities/user/user.entity';
 import { Provider } from 'src/shared/types';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
+import { FriendStatus } from '@prisma/client';
 
 export const generateUserEntity = (
   email: string,
@@ -19,12 +20,8 @@ export const generateUserEntity = (
 export const generateFriendEntity = (
   senderId: string,
   receiverId: string,
-): FriendEntity =>
-  FriendEntity.create(
-    {
-      senderId,
-      receiverId,
-    },
-    v4,
-    new Date(),
-  );
+  status: FriendStatus = 'PENDING',
+): FriendEntity => {
+  const stdDate = new Date();
+  return new FriendEntity(v4(), senderId, receiverId, stdDate, stdDate, status);
+};

@@ -10,7 +10,7 @@ import { Request, Response } from 'express';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger();
+  private readonly logger = new Logger('Exception Filter');
 
   catch(exception: Error, host: ArgumentsHost) {
     const ctx = host.switchToHttp();

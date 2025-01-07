@@ -6,17 +6,17 @@ import * as request from 'supertest';
 
 import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
-import { SearchUserResponse } from 'src/presentation/dto/user/search-user.response';
-import { CreateFriendRequest } from 'src/presentation/dto/friend/create-friend.request';
+import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
+import { CreateFriendRequest } from 'src/presentation/dto/friend/request/create-friend.request';
 import { login } from 'test/helpers/login';
 import {
   generateFriendEntity,
   generateUserEntity,
 } from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
-import { FriendListResponse } from 'src/presentation/dto/friend/friend-list.response';
+import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-list.response';
 import { UserCursor } from 'src/presentation/dto/shared/indexs';
-import { FriendRequestListResponse } from 'src/presentation/dto/friend/friend-request-list.response';
+import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 
 describe('FriendsController (e2e)', () => {
   let app: INestApplication;

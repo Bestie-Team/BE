@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ClsModule } from 'nestjs-cls';
 import { AppController } from 'src/app.controller';
 import { UsersModule } from 'src/modules/user/users.module';
 import { validationSchema } from 'src/configs/config-module/validation';
@@ -9,8 +10,8 @@ import { FiltersModule } from 'src/common/filters/filters.module';
 import { PipesModule } from 'src/common/pipes/pipes.module';
 import { FriendsModule } from 'src/modules/friend/friends.module';
 import { GatheringsModule } from 'src/modules/gathering/gatherings.module';
-import { ClsModule } from 'nestjs-cls';
 import { clsOptions } from 'src/configs/cls/cls-options';
+import { GroupsModule } from 'src/modules/group/groups.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { clsOptions } from 'src/configs/cls/cls-options';
     AuthModule,
     FriendsModule,
     GatheringsModule,
+    GroupsModule,
   ],
   controllers: [AppController],
 })

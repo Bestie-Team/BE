@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
-export class UploadProfileImageResponse {
+export class UploadImageResponse {
   @ApiProperty()
   readonly imageUrl: string;
 
@@ -9,6 +9,6 @@ export class UploadProfileImageResponse {
   }
 
   static create(imagePath: string) {
-    return new UploadProfileImageResponse(imagePath);
+    return new UploadImageResponse(imagePath);
   }
 }

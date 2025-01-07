@@ -12,6 +12,7 @@ import { FriendsModule } from 'src/modules/friend/friends.module';
 import { GatheringsModule } from 'src/modules/gathering/gatherings.module';
 import { clsOptions } from 'src/configs/cls/cls-options';
 import { GroupsModule } from 'src/modules/group/groups.module';
+import { InterceptorsModule } from 'src/common/interceptors/interceptors.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { GroupsModule } from 'src/modules/group/groups.module';
     ClsModule.forRoot(clsOptions),
     PrismaModule,
     FiltersModule,
+    InterceptorsModule,
     PipesModule,
     UsersModule,
     AuthModule,

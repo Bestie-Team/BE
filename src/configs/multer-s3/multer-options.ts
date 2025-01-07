@@ -30,3 +30,7 @@ const CreateMulterOptions = (resource: string, path: string): MulterOptions => {
 export const CreateProfileImageMulterOptions = (): MulterOptions => {
   return CreateMulterOptions('user', 'profile');
 };
+
+export const CreateGroupCoverImageMulterOptions = (): MulterOptions => {
+  return CreateMulterOptions('group', 'cover');
+};

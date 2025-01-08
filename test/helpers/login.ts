@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { RegisterRequest } from 'src/presentation/dto/auth/register.request';
-import { LoginResponse } from 'src/presentation/dto/auth/login.response';
+import { RegisterRequest } from 'src/presentation/dto/auth/request/register.request';
+import { LoginResponse } from 'src/presentation/dto/auth/response/login.response';
 import { ResponseResult } from '../helpers/types';
 
 /**

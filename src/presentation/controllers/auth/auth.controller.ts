@@ -2,9 +2,9 @@ import { Body, Controller, Param, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ValidateProviderPipe } from 'src/common/pipes/validate-provider.pipe';
 import { AuthService } from 'src/domain/services/auth/auth.service';
-import { LoginRequest } from 'src/presentation/dto/auth/login.request';
-import { LoginResponse } from 'src/presentation/dto/auth/login.response';
-import { RegisterRequest } from 'src/presentation/dto/auth/register.request';
+import { LoginRequest } from 'src/presentation/dto/auth/request/login.request';
+import { LoginResponse } from 'src/presentation/dto/auth/response/login.response';
+import { RegisterRequest } from 'src/presentation/dto/auth/request/register.request';
 import { LoginFailResponse } from 'src/presentation/dto/user/response/login-fail.response';
 import { Provider } from 'src/shared/types';
 

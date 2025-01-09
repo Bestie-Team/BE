@@ -1,7 +1,7 @@
 import { IsEmail, IsIn, IsUrl, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { Provider } from 'src/shared/types';
 import { ApiProperty } from '@nestjs/swagger';
+import { Provider } from '../../shared';
 
 export class RegisterRequest {
   @ApiProperty()

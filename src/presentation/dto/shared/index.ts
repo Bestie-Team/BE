@@ -7,3 +7,6 @@ export class UserCursor {
   @ApiProperty()
   readonly accountId: string;
 }
+
+export type Provider = 'GOOGLE' | 'KAKAO' | 'APPLE';
+export type FriendStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'REPORTED';

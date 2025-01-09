@@ -1,5 +1,5 @@
 import { ApiQuery } from '@nestjs/swagger';
-import { UserCursor } from 'src/presentation/dto/shared/indexs';
+import { UserCursor } from 'src/presentation/dto/shared';
 
 export const ApiUserPaginationQuery = () => {
   return (

@@ -15,7 +15,7 @@ import {
 } from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
 import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-list.response';
-import { UserCursor } from 'src/presentation/dto/shared/indexs';
+import { UserCursor } from 'src/presentation/dto/shared';
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 
 describe('FriendsController (e2e)', () => {

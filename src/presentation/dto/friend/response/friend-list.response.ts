@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserCursor } from 'src/presentation/dto/shared/indexs';
+import { UserCursor } from 'src/presentation/dto/shared';
 import { User } from 'src/presentation/dto/user/response/data.types';
 
 export class FriendListResponse {

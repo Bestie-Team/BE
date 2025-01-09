@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
@@ -46,7 +47,9 @@ export class GroupsController {
   uploadCoverImage(
     @UploadedFile() file: Express.MulterS3.File,
   ): UploadImageResponse {
-    return UploadImageResponse.create(file.key);
+    return {
+      imageUrl: `${IMAGE_BASE_URL}/${file.key}`,
+    };
   }
 
   @ApiOperation({ summary: '그룹 생성' })

@@ -19,6 +19,7 @@ import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { SearchUserRequest } from 'src/presentation/dto/user/request/search-user.request';
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
+import { IMAGE_BASE_URL } from 'src/common/constant';
 
 @ApiTags('/users')
 @UseGuards(AuthGuard)
@@ -47,7 +48,9 @@ export class UsersController {
   uploadProfileImage(
     @UploadedFile() file: Express.MulterS3.File,
   ): UploadImageResponse {
-    return UploadImageResponse.create(file.key);
+    return {
+      imageUrl: `${IMAGE_BASE_URL}/${file.key}`,
+    };
   }
 
   @Get('search')

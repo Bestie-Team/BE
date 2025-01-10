@@ -8,9 +8,13 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { login } from 'test/helpers/login';
 import {
   generateFriendEntity,
+  generateGroupEntity,
+  generateGroupParticipationEntity,
   generateUserEntity,
 } from 'test/helpers/generators';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
+import { ResponseResult } from 'test/helpers/types';
+import { GroupListResponse } from 'src/presentation/dto';
 
 describe('GroupsController (e2e)', () => {
   let app: INestApplication;
@@ -118,6 +122,94 @@ describe('GroupsController (e2e)', () => {
       const { status, body } = response;
 
       expect(status).toEqual(400);
+    });
+  });
+
+  describe('(GET) /groups - 참여 그룹 목록 조회', () => {
+    it('그룹 목록 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const groupParticipationStdDate1 = new Date('2025-01-01T00:00:00.000Z');
+      const groupParticipationStdDate2 = new Date('2025-01-01T12:00:00.000Z');
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
+      });
+      const user3 = await prisma.user.create({
+        data: generateUserEntity('test3@test.com', 'lighty_3', '이진수'), // 2
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
+      });
+      const friendRealtion3 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
+      });
+      const group1 = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+      const group1Participation1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(
+          group1.id,
+          user1.id,
+          groupParticipationStdDate2,
+        ),
+      });
+      const group1Participation2 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(
+          group1.id,
+          user2.id,
+          groupParticipationStdDate2,
+        ),
+      });
+      const group1Participation3 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(
+          group1.id,
+          user3.id,
+          groupParticipationStdDate2,
+        ),
+      });
+      const group2 = await prisma.group.create({
+        data: generateGroupEntity(user1.id, '안멋쟁이 그룹'),
+      });
+      const group2Participation1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(
+          group2.id,
+          loginedUser!.id,
+          groupParticipationStdDate1,
+        ),
+      });
+      const expectedGroups = [group1, group2];
+
+      const cursor = new Date('2025-01-01T12:00:00.001Z').toISOString();
+      const limit = 2;
+
+      // when
+      const response = await request(app.getHttpServer())
+        .get(`/groups?cursor=${cursor}&limit=${limit}`)
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GroupListResponse> = response;
+      const { groups, nextCursor } = body;
+      console.log(nextCursor);
+
+      expect(status).toEqual(200);
+      expect(nextCursor).toEqual(groupParticipationStdDate1.toISOString());
+      groups.forEach((group, i) => {
+        expect(group.id).toEqual(expectedGroups[i].id);
+        expect(group.name).toEqual(expectedGroups[i].name);
+        expect(group.description).toEqual(expectedGroups[i].description);
+        expect(group.gatheringCount).toEqual(expectedGroups[i].gatheringCount);
+      });
+      // 멤버도 검증해야하는데 귀찮다...
     });
   });
 });

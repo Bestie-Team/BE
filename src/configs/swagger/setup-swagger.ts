@@ -7,6 +7,7 @@ export const setupSwagger = (app: INestApplication) => {
     .setDescription('친절하고 싶은 문서')
     .setVersion('1.0')
     .addTag('lighty')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

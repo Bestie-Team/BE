@@ -8,7 +8,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -18,6 +24,7 @@ import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 
 @ApiTags('/gathering')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('gatherings')
 export class GatheringsController {

@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -26,6 +27,7 @@ import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pa
 import { ApiUserPaginationQuery } from 'src/common/decorators/swagger';
 
 @ApiTags('/friends')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('friends')
 export class FriendsController {

@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -36,6 +37,7 @@ import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-gr
 import { GroupListResponse } from 'src/presentation/dto/group/response/group-list.response';
 
 @ApiTags('/groups')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('groups')
 export class GroupsController {

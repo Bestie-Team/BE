@@ -114,4 +114,12 @@ export class GroupsPrismaRepository implements GroupsRepository {
       },
     });
   }
+
+  async delete(groupId: string): Promise<void> {
+    await this.txHost.tx.group.delete({
+      where: {
+        id: groupId,
+      },
+    });
+  }
 }

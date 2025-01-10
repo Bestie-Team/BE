@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { v4 } from 'uuid';
 import { GroupEntity } from 'src/domain/entities/group/group.entity';
@@ -6,6 +11,7 @@ import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
 import { GroupPrototype } from 'src/domain/types/group.types';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import {
+  FORBIDDEN_MESSAGE,
   GROUP_OWNER_CANT_LEAVE_MESSAGE,
   IS_NOT_FRIEND_RELATION_MESSAGE,
 } from 'src/domain/error/messages';
@@ -36,8 +42,20 @@ export class GroupCreateService {
   }
 
   async leaveGroup(groupId: string, userId: string) {
-    await this.checkIsOwner(groupId, userId);
+    const isOwner = await this.checkIsOwner(groupId, userId);
+    if (isOwner) {
+      throw new BadRequestException(GROUP_OWNER_CANT_LEAVE_MESSAGE);
+    }
     await this.groupParticipationsRepository.delete(groupId, userId);
+  }
+
+  async deleteGroup(groupId: string, userId: string) {
+    const isOwner = await this.checkIsOwner(groupId, userId);
+    if (!isOwner) {
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    }
+
+    await this.groupsRepository.delete(groupId);
   }
 
   @Transactional()
@@ -69,9 +87,8 @@ export class GroupCreateService {
       groupId,
       userId,
     );
-    if (group) {
-      throw new BadRequestException(GROUP_OWNER_CANT_LEAVE_MESSAGE);
-    }
+
+    return group;
   }
 
   private async createGroup(entity: GroupEntity) {

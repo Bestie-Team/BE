@@ -12,6 +12,7 @@ export interface GroupsRepository {
     groupId: string,
     ownerId: string,
   ): Promise<{ id: string } | null>;
+  delete(groupId: string): Promise<void>;
 }
 
 export const GroupsRepository = Symbol('GroupsRepository');

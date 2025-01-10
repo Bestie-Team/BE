@@ -7,3 +7,7 @@ export const NOT_FOUND_FRIEND_MESSAGE = '존재하지 않는 친구 혹은 요�
 export const IS_NOT_FRIEND_RELATION_MESSAGE = '친구 관계가 아닙니다.';
 export const GROUP_OWNER_CANT_LEAVE_MESSAGE =
   '그룹장은 그룹을 떠날 수 없습니다.';
+export const GROUP_GATHERING_REQUIRED_GROUPID_MESSAGE =
+  '그룹 타입의 모임에 그룹 번호는 필수입니다.';
+export const MINIMUM_FRIENDS_REQUIRED_MESSAGE =
+  '친구가 최소 1명은 있어야합니다.';

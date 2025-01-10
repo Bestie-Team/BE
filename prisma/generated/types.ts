@@ -10,6 +10,11 @@ export const OAuthProvider = {
   APPLE: 'APPLE',
 } as const;
 export type OAuthProvider = (typeof OAuthProvider)[keyof typeof OAuthProvider];
+export const GatheringType = {
+  FRIEND: 'FRIEND',
+  GROUP: 'GROUP',
+} as const;
+export type GatheringType = (typeof GatheringType)[keyof typeof GatheringType];
 export const FriendStatus = {
   PENDING: 'PENDING',
   ACCEPTED: 'ACCEPTED',
@@ -64,6 +69,8 @@ export type Friend = {
 };
 export type Gathering = {
   id: string;
+  type: GatheringType;
+  group_id: string | null;
   host_user_id: string;
   name: string;
   description: string;
@@ -79,7 +86,7 @@ export type GatheringParticipation = {
   id: string;
   gathering_id: string;
   participant_id: string;
-  status: GatheringParticipationStatus;
+  status: Generated<GatheringParticipationStatus>;
   created_at: Timestamp;
   updated_at: Timestamp;
   deleted_at: Timestamp | null;

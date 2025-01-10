@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   HttpCode,
   Post,
@@ -9,16 +10,20 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { GatheringsService } from 'src/domain/services/gathering/gatherings.service';
+import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
 import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
+import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 
 @ApiTags('/gathering')
 @UseGuards(AuthGuard)
 @Controller('gatherings')
 export class GatheringsController {
-  constructor(private readonly gatheringsService: GatheringsService) {}
+  constructor(
+    private readonly gatheringsWriteService: GatheringsWriteService,
+  ) {}
 
   @ApiOperation({ summary: '모임 초대장 이미지 업로드' })
   @ApiBody({ type: FileRequest })
@@ -46,5 +51,29 @@ export class GatheringsController {
     return {
       imageUrl: `${IMAGE_BASE_URL}/${file.key}`,
     };
+  }
+
+  @ApiOperation({ summary: '모임 생성' })
+  @ApiBody({
+    type: CreateGatheringRequest,
+  })
+  @ApiResponse({
+    status: 201,
+    description: '모임 생성 완료',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패, friendIds에 친구가 아닌 회원이 존재할 경우',
+  })
+  @Post()
+  async create(
+    @Body() dto: CreateGatheringRequest,
+    @CurrentUser() userId: string,
+  ) {
+    const { friendIds, ...rest } = dto;
+    await this.gatheringsWriteService.create(
+      { ...rest, hostUserId: userId },
+      friendIds,
+    );
   }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { FriendRequest } from 'src/presentation/dto/friend/response/data.types';
-import { UserCursor } from 'src/presentation/dto/shared';
+import { FriendRequest } from './data.types';
+import { UserCursor } from '../../shared';
 
 export class FriendRequestListResponse {
   @ApiProperty({ type: FriendRequest })

@@ -9,3 +9,8 @@ export interface UserPaginationInput {
   };
   readonly limit: number;
 }
+
+export interface PaginationInput {
+  readonly cursor: string;
+  readonly limit: number;
+}

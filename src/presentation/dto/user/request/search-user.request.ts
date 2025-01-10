@@ -1,5 +1,5 @@
 import { Length } from 'class-validator';
-import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
+import { UserPaginationRequest } from './user-pagination.request';
 
 export class SearchUserRequest extends UserPaginationRequest {
   @Length(2, 15, {

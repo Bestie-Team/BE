@@ -1,28 +1,43 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GroupCreateService } from 'src/domain/services/group/group-create.service';
+import { GroupsService } from 'src/domain/services/group/groups.service';
+import { toListDto } from 'src/presentation/converters/group/group.converters';
+import { PaginationRequest } from 'src/presentation/dto';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
+import { GroupListResponse } from 'src/presentation/dto/group/response/group-list.response';
 
 @ApiTags('/groups')
 @UseGuards(AuthGuard)
 @Controller('groups')
 export class GroupsController {
-  constructor(private readonly groupsCreateService: GroupCreateService) {}
+  constructor(
+    private readonly groupsCreateService: GroupCreateService,
+    private readonly groupsService: GroupsService,
+  ) {}
 
   @ApiOperation({ summary: '그룹 커버 이미지 업로드' })
   @ApiBody({ type: FileRequest })
@@ -71,5 +86,32 @@ export class GroupsController {
       { ownerId: userId, ...rest },
       friendIds,
     );
+  }
+
+  @ApiOperation({ summary: '참여 그룹 목록 조회' })
+  @ApiQuery({
+    name: 'cursor',
+    description: '모임 참여일',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '그룹 목록 조회 완료',
+    type: GroupListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Get()
+  async getGroups(
+    @Query() paginationDto: PaginationRequest,
+    @CurrentUser() userId: string,
+  ): Promise<GroupListResponse> {
+    const domain = await this.groupsService.getGroupsByUserId(
+      userId,
+      paginationDto,
+    );
+    return toListDto(domain);
   }
 }

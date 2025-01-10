@@ -1,4 +1,5 @@
 import { FriendRequest } from 'src/domain/types/friend.types';
+import { Group } from 'src/domain/types/group.types';
 import { User } from 'src/domain/types/user.types';
 
 export const getUserCursor = (users: User[], limit: number) => {
@@ -20,4 +21,8 @@ export const getFriendRequestCursor = (
         accountId: friendRequests[limit - 1].sender.accountId,
       }
     : null;
+};
+
+export const getGroupCursor = (groups: Group[], limit: number) => {
+  return groups[limit - 1]?.joinDate.toISOString() || null;
 };

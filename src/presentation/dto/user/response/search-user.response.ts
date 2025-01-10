@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserCursor } from 'src/presentation/dto/shared';
-import { User } from 'src/presentation/dto/user/response/data.types';
+import { User } from './data.types';
+import { UserCursor } from '../../shared';
 
 export class SearchUserResponse {
   @ApiProperty({ type: User })

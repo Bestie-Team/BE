@@ -11,9 +11,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "emitDeclarationOnly": true,
-    "paths": {
-      "src/*": ["../../*"]
-    }
   },
   "include": [
     "./**/*.ts"

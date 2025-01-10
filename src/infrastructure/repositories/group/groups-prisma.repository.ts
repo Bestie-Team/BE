@@ -115,6 +115,17 @@ export class GroupsPrismaRepository implements GroupsRepository {
     });
   }
 
+  async findGroupMembersById(id: string): Promise<{ participantId: string }[]> {
+    return await this.txHost.tx.groupParticipation.findMany({
+      select: {
+        participantId: true,
+      },
+      where: {
+        groupId: id,
+      },
+    });
+  }
+
   async delete(groupId: string): Promise<void> {
     await this.txHost.tx.group.delete({
       where: {

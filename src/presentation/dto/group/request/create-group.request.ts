@@ -3,11 +3,11 @@ import { ArrayNotEmpty, IsArray, IsUrl, IsUUID, Length } from 'class-validator';
 
 export class CreateGroupRequest {
   @ApiProperty()
-  @Length(1, 20)
+  @Length(1, 20, { message: '그룹 이름은 최소 1자 최대 20자만 가능합니다.' })
   readonly name: string;
 
   @ApiProperty()
-  @Length(1, 40)
+  @Length(1, 40, { message: '그룹 설명은 최소 1자 최대 40자만 가능합니다.' })
   readonly description: string;
 
   @ApiProperty()
@@ -17,6 +17,6 @@ export class CreateGroupRequest {
   readonly friendIds: string[];
 
   @ApiProperty()
-  @IsUrl()
+  @IsUrl({}, { message: 'url 형식이 아닙니다.' })
   readonly groupImageUrl: string;
 }

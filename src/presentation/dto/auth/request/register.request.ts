@@ -28,7 +28,7 @@ export class RegisterRequest {
     example: 'GOOGLE',
   })
   @IsIn(['GOOGLE', 'KAKAO', 'APPLE'], {
-    message: 'provider는 GOOGLE, KAKAO, APPLE 중 하나여야 합니다.',
+    message: 'provider는 GOOGLE, KAKAO, APPLE만 가능합니다.',
   })
   @Transform(({ value }) => value.toUpperCase(), { toClassOnly: true })
   readonly provider: Provider;

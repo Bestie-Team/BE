@@ -99,7 +99,6 @@ export class GroupsPrismaRepository implements GroupsRepository {
 
       result[row.group_id].members.push(member);
     });
-    console.log(result);
 
     return Object.values(result);
   }

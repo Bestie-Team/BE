@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { Body, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
@@ -369,6 +369,47 @@ describe('GroupsController (e2e)', () => {
 
       expect(status).toEqual(204);
       expect(groupParticipation.length).toEqual(1);
+    });
+
+    it('그룹장이 그룹을 나가려는 경우 예외', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
+      });
+      const group = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+      const groupParticipation1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user1.id, new Date()),
+      });
+      const groupParticipation2 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user2.id, new Date()),
+      });
+
+      const groupId = group.id;
+
+      // when
+      const response = await request(app.getHttpServer())
+        .delete(`/groups/${groupId}/members`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(400);
     });
   });
 });

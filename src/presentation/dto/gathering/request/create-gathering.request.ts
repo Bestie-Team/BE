@@ -32,7 +32,7 @@ export class CreateGatheringRequest {
   })
   readonly type: GatheringType;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: [String], nullable: true })
   @IsArray()
   @IsUUID(4, { each: true, message: '친구 번호 형식이 맞지 않습니다.' })
   @ArrayNotEmpty({ message: '그룹의 친구는 1명 이상이어야합니다.' })
@@ -40,7 +40,7 @@ export class CreateGatheringRequest {
   @ValidateIf((_, value) => value !== null)
   readonly friendIds: string[] | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: 'string', nullable: true })
   @IsUUID(4, { each: true, message: '그룹 번호 형식이 맞지 않습니다.' })
   @IsNotEmpty()
   @ValidateIf((_, value) => value !== null)

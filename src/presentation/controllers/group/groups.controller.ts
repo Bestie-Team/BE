@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
+  ParseUUIDPipe,
   Post,
   Query,
   UploadedFile,
@@ -13,6 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -24,7 +27,7 @@ import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer
 import { GroupCreateService } from 'src/domain/services/group/group-create.service';
 import { GroupsService } from 'src/domain/services/group/groups.service';
 import { toListDto } from 'src/presentation/converters/group/group.converters';
-import { PaginationRequest } from 'src/presentation/dto';
+import { AddGroupMemberRequest, PaginationRequest } from 'src/presentation/dto';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
@@ -113,5 +116,29 @@ export class GroupsController {
       paginationDto,
     );
     return toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '그룹원 추가' })
+  @ApiParam({
+    name: 'groupId',
+    type: 'string',
+  })
+  @ApiBody({
+    type: AddGroupMemberRequest,
+  })
+  @ApiResponse({
+    status: 201,
+    description: '그룹원 추가 완료',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Post(':groupId/members')
+  async addMember(
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+    @Body() dto: AddGroupMemberRequest,
+  ) {
+    await this.groupsCreateService.addMember(groupId, dto.userId);
   }
 }

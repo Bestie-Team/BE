@@ -12,7 +12,7 @@ export class CreateGroupRequest {
 
   @ApiProperty()
   @IsArray()
-  @IsUUID(4, { each: true })
+  @IsUUID(4, { each: true, message: '친구 번호 형식이 맞지 않습니다.' })
   @ArrayNotEmpty({ message: '그룹의 친구는 1명 이상이어야합니다.' })
   readonly friendIds: string[];
 

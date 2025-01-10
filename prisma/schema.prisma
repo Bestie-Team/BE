@@ -191,8 +191,8 @@ model GroupParticipation {
   participantId String @map("participant_id")
   createdAt DateTime @map("created_at")
 
-  group Group @relation(fields: [groupId], references: [id])
-  participant User @relation(fields: [participantId], references: [id])
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  participant User @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, participantId])
   @@map("group_participation")

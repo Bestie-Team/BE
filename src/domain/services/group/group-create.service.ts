@@ -55,19 +55,20 @@ export class GroupCreateService {
     groupId: string,
     friendIds: string[],
   ) {
-    const stdDate = new Date();
     const groupParticipations = friendIds.map(async (friendId) => {
-      const participation = GroupParticipationEntity.create(
-        {
-          groupId,
-          participantId: friendId,
-        },
-        v4,
-        stdDate,
-      );
-      await this.groupParticipationsRepository.save(participation);
+      await this.addMember(groupId, friendId);
     });
 
     await Promise.all(groupParticipations);
+  }
+
+  async addMember(groupId: string, participantId: string) {
+    const stdDate = new Date();
+    const participation = GroupParticipationEntity.create(
+      { groupId, participantId },
+      v4,
+      stdDate,
+    );
+    await this.groupParticipationsRepository.save(participation);
   }
 }

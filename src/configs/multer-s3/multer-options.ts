@@ -38,3 +38,8 @@ export const CreateProfileImageMulterOptions = (): MulterOptions => {
 export const CreateGroupCoverImageMulterOptions = (): MulterOptions => {
   return CreateMulterOptions('group', 'cover');
 };
+
+export const CreateGatheringInvitationImageMulterOptions =
+  (): MulterOptions => {
+    return CreateMulterOptions('gathering', 'invitation');
+  };

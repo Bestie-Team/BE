@@ -23,3 +23,4 @@ export class PaginationRequest {
 
 export type Provider = 'GOOGLE' | 'KAKAO' | 'APPLE';
 export type FriendStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'REPORTED';
+export type GatheringType = 'GROUP' | 'FRIEND';

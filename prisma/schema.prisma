@@ -23,6 +23,11 @@ enum OAuthProvider {
   APPLE
 }
 
+enum GatheringType {
+  FRIEND
+  GROUP
+}
+
 enum FriendStatus {
   PENDING
   ACCEPTED
@@ -64,6 +69,8 @@ model User {
 
 model Gathering {
   id String @id
+  type GatheringType
+  groupId String? @map("group_id")
   hostUserId String @map("host_user_id")
   name String @db.VarChar(20)
   description String @db.VarChar(40)
@@ -75,6 +82,7 @@ model Gathering {
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  group Group? @relation(fields: [groupId], references: [id])
   user User @relation(fields: [hostUserId], references: [id])
   participations GatheringParticipation[]
   feeds Feed[]
@@ -86,7 +94,7 @@ model GatheringParticipation {
   id String @id
   gatheringId String @map("gathering_id")
   participantId String @map("participant_id")
-  status GatheringParticipationStatus
+  status GatheringParticipationStatus @default(PENDING)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
@@ -181,6 +189,7 @@ model Group {
 
   owner User @relation(fields: [ownerId], references: [id])
   groupParticipation GroupParticipation[]
+  gatherings Gathering[]
 
   @@map("group")
 }

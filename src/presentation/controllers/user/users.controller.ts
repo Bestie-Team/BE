@@ -9,7 +9,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { ApiUserPaginationQuery } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -22,6 +28,7 @@ import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-i
 import { IMAGE_BASE_URL } from 'src/common/constant';
 
 @ApiTags('/users')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('users')
 export class UsersController {

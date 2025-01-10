@@ -12,6 +12,7 @@ export interface GroupsRepository {
     groupId: string,
     ownerId: string,
   ): Promise<{ id: string } | null>;
+  findGroupMembersById(id: string): Promise<{ participantId: string }[]>;
   delete(groupId: string): Promise<void>;
 }
 

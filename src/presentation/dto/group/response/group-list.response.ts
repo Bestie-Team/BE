@@ -17,6 +17,9 @@ export class Group {
   @ApiProperty()
   readonly groupImageUrl: string;
 
+  @ApiProperty()
+  readonly joinDate: string;
+
   @ApiProperty({ type: User })
   readonly owner: User;
 
@@ -24,7 +27,7 @@ export class Group {
   readonly members: User[];
 }
 
-export class GroupListReponse {
+export class GroupListResponse {
   @ApiProperty({ type: [Group] })
   readonly groups: Group[];
 

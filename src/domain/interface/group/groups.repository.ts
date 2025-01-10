@@ -8,6 +8,10 @@ export interface GroupsRepository {
     userId: string,
     paginationInput: PaginationInput,
   ): Promise<Group[]>;
+  findOneByGroupAndOwnerId(
+    groupId: string,
+    ownerId: string,
+  ): Promise<{ id: string } | null>;
 }
 
 export const GroupsRepository = Symbol('GroupsRepository');

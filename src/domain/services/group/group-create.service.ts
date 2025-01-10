@@ -5,7 +5,10 @@ import { GroupEntity } from 'src/domain/entities/group/group.entity';
 import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
 import { GroupPrototype } from 'src/domain/types/group.types';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
-import { IS_NOT_FRIEND_RELATION_MESSAGE } from 'src/domain/error/messages';
+import {
+  GROUP_OWNER_CANT_LEAVE_MESSAGE,
+  IS_NOT_FRIEND_RELATION_MESSAGE,
+} from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
 
@@ -32,6 +35,11 @@ export class GroupCreateService {
     await this.addMember(groupId, participantId);
   }
 
+  async leaveGroup(groupId: string, userId: string) {
+    await this.checkIsOwner(groupId, userId);
+    await this.groupParticipationsRepository.delete(groupId, userId);
+  }
+
   @Transactional()
   private async createTransaction(group: GroupEntity, friendIds: string[]) {
     await this.createGroup(group);
@@ -53,6 +61,16 @@ export class GroupCreateService {
     );
     if (!friend) {
       throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
+    }
+  }
+
+  private async checkIsOwner(groupId: string, userId: string) {
+    const group = await this.groupsRepository.findOneByGroupAndOwnerId(
+      groupId,
+      userId,
+    );
+    if (group) {
+      throw new BadRequestException(GROUP_OWNER_CANT_LEAVE_MESSAGE);
     }
   }
 

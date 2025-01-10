@@ -45,25 +45,28 @@ export class GroupsPrismaRepository implements GroupsRepository {
         'mu.profile_image_url as member_profile_image_url',
       ])
       .where((eb) =>
-        eb.or([
-          eb('g.id', 'in', (qb) =>
-            qb
-              .selectFrom('group_participation as gp')
-              .select('group_id')
-              .where('gp.participant_id', '=', userId),
-          ),
-          eb('g.owner_id', '=', userId),
-        ]),
+        eb('g.id', 'in', (qb) =>
+          qb
+            .selectFrom('group as g')
+            .select('g.id')
+            .where('g.id', 'in', (qb) =>
+              qb
+                .selectFrom('group as g')
+                .select('g.id as group_id')
+                .where('g.owner_id', '=', userId)
+                .union((qb) =>
+                  qb
+                    .selectFrom('group_participation as gp')
+                    .select('gp.group_id')
+                    .where('gp.participant_id', '=', userId),
+                ),
+            )
+            .where('gp.created_at', '<', new Date(cursor))
+            .orderBy('gp.created_at', 'desc')
+            .orderBy('g.name', 'asc')
+            .limit(limit),
+        ),
       )
-      // .where('g.id', 'in', (qb) =>
-      //   qb
-      //     .selectFrom('group_participation as gp')
-      //     .select('group_id')
-      //     .where('gp.participant_id', '=', userId),
-      // )
-      .where('g.created_at', '<', new Date(cursor))
-      .orderBy('g.created_at', 'desc')
-      .limit(limit)
       .execute();
 
     const result: { [key: string]: Group } = {};
@@ -94,13 +97,7 @@ export class GroupsPrismaRepository implements GroupsRepository {
         profileImageUrl: row.member_profile_image_url,
       };
 
-      const memberExists = result[row.group_id].members.some(
-        (existingMember) => existingMember.id === member.id,
-      );
-
-      if (!memberExists) {
-        result[row.group_id].members.push(member);
-      }
+      result[row.group_id].members.push(member);
     });
     console.log(result);
 

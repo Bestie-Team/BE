@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsInt, IsString } from 'class-validator';
 
 export class UserCursor {
   @ApiProperty()
@@ -6,6 +8,17 @@ export class UserCursor {
 
   @ApiProperty()
   readonly accountId: string;
+}
+
+export class PaginationRequest {
+  @ApiProperty()
+  @IsString()
+  readonly cursor: string;
+
+  @ApiProperty()
+  @IsInt({ message: 'limit은 정수만 가능합니다.' })
+  @Transform(({ value }) => Number(value), { toClassOnly: true })
+  readonly limit: number;
 }
 
 export type Provider = 'GOOGLE' | 'KAKAO' | 'APPLE';

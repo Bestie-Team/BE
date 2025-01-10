@@ -1,5 +1,11 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ValidateProviderPipe } from 'src/common/pipes/validate-provider.pipe';
 import { AuthService } from 'src/domain/services/auth/auth.service';
 import { LoginRequest } from 'src/presentation/dto/auth/request/login.request';
@@ -15,6 +21,12 @@ export class AuthController {
 
   @ApiOperation({ summary: '소셜 로그인' })
   @ApiBody({ type: LoginRequest })
+  @ApiParam({
+    name: 'provider',
+    description: '소셜 로그인 플랫폼',
+    enum: ['GOOGLE', 'KAKAO', 'APPLE'],
+    example: 'GOOGLE',
+  })
   @ApiResponse({
     status: 201,
     description: '로그인 성공',

@@ -1,5 +1,5 @@
 import { ApiQuery } from '@nestjs/swagger';
-import { UserCursor } from 'src/presentation/dto/shared';
+import { UserCursor } from 'src/presentation/dto';
 
 export const ApiUserPaginationQuery = () => {
   return (
@@ -10,7 +10,6 @@ export const ApiUserPaginationQuery = () => {
     ApiQuery({
       name: 'cursor',
       type: UserCursor,
-      example: 'abc123',
     })(target, propertyKey, descriptor);
     ApiQuery({ name: 'limit', type: 'number', example: 10 })(
       target,

@@ -14,7 +14,7 @@ import {
 } from 'test/helpers/generators';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
 import { ResponseResult } from 'test/helpers/types';
-import { GroupListResponse } from 'src/presentation/dto';
+import { AddGroupMemberRequest, GroupListResponse } from 'src/presentation/dto';
 
 describe('GroupsController (e2e)', () => {
   let app: INestApplication;
@@ -199,7 +199,6 @@ describe('GroupsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GroupListResponse> = response;
       const { groups, nextCursor } = body;
-      console.log(nextCursor);
 
       expect(status).toEqual(200);
       expect(nextCursor).toEqual(groupParticipationStdDate1.toISOString());
@@ -210,6 +209,113 @@ describe('GroupsController (e2e)', () => {
         expect(group.gatheringCount).toEqual(expectedGroups[i].gatheringCount);
       });
       // 멤버도 검증해야하는데 귀찮다...
+    });
+  });
+
+  describe('(POST) /groups/{groupId}/members - 그룹원 추가', () => {
+    it('그룹원 추가 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
+      });
+      const user3 = await prisma.user.create({
+        data: generateUserEntity('test3@test.com', 'lighty_3', '이진수'), // 2
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
+      });
+      const friendRealtion3 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
+      });
+      const group = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+      const group1Participation1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user1.id, new Date()),
+      });
+      const group1Participation2 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user2.id, new Date()),
+      });
+      const groupId = group.id;
+      const newMemberId = user3.id;
+      const dto: AddGroupMemberRequest = {
+        userId: newMemberId,
+      };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post(`/groups/${groupId}/members`)
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+      const members = await prisma.groupParticipation.findMany({
+        where: {
+          groupId,
+        },
+      });
+
+      expect(status).toEqual(201);
+      expect(members.length).toEqual(3);
+    });
+
+    it('친구가 아닌 회원을 추가하려고 하는 경우 예외', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
+      });
+      const user3 = await prisma.user.create({
+        data: generateUserEntity('test3@test.com', 'lighty_3', '이진수'), // 2
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
+      });
+      const group = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+      const group1Participation1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user1.id, new Date()),
+      });
+      const group1Participation2 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user2.id, new Date()),
+      });
+      const groupId = group.id;
+      const nonFriendUserId = user3.id;
+      const dto: AddGroupMemberRequest = {
+        userId: nonFriendUserId,
+      };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post(`/groups/${groupId}/members`)
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(400);
     });
   });
 });

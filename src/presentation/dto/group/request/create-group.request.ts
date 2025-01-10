@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsArray, IsUrl, IsUUID, Length } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  IsArray,
+  IsUrl,
+  IsUUID,
+  Length,
+} from 'class-validator';
 
 export class CreateGroupRequest {
   @ApiProperty()
@@ -14,6 +21,7 @@ export class CreateGroupRequest {
   @IsArray()
   @IsUUID(4, { each: true, message: '친구 번호 형식이 맞지 않습니다.' })
   @ArrayNotEmpty({ message: '그룹의 친구는 1명 이상이어야합니다.' })
+  @ArrayMaxSize(12)
   readonly friendIds: string[];
 
   @ApiProperty()

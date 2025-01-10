@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
   IsDateString,
@@ -36,6 +37,7 @@ export class CreateGatheringRequest {
   @IsArray()
   @IsUUID(4, { each: true, message: '친구 번호 형식이 맞지 않습니다.' })
   @ArrayNotEmpty({ message: '그룹의 친구는 1명 이상이어야합니다.' })
+  @ArrayMaxSize(10)
   @IsNotEmpty()
   @ValidateIf((_, value) => value !== null)
   readonly friendIds: string[] | null;
@@ -47,7 +49,7 @@ export class CreateGatheringRequest {
   readonly groupId: string | null;
 
   @ApiProperty()
-  @IsDateString()
+  @IsDateString({}, { message: 'ISO8601 형식이 아닙니다.' })
   readonly gatheringDate: string;
 
   @ApiProperty()

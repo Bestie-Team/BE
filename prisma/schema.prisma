@@ -190,7 +190,6 @@ model GroupParticipation {
   groupId String @map("group_id")
   participantId String @map("participant_id")
   createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
 
   group Group @relation(fields: [groupId], references: [id])
   participant User @relation(fields: [participantId], references: [id])

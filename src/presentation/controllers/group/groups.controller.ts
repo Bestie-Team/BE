@@ -138,7 +138,8 @@ export class GroupsController {
   async addMember(
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @Body() dto: AddGroupMemberRequest,
+    @CurrentUser() userId: string,
   ) {
-    await this.groupsCreateService.addMember(groupId, dto.userId);
+    await this.groupsCreateService.addNewMember(userId, groupId, dto.userId);
   }
 }

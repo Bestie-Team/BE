@@ -21,10 +21,15 @@ export class GroupCreateService {
   ) {}
 
   async create(prototype: GroupPrototype, friendIds: string[]) {
-    await this.checkIsFriend(prototype.ownerId, friendIds);
+    await this.checkIsFriendAll(prototype.ownerId, friendIds);
     const stdDate = new Date();
     const group = GroupEntity.create(prototype, v4, stdDate);
     await this.createTransaction(group, friendIds);
+  }
+
+  async addNewMember(userId: string, groupId: string, participantId: string) {
+    await this.checkIsFriend(userId, participantId);
+    await this.addMember(groupId, participantId);
   }
 
   @Transactional()
@@ -33,18 +38,22 @@ export class GroupCreateService {
     await this.createGroupParticipations(group.id, friendIds);
   }
 
-  private async checkIsFriend(userId: string, friendIds: string[]) {
+  private async checkIsFriendAll(userId: string, friendIds: string[]) {
     const friendChecks = friendIds.map(async (friendId) => {
-      const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
-        friendId,
-        userId,
-      );
-      if (!friend) {
-        throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
-      }
+      await this.checkIsFriend(userId, friendId);
     });
 
     await Promise.all(friendChecks);
+  }
+
+  private async checkIsFriend(userId: string, friendId: string) {
+    const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
+      friendId,
+      userId,
+    );
+    if (!friend) {
+      throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
+    }
   }
 
   private async createGroup(entity: GroupEntity) {

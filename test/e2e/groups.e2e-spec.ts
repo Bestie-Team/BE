@@ -412,4 +412,53 @@ describe('GroupsController (e2e)', () => {
       expect(status).toEqual(400);
     });
   });
+
+  describe('(DELETE) /groups/:groupId - 그룹 삭제', () => {
+    it('그룹 삭제 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
+      });
+      const group = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+      const groupParticipation1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user1.id, new Date()),
+      });
+      const groupParticipation2 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user2.id, new Date()),
+      });
+
+      const groupId = group.id;
+
+      // when
+      const response = await request(app.getHttpServer())
+        .delete(`/groups/${groupId}`)
+        .set('Authorization', accessToken);
+      const { status, body } = response;
+      const groupParticipations = await prisma.groupParticipation.findMany({
+        where: {
+          groupId,
+        },
+      });
+
+      expect(status).toEqual(204);
+      expect(groupParticipations.length).toEqual(0);
+    });
+  });
 });

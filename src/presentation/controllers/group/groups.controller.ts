@@ -91,7 +91,7 @@ export class GroupsController {
   @ApiOperation({ summary: '참여 그룹 목록 조회' })
   @ApiQuery({
     name: 'cursor',
-    description: '모임 참여일',
+    description: '그룹 참여일',
     example: '2025-01-01T00:00:00.000Z',
   })
   @ApiResponse({

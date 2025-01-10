@@ -94,7 +94,7 @@ model GatheringParticipation {
   id String @id
   gatheringId String @map("gathering_id")
   participantId String @map("participant_id")
-  status GatheringParticipationStatus
+  status GatheringParticipationStatus @default(PENDING)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")

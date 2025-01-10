@@ -99,7 +99,6 @@ export type GroupParticipation = {
   group_id: string;
   participant_id: string;
   created_at: Timestamp;
-  deleted_at: Timestamp | null;
 };
 export type User = {
   id: string;

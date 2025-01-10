@@ -102,4 +102,24 @@ export class GroupsPrismaRepository implements GroupsRepository {
 
     return Object.values(result);
   }
+
+  async findOneByGroupAndOwnerId(
+    groupId: string,
+    ownerId: string,
+  ): Promise<{ id: string } | null> {
+    return await this.txHost.tx.group.findFirst({
+      where: {
+        id: groupId,
+        ownerId,
+      },
+    });
+  }
+
+  async delete(groupId: string): Promise<void> {
+    await this.txHost.tx.group.delete({
+      where: {
+        id: groupId,
+      },
+    });
+  }
 }

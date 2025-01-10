@@ -17,4 +17,15 @@ export class GroupParticipationsPrismaRepository
       data,
     });
   }
+
+  async delete(groupId: string, participantId: string): Promise<void> {
+    await this.txHost.tx.groupParticipation.delete({
+      where: {
+        groupId_participantId: {
+          groupId,
+          participantId,
+        },
+      },
+    });
+  }
 }

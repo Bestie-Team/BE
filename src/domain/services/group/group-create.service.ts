@@ -1,11 +1,20 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { v4 } from 'uuid';
 import { GroupEntity } from 'src/domain/entities/group/group.entity';
 import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
 import { GroupPrototype } from 'src/domain/types/group.types';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
-import { IS_NOT_FRIEND_RELATION_MESSAGE } from 'src/domain/error/messages';
+import {
+  FORBIDDEN_MESSAGE,
+  GROUP_OWNER_CANT_LEAVE_MESSAGE,
+  IS_NOT_FRIEND_RELATION_MESSAGE,
+} from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
 
@@ -32,6 +41,23 @@ export class GroupCreateService {
     await this.addMember(groupId, participantId);
   }
 
+  async leaveGroup(groupId: string, userId: string) {
+    const isOwner = await this.checkIsOwner(groupId, userId);
+    if (isOwner) {
+      throw new BadRequestException(GROUP_OWNER_CANT_LEAVE_MESSAGE);
+    }
+    await this.groupParticipationsRepository.delete(groupId, userId);
+  }
+
+  async deleteGroup(groupId: string, userId: string) {
+    const isOwner = await this.checkIsOwner(groupId, userId);
+    if (!isOwner) {
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    }
+
+    await this.groupsRepository.delete(groupId);
+  }
+
   @Transactional()
   private async createTransaction(group: GroupEntity, friendIds: string[]) {
     await this.createGroup(group);
@@ -54,6 +80,15 @@ export class GroupCreateService {
     if (!friend) {
       throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
     }
+  }
+
+  private async checkIsOwner(groupId: string, userId: string) {
+    const group = await this.groupsRepository.findOneByGroupAndOwnerId(
+      groupId,
+      userId,
+    );
+
+    return group;
   }
 
   private async createGroup(entity: GroupEntity) {

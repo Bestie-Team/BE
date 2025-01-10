@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -122,6 +124,7 @@ export class GroupsController {
   @ApiParam({
     name: 'groupId',
     type: 'string',
+    description: '추가할 대상 그룹',
   })
   @ApiBody({
     type: AddGroupMemberRequest,
@@ -141,5 +144,55 @@ export class GroupsController {
     @CurrentUser() userId: string,
   ) {
     await this.groupsCreateService.addNewMember(userId, groupId, dto.userId);
+  }
+
+  @ApiOperation({ summary: '그룹 나가기 (그룹원)' })
+  @ApiParam({
+    name: 'groupId',
+    type: 'string',
+    description: '나갈 대상 그룹',
+  })
+  @ApiResponse({
+    status: 204,
+    description: '그룹 나가기 완료',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':groupId/members')
+  async leave(
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.groupsCreateService.leaveGroup(groupId, userId);
+  }
+
+  @ApiOperation({ summary: '그룹 삭제 (그룹장)' })
+  @ApiParam({
+    name: 'groupId',
+    type: 'string',
+    description: '삭제할 대상 그룹',
+  })
+  @ApiResponse({
+    status: 204,
+    description: '그룹 삭제 완료',
+  })
+  @ApiResponse({
+    status: 403,
+    description: '그룹장이 아닌 경우 삭제 실패',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':groupId')
+  async delete(
+    @Param('groupId', ParseUUIDPipe) groupId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.groupsCreateService.deleteGroup(groupId, userId);
   }
 }

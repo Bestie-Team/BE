@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
@@ -7,8 +8,14 @@ import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
 import { login } from 'test/helpers/login';
-import { generateUserEntity } from 'test/helpers/generators';
+import {
+  generateFriendEntity,
+  generateGroupEntity,
+  generateGroupParticipationEntity,
+  generateUserEntity,
+} from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
+import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 
 describe('GatheringsController (e2e)', () => {
   let app: INestApplication;
@@ -25,64 +32,121 @@ describe('GatheringsController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.gatheringParticipation.deleteMany();
+    await prisma.gathering.deleteMany();
+    await prisma.groupParticipation.deleteMany();
+    await prisma.group.deleteMany();
+    await prisma.friend.deleteMany();
     await prisma.user.deleteMany();
   });
 
-  describe('(GET) /users/search?search={} - 회원 검색', () => {
-    it('회원 검색 정상 동작', async () => {
-      const { accessToken } = await login(app);
+  describe('(POST) /gatherings - 모임 생성', () => {
+    it('친구 모임 생성 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
 
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
       const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 4
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
       });
       const user2 = await prisma.user.create({
-        data: generateUserEntity('test2@test.com', 'lighty_2', '김기수'), // 3
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
       });
       const user3 = await prisma.user.create({
-        data: generateUserEntity('test3@test.com', 'lighty_3', '박민수'), //5
+        data: generateUserEntity('test3@test.com', 'lighty_3', '이진수'), // 2
       });
-      const user4 = await prisma.user.create({
-        data: generateUserEntity('test4@test.com', 'lighty_4', '강민수'), // 1
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
       });
-      const user5 = await prisma.user.create({
-        data: generateUserEntity('test5@test.com', 'lighty_5', '조민수'), //6
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
       });
-      const user6 = await prisma.user.create({
-        data: generateUserEntity('test6@test.com', 'lighty_6', '강민수'), // 2
-      });
-      const nonSearchedUser = await prisma.user.create({
-        data: generateUserEntity('test7@test.com', 'righty', '이민수'),
+      const friendRealtion3 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
       });
 
-      const searchKeyword = 'lig';
-      const cursor = {
-        name: user4.name, // 강민수
-        accountId: user4.accountId,
+      const dto: CreateGatheringRequest = {
+        name: '크리스마스 모임',
+        address: '내집',
+        description: '크리스마스 모임입니다~~',
+        friendIds: [user1.id, user2.id, user3.id],
+        gatheringDate: '2025-12-25T00:00:00.000Z',
+        groupId: null,
+        invitationImageUrl: 'https://image.com',
+        type: 'FRIEND',
       };
-      const limit = 4;
-      const expectedUsers = [user6, user2, user1, user3];
-      const url = encodeURI(
-        `/users/search?search=${searchKeyword}&cursor=${JSON.stringify(
-          cursor,
-        )}&limit=${limit}`,
-      );
+
       // when
       const response = await request(app.getHttpServer())
-        .get(url)
+        .post('/gatherings')
+        .send(dto)
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<SearchUserResponse> = response;
 
-      expect(status).toEqual(200);
-      expect(body.nextCursor).toEqual({
-        name: expectedUsers.at(-1)?.name,
-        accountId: expectedUsers.at(-1)?.accountId,
+      expect(status).toEqual(201);
+    });
+
+    it('그룹 모임 생성 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
       });
-      body.users.forEach((user, i) => {
-        expect(user.id).toEqual(expectedUsers[i].id);
-        expect(user.accountId).toEqual(expectedUsers[i].accountId);
-        expect(user.name).toEqual(expectedUsers[i].name);
-        expect(user.profileImageUrl).toEqual(expectedUsers[i].profileImageUrl);
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
       });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
+      });
+      const user3 = await prisma.user.create({
+        data: generateUserEntity('test3@test.com', 'lighty_3', '이진수'), // 2
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
+      });
+      const friendRealtion3 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
+      });
+      const group = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+      const groupParticipation1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user1.id, new Date()),
+      });
+      const groupParticipation2 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user2.id, new Date()),
+      });
+      const groupParticipation3 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user3.id, new Date()),
+      });
+
+      const dto: CreateGatheringRequest = {
+        name: '크리스마스 모임',
+        address: '내집',
+        description: '크리스마스 모임입니다~~',
+        friendIds: null,
+        gatheringDate: '2025-12-25T00:00:00.000Z',
+        groupId: group.id,
+        invitationImageUrl: 'https://image.com',
+        type: 'GROUP',
+      };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post('/gatherings')
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<SearchUserResponse> = response;
+
+      expect(status).toEqual(201);
     });
   });
 });

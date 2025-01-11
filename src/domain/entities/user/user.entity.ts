@@ -8,7 +8,7 @@ export class UserEntity {
     readonly name: string,
     readonly accountId: string,
     readonly provider: Provider,
-    readonly profileImageUrl: string,
+    readonly profileImageUrl: string | null,
     readonly createdAt: Date,
     readonly updatedAt: Date,
   ) {}

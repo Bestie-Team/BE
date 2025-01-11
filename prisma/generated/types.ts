@@ -113,7 +113,7 @@ export type User = {
   provider: OAuthProvider;
   name: string;
   account_id: string;
-  profile_image_url: string;
+  profile_image_url: string | null;
   created_at: Timestamp;
   updated_at: Timestamp;
   deleted_at: Timestamp | null;

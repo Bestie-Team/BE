@@ -40,8 +40,12 @@ export class UsersService {
     await this.usersRepository.update({ id: userId, profileImageUrl });
   }
 
-  async updateAccountId(userId: string, accountId: string) {
-    await this.checkAccountIdChangeCooldown(userId);
+  async updateAccountId(
+    userId: string,
+    accountId: string,
+    today: Date = new Date(),
+  ) {
+    await this.checkAccountIdChangeCooldown(userId, today);
     await this.checkDuplicateAccountId(accountId);
 
     await this.usersRepository.update({ id: userId, accountId });
@@ -65,10 +69,7 @@ export class UsersService {
     }
   }
 
-  private async checkAccountIdChangeCooldown(
-    userId: string,
-    today: Date = new Date(),
-  ) {
+  private async checkAccountIdChangeCooldown(userId: string, today: Date) {
     const { createdAt, updatedAt } = await this.getUserByIdOrThrow(userId);
 
     if (

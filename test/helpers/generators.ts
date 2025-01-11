@@ -12,11 +12,14 @@ export const generateUserEntity = (
   name = '이름',
   profileImageUrl = 'https://image.com',
   provider: Provider = 'GOOGLE',
+  stdDate: Date = new Date(),
+  updatedAt?: Date,
 ): UserEntity =>
   UserEntity.create(
     { accountId, email, name, profileImageUrl, provider },
     v4,
-    new Date(),
+    stdDate,
+    updatedAt ? updatedAt : undefined,
   );
 
 export const generateFriendEntity = (

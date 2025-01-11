@@ -11,5 +11,5 @@ export class User {
   readonly name: string;
 
   @ApiProperty()
-  readonly profileImageUrl: string;
+  readonly profileImageUrl: string | null;
 }

@@ -92,4 +92,16 @@ export class UsersPrismaRepository implements UsersRepository {
       profileImageUrl: row.profile_image_url,
     }));
   }
+
+  async update(data: Partial<UserEntity>): Promise<void> {
+    const { id, profileImageUrl } = data;
+    await this.prisma.user.update({
+      data: {
+        profileImageUrl,
+      },
+      where: {
+        id,
+      },
+    });
+  }
 }

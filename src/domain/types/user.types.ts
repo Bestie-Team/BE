@@ -18,7 +18,7 @@ export interface User {
   readonly id: string;
   readonly accountId: string;
   readonly name: string;
-  readonly profileImageUrl: string;
+  readonly profileImageUrl: string | null;
 }
 
 export interface SearchInput {

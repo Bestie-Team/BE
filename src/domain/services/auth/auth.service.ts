@@ -34,6 +34,8 @@ export class AuthService {
 
     return {
       accessToken: await this.generateToken(user.id),
+      accountId: user.accountId,
+      profileImageUrl: user.profileImageUrl,
     };
   }
 
@@ -51,6 +53,7 @@ export class AuthService {
 
     return {
       accessToken: await this.generateToken(user.id),
+      accountId: user.accountId,
     };
   }
 

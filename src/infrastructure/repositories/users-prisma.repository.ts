@@ -20,6 +20,8 @@ export class UsersPrismaRepository implements UsersRepository {
       select: {
         id: true,
         email: true,
+        accountId: true,
+        profileImageUrl: true,
         provider: true,
       },
       where: {

@@ -13,6 +13,7 @@ import { LoginResponse } from 'src/presentation/dto/auth/response/login.response
 import { RegisterRequest } from 'src/presentation/dto/auth/request/register.request';
 import { LoginFailResponse } from 'src/presentation/dto/user/response/login-fail.response';
 import { Provider } from 'src/shared/types';
+import { RegisterResponse } from 'src/presentation/dto/auth/response/register.response';
 
 @ApiTags('/auth')
 @Controller('auth')
@@ -56,10 +57,10 @@ export class AuthController {
   @ApiResponse({
     status: 201,
     description: '회원가입 완료, 즉시 로그인',
-    type: LoginResponse,
+    type: RegisterResponse,
   })
   @Post('register')
-  async register(@Body() dto: RegisterRequest): Promise<LoginResponse> {
+  async register(@Body() dto: RegisterRequest): Promise<RegisterResponse> {
     return await this.authService.register(dto);
   }
 }

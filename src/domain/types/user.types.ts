@@ -11,6 +11,8 @@ export interface UserPrototype {
 export interface UserBasicInfo {
   readonly id: string;
   readonly email: string;
+  readonly accountId: string;
+  readonly profileImageUrl: string | null;
   readonly provider: Provider;
 }
 

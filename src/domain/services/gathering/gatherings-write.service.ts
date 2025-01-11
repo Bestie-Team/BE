@@ -110,4 +110,11 @@ export class GatheringsWriteService {
     const members = await this.groupsRepository.findGroupMembersById(groupId);
     return members.map((member) => member.participantId);
   }
+
+  async accept(invitationId: string, userId: string) {
+    await this.gatheringParticipationsRepository.updateStatus(
+      invitationId,
+      'ACCEPTED',
+    );
+  }
 }

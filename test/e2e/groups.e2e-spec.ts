@@ -135,6 +135,7 @@ describe('GroupsController (e2e)', () => {
       });
       const groupParticipationStdDate1 = new Date('2025-01-01T00:00:00.000Z');
       const groupParticipationStdDate2 = new Date('2025-01-01T12:00:00.000Z');
+      const groupParticipationStdDate3 = new Date('2024-12-21T12:00:00.000Z');
       const user1 = await prisma.user.create({
         data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
       });
@@ -187,10 +188,20 @@ describe('GroupsController (e2e)', () => {
           groupParticipationStdDate1,
         ),
       });
-      const expectedGroups = [group1, group2];
+      const group3 = await prisma.group.create({
+        data: generateGroupEntity(user2.id, '테스트 그룹'),
+      });
+      const group3Participation1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(
+          group3.id,
+          loginedUser!.id,
+          groupParticipationStdDate3,
+        ),
+      });
+      const expectedGroups = [group1, group2, group3];
 
       const cursor = new Date('2025-01-01T12:00:00.001Z').toISOString();
-      const limit = 2;
+      const limit = 3;
 
       // when
       const response = await request(app.getHttpServer())
@@ -198,9 +209,10 @@ describe('GroupsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GroupListResponse> = response;
       const { groups, nextCursor } = body;
+      console.log(groups);
 
       expect(status).toEqual(200);
-      expect(nextCursor).toEqual(groupParticipationStdDate1.toISOString());
+      expect(nextCursor).toEqual(groupParticipationStdDate3.toISOString());
       groups.forEach((group, i) => {
         expect(group.id).toEqual(expectedGroups[i].id);
         expect(group.name).toEqual(expectedGroups[i].name);

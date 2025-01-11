@@ -1,8 +1,14 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { v4 } from 'uuid';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import {
+  FORBIDDEN_MESSAGE,
   GROUP_GATHERING_REQUIRED_GROUPID_MESSAGE,
   IS_NOT_FRIEND_RELATION_MESSAGE,
   MINIMUM_FRIENDS_REQUIRED_MESSAGE,
@@ -112,6 +118,7 @@ export class GatheringsWriteService {
   }
 
   async accept(invitationId: string, userId: string) {
+    await this.checkIsParticipant(invitationId, userId);
     await this.gatheringParticipationsRepository.updateStatus(
       invitationId,
       'ACCEPTED',
@@ -119,9 +126,18 @@ export class GatheringsWriteService {
   }
 
   async reject(invitationId: string, userId: string) {
-    await this.gatheringParticipationsRepository.updateStatus(
-      invitationId,
-      'REJECTED',
-    );
+    await this.checkIsParticipant(invitationId, userId);
+    await this.gatheringParticipationsRepository.delete(invitationId);
+  }
+
+  private async checkIsParticipant(invitationId: string, userId: string) {
+    const participation =
+      await this.gatheringParticipationsRepository.findOneByIdAndParticipantId(
+        invitationId,
+        userId,
+      );
+    if (!participation) {
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    }
   }
 }

@@ -19,6 +19,18 @@ export class GatheringParticipationsPrismaRepository
     });
   }
 
+  async findOneByIdAndParticipantId(
+    id: string,
+    participantId: string,
+  ): Promise<{ id: string } | null> {
+    return await this.txHost.tx.gatheringParticipation.findFirst({
+      where: {
+        id,
+        participantId,
+      },
+    });
+  }
+
   async updateStatus(
     invitationId: string,
     status: GatheringParticipationStatues,
@@ -27,6 +39,14 @@ export class GatheringParticipationsPrismaRepository
       data: {
         status,
       },
+      where: {
+        id: invitationId,
+      },
+    });
+  }
+
+  async delete(invitationId: string): Promise<void> {
+    await this.txHost.tx.gatheringParticipation.delete({
       where: {
         id: invitationId,
       },

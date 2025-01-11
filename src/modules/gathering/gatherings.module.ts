@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
+import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
 import { GatheringParticipationsPrismaRepository } from 'src/infrastructure/repositories/gathering/gathering-participations-prisma.repository';
 import { GatheringsPrismaRepository } from 'src/infrastructure/repositories/gathering/gatherings-prisma.repository';
@@ -13,6 +14,7 @@ import { GatheringsController } from 'src/presentation/controllers/gathering/gat
   controllers: [GatheringsController],
   providers: [
     GatheringsWriteService,
+    GatheringInvitationsReadService,
     { provide: GatheringsRepository, useClass: GatheringsPrismaRepository },
     {
       provide: GatheringParticipationsRepository,

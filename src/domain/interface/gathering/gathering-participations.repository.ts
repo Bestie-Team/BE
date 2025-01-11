@@ -7,6 +7,7 @@ export interface GatheringParticipationsRepository {
     id: string,
     participantId: string,
   ): Promise<{ id: string } | null>;
+  findByParticipantId(): Promise<any>;
   updateStatus(
     invitationId: string,
     status: GatheringParticipationStatues,

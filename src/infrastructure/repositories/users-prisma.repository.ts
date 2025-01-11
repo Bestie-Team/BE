@@ -37,10 +37,14 @@ export class UsersPrismaRepository implements UsersRepository {
     });
   }
 
-  async findOneById(id: string): Promise<{ id: string } | null> {
+  async findOneById(
+    id: string,
+  ): Promise<{ id: string; createdAt: Date; updatedAt: Date } | null> {
     return await this.prisma.user.findUnique({
       select: {
         id: true,
+        createdAt: true,
+        updatedAt: true,
       },
       where: {
         id,
@@ -94,11 +98,9 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async update(data: Partial<UserEntity>): Promise<void> {
-    const { id, profileImageUrl } = data;
+    const { id, ...updateDate } = data;
     await this.prisma.user.update({
-      data: {
-        profileImageUrl,
-      },
+      data: updateDate,
       where: {
         id,
       },

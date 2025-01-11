@@ -30,6 +30,7 @@ import { SearchUserResponse } from 'src/presentation/dto/user/response/search-us
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { ChangeProfileImageRequest } from 'src/presentation/dto/user/request/change-profile-image.request';
+import { ChangeAccountIdRequest } from 'src/presentation/dto';
 
 @ApiTags('/users')
 @ApiBearerAuth()
@@ -100,5 +101,35 @@ export class UsersController {
     @CurrentUser() userId: string,
   ) {
     await this.usersService.updateProfileImage(userId, dto.profileImageUrl);
+  }
+
+  @ApiOperation({ summary: '계정 아이디 변경' })
+  @ApiResponse({
+    status: 204,
+    description: '변경 성공',
+  })
+  @ApiResponse({
+    status: 409,
+    description: '이미 존재하는 계정 아이디',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '존재하지 않는 회원 번호',
+  })
+  @ApiResponse({
+    status: 422,
+    description: '마지막 변경일로부터 30일 미경과',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('account-id')
+  async changeAccountId(
+    @Body() dto: ChangeAccountIdRequest,
+    @CurrentUser() userId: string,
+  ) {
+    await this.usersService.updateAccountId(userId, dto.accountId);
   }
 }

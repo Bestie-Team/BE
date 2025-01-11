@@ -209,7 +209,6 @@ describe('GroupsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GroupListResponse> = response;
       const { groups, nextCursor } = body;
-      console.log(groups);
 
       expect(status).toEqual(200);
       expect(nextCursor).toEqual(groupParticipationStdDate3.toISOString());

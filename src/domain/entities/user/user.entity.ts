@@ -17,6 +17,7 @@ export class UserEntity {
     input: UserPrototype,
     idGen: () => string,
     stdDate: Date,
+    updatedAt?: Date,
   ): UserEntity {
     return new UserEntity(
       idGen(),
@@ -26,7 +27,7 @@ export class UserEntity {
       input.provider,
       input.profileImageUrl,
       stdDate,
-      stdDate,
+      updatedAt ? updatedAt : stdDate,
     );
   }
 }

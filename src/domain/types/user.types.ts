@@ -4,7 +4,7 @@ export interface UserPrototype {
   readonly email: string;
   readonly name: string;
   readonly accountId: string;
-  readonly profileImageUrl: string;
+  readonly profileImageUrl: string | null;
   readonly provider: Provider;
 }
 

@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   HttpCode,
+  Param,
+  ParseUUIDPipe,
   Post,
   UploadedFile,
   UseGuards,
@@ -12,6 +14,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -82,5 +85,49 @@ export class GatheringsController {
       { ...rest, hostUserId: userId },
       friendIds,
     );
+  }
+
+  @ApiOperation({ summary: '모임 초대 수락' })
+  @ApiParam({
+    name: 'invitationId',
+    type: 'string',
+    description: '수락할 모임 초대 번호',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '모임 초대 수락 완료',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Post(':invitationId/accept')
+  async accept(
+    @Param('invitationId', ParseUUIDPipe) invitationId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.gatheringsWriteService.accept(invitationId, userId);
+  }
+
+  @ApiOperation({ summary: '모임 초대 거절' })
+  @ApiParam({
+    name: 'invitationId',
+    type: 'string',
+    description: '거절할 모임 초대 번호',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '모임 초대 거절 완료',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Post(':invitationId/reject')
+  async reject(
+    @Param('invitationId', ParseUUIDPipe) invitationId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.gatheringsWriteService.reject(invitationId, userId);
   }
 }

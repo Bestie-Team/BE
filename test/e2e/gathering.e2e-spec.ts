@@ -10,6 +10,8 @@ import { SearchUserResponse } from 'src/presentation/dto/user/response/search-us
 import { login } from 'test/helpers/login';
 import {
   generateFriendEntity,
+  generateGatheringEntity,
+  generateGatheringParticipationEntity,
   generateGroupEntity,
   generateGroupParticipationEntity,
   generateUserEntity,
@@ -147,6 +149,90 @@ describe('GatheringsController (e2e)', () => {
       const { status, body }: ResponseResult<SearchUserResponse> = response;
 
       expect(status).toEqual(201);
+    });
+  });
+
+  describe('(POST) /gatherings/{:invitationId}/accept - 모임 초대 수락', () => {
+    it('모임 초대 수락 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const gathering = await prisma.gathering.create({
+        data: generateGatheringEntity(user1.id),
+      });
+      const gatheringInvitation = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(
+          gathering.id,
+          loginedUser!.id,
+        ),
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/gatherings/${gatheringInvitation.id}/accept`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+      const acceptedInvitation = await prisma.gatheringParticipation.findUnique(
+        {
+          where: {
+            id: gatheringInvitation.id,
+          },
+        },
+      );
+
+      expect(status).toEqual(201);
+      expect(acceptedInvitation?.status).toEqual('ACCEPTED');
+    });
+  });
+
+  describe('(POST) /gatherings/{:invitationId}/reject - 모임 초대 거절', () => {
+    it('모임 초대 거절 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      });
+      const friendRealtion1 = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
+      });
+      const gathering = await prisma.gathering.create({
+        data: generateGatheringEntity(user1.id),
+      });
+      const gatheringInvitation = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(
+          gathering.id,
+          loginedUser!.id,
+        ),
+      });
+
+      const response = await request(app.getHttpServer())
+        .post(`/gatherings/${gatheringInvitation.id}/reject`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+      const acceptedInvitation = await prisma.gatheringParticipation.findUnique(
+        {
+          where: {
+            id: gatheringInvitation.id,
+          },
+        },
+      );
+
+      expect(status).toEqual(201);
+      expect(acceptedInvitation).toBeNull();
     });
   });
 });

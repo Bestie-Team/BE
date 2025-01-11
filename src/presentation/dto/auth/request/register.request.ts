@@ -1,4 +1,11 @@
-import { IsEmail, IsIn, IsUrl, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsNotEmpty,
+  IsUrl,
+  Length,
+  ValidateIf,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Provider } from '../../shared';
@@ -22,6 +29,8 @@ export class RegisterRequest {
     nullable: true,
   })
   @IsUrl({}, { message: 'URL 형식이 아닙니다.' })
+  @IsNotEmpty()
+  @ValidateIf((_, value) => value !== null)
   readonly profileImageUrl: string | null;
 
   @ApiProperty({

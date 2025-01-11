@@ -1,7 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -26,6 +29,7 @@ import { SearchUserRequest } from 'src/presentation/dto/user/request/search-user
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { IMAGE_BASE_URL } from 'src/common/constant';
+import { ChangeProfileImageRequest } from 'src/presentation/dto/user/request/change-profile-image.request';
 
 @ApiTags('/users')
 @ApiBearerAuth()
@@ -34,7 +38,7 @@ import { IMAGE_BASE_URL } from 'src/common/constant';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiOperation({ summary: '프로필 이미지 업로드' })
+  @ApiOperation({ summary: '프로필 사진 업로드' })
   @ApiBody({ type: FileRequest })
   @ApiResponse({
     status: 200,
@@ -78,5 +82,23 @@ export class UsersController {
   ): Promise<SearchUserResponse> {
     const { search, ...paginationInput } = dto;
     return await this.usersService.search(userId, { search, paginationInput });
+  }
+
+  @ApiOperation({ summary: '프로필 사진 변경' })
+  @ApiResponse({
+    status: 204,
+    description: '변경 성공',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('profile/image')
+  async changeProfileImage(
+    @Body() dto: ChangeProfileImageRequest,
+    @CurrentUser() userId: string,
+  ) {
+    await this.usersService.updateProfileImage(userId, dto.profileImageUrl);
   }
 }

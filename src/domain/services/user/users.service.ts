@@ -23,4 +23,8 @@ export class UsersService {
       nextCursor,
     };
   }
+
+  async updateProfileImage(userId: string, profileImageUrl: string) {
+    await this.usersRepository.update({ id: userId, profileImageUrl });
+  }
 }

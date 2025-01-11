@@ -12,6 +12,7 @@ export interface UsersRepository {
     userId: string,
     searchInput: SearchInput,
   ): Promise<User[]>;
+  update(data: Partial<UserEntity>): Promise<void>;
 }
 
 export const UsersRepository = Symbol('UsersRepository');

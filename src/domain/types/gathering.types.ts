@@ -1,3 +1,4 @@
+import { User } from 'src/domain/types/user.types';
 import { GatheringType } from 'src/shared/types';
 
 export interface GatheringPrototype {
@@ -9,4 +10,15 @@ export interface GatheringPrototype {
   readonly gatheringDate: string;
   readonly address: string;
   readonly invitationImageUrl: string;
+}
+
+export interface GatheringInvitation {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly sender: string;
+  readonly createdAt: Date;
+  readonly gatheringDate: Date;
+  readonly address: string;
+  readonly members: User[];
 }

@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -15,6 +17,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -22,9 +25,16 @@ import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
+import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
-import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
+import { gatheringInvitationConverter } from 'src/presentation/converters/gathering/gathering-invitation.converters';
+import {
+  FileRequest,
+  PaginationRequest,
+  UploadImageResponse,
+} from 'src/presentation/dto';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
+import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 
 @ApiTags('/gathering')
 @ApiBearerAuth()
@@ -33,6 +43,7 @@ import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/c
 export class GatheringsController {
   constructor(
     private readonly gatheringsWriteService: GatheringsWriteService,
+    private readonly gatheringInvitationsReadService: GatheringInvitationsReadService,
   ) {}
 
   @ApiOperation({ summary: '모임 초대장 이미지 업로드' })
@@ -129,5 +140,33 @@ export class GatheringsController {
     @CurrentUser() userId: string,
   ) {
     await this.gatheringsWriteService.reject(invitationId, userId);
+  }
+
+  @ApiOperation({ summary: '받은 모임 초대 목록 조회' })
+  @ApiQuery({
+    name: 'cursor',
+    description: '초대일',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '받은 모임 초대 목록 조회 완료',
+    type: GatheringInvitationListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Get('invitations/received')
+  async getReceivedInvitations(
+    @Query() paginationDto: PaginationRequest,
+    @CurrentUser() userId: string,
+  ): Promise<GatheringInvitationListResponse> {
+    const domain =
+      await this.gatheringInvitationsReadService.getReceivedInvitations(
+        userId,
+        paginationDto,
+      );
+    return gatheringInvitationConverter.toListDto(domain);
   }
 }

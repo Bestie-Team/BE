@@ -1,5 +1,9 @@
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
-import { GatheringParticipationStatues } from 'src/shared/types';
+import { GatheringInvitation } from 'src/domain/types/gathering.types';
+import {
+  GatheringParticipationStatus,
+  PaginationInput,
+} from 'src/shared/types';
 
 export interface GatheringParticipationsRepository {
   save(data: GatheringParticipationEntity): Promise<void>;
@@ -7,10 +11,13 @@ export interface GatheringParticipationsRepository {
     id: string,
     participantId: string,
   ): Promise<{ id: string } | null>;
-  findByParticipantId(): Promise<any>;
+  findReceivedByParticipantId(
+    participantId: string,
+    paginationInput: PaginationInput,
+  ): Promise<GatheringInvitation[]>;
   updateStatus(
     invitationId: string,
-    status: GatheringParticipationStatues,
+    status: GatheringParticipationStatus,
   ): Promise<void>;
   delete(invitationId: string): Promise<void>;
 }

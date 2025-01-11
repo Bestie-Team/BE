@@ -1,4 +1,5 @@
 import { FriendRequest } from 'src/domain/types/friend.types';
+import { GatheringInvitation } from 'src/domain/types/gathering.types';
 import { Group } from 'src/domain/types/group.types';
 import { User } from 'src/domain/types/user.types';
 
@@ -25,4 +26,11 @@ export const getFriendRequestCursor = (
 
 export const getGroupCursor = (groups: Group[], limit: number) => {
   return groups[limit - 1]?.joinDate.toISOString() || null;
+};
+
+export const getGatheringInvitationCursor = (
+  invitations: GatheringInvitation[],
+  limit: number,
+) => {
+  return invitations[limit - 1]?.createdAt.toISOString() || null;
 };

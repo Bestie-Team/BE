@@ -4,7 +4,7 @@ export type FriendStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'REPORTED';
 
 export type GatheringType = 'GROUP' | 'FRIEND';
 
-export type GatheringParticipationStatues = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+export type GatheringParticipationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
 export interface UserPaginationInput {
   readonly cursor: {

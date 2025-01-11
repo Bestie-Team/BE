@@ -17,9 +17,12 @@ export class RegisterRequest {
   @Length(5, 15, { message: '계정 아이디는 최소 5자 최대 15자만 가능합니다.' })
   readonly accountId: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
   @IsUrl({}, { message: 'URL 형식이 아닙니다.' })
-  readonly profileImageUrl: string;
+  readonly profileImageUrl: string | null;
 
   @ApiProperty({
     description: '소셜 로그인 플랫폼',

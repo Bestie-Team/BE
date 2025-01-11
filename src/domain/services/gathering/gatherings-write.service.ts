@@ -117,4 +117,11 @@ export class GatheringsWriteService {
       'ACCEPTED',
     );
   }
+
+  async reject(invitationId: string, userId: string) {
+    await this.gatheringParticipationsRepository.updateStatus(
+      invitationId,
+      'REJECTED',
+    );
+  }
 }

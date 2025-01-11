@@ -9,6 +9,7 @@ import { SearchUserResponse } from 'src/presentation/dto/user/response/search-us
 import { login } from 'test/helpers/login';
 import { generateUserEntity } from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
+import { ChangeAccountIdRequest } from 'src/presentation/dto';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
@@ -83,6 +84,49 @@ describe('UsersController (e2e)', () => {
         expect(user.name).toEqual(expectedUsers[i].name);
         expect(user.profileImageUrl).toEqual(expectedUsers[i].profileImageUrl);
       });
+    });
+  });
+
+  describe('(PATCH) /users/accound-id - 계정 아이디 변경', () => {
+    it('계정 아이디 변경 정상 동작', async () => {
+      const { accessToken } = await login(app);
+
+      const dto: ChangeAccountIdRequest = {
+        accountId: 'new_account_id',
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch('/users/account-id')
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+      const updatedUser = await prisma.user.findFirst({
+        where: {
+          accountId: 'new_account_id',
+        },
+      });
+
+      expect(status).toEqual(204);
+      expect(updatedUser).not.toBeNull();
+    });
+
+    it('이미 존재하는 계정 아이디로 변경하려는 경우 예외', async () => {
+      const { accessToken } = await login(app);
+
+      const user = await prisma.user.create({
+        data: generateUserEntity('test@test.com', 'account_id'),
+      });
+      const dto: ChangeAccountIdRequest = {
+        accountId: user.accountId,
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch('/users/account-id')
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status, body } = response;
+
+      expect(status).toEqual(409);
     });
   });
 });

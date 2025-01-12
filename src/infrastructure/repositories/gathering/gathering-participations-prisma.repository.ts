@@ -8,7 +8,7 @@ import { GatheringParticipationsRepository } from 'src/domain/interface/gatherin
 import { GatheringInvitation } from 'src/domain/types/gathering.types';
 import {
   GatheringParticipationStatus as SharedGatheringParticipationStatus,
-  PaginationInput,
+  PaginatedDateRangeInput,
 } from 'src/shared/types';
 
 @Injectable()
@@ -39,9 +39,9 @@ export class GatheringParticipationsPrismaRepository
 
   async findReceivedByParticipantId(
     participantId: string,
-    paginationInput: PaginationInput,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<GatheringInvitation[]> {
-    const { cursor, limit } = paginationInput;
+    const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const participationRows = await this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('gathering as g', 'gp.gathering_id', 'g.id')
@@ -57,6 +57,8 @@ export class GatheringParticipationsPrismaRepository
         'hu.account_id as sender',
       ])
       .where('gp.participant_id', '=', participantId)
+      .where('gp.created_at', '>=', new Date(minDate))
+      .where('gp.created_at', '<=', new Date(maxDate))
       .where('gp.created_at', '<', new Date(cursor))
       .where(
         'gp.status',
@@ -68,6 +70,8 @@ export class GatheringParticipationsPrismaRepository
       .execute();
 
     const gatheringIds = participationRows.map((row) => row.gathering_id);
+    if (gatheringIds.length === 0) return [];
+
     const memberRows = await this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('user as mu', 'gp.participant_id', 'mu.id')
@@ -101,6 +105,69 @@ export class GatheringParticipationsPrismaRepository
         accountId: member.account_id,
         name: member.name,
         profileImageUrl: member.profile_image_url,
+      });
+    });
+
+    return Object.values(result);
+  }
+
+  async findSentBySenderId(
+    senderId: string,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
+  ): Promise<GatheringInvitation[]> {
+    const { cursor, limit, maxDate, minDate } = paginatedDateRangeInput;
+    const rows = await this.txHost.tx.$kysely
+      .selectFrom('gathering as g')
+      .innerJoin('user as hu', 'g.host_user_id', 'hu.id')
+      .innerJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
+      .innerJoin('user as mu', 'gp.participant_id', 'mu.id')
+      .select([
+        'g.id',
+        'g.name',
+        'g.description',
+        'g.created_at',
+        'g.gathering_date',
+        'g.address',
+        'hu.account_id as sender',
+        'mu.id as member_id',
+        'mu.account_id as member_account_id',
+        'mu.name as member_name',
+        'mu.profile_image_url as member_profile_image_url',
+      ])
+      .where('g.id', 'in', (qb) =>
+        qb
+          .selectFrom('gathering_participation as gp2')
+          .innerJoin('gathering as g2', 'gp2.gathering_id', 'g2.id')
+          .select('gp.gathering_id')
+          .where('g2.host_user_id', '=', senderId)
+          .where('g2.created_at', '>=', new Date(minDate))
+          .where('g2.created_at', '<=', new Date(maxDate))
+          .where('g2.created_at', '<', new Date(cursor))
+          .limit(limit),
+      )
+      .orderBy('g.created_at', 'desc')
+      .execute();
+
+    const result: { [key: string]: GatheringInvitation } = {};
+    rows.forEach((row) => {
+      if (!result[row.id]) {
+        result[row.id] = {
+          id: row.id,
+          name: row.name,
+          description: row.description,
+          address: row.address,
+          createdAt: row.created_at,
+          gatheringDate: row.gathering_date,
+          sender: row.sender,
+          members: [],
+        };
+      }
+
+      result[row.id].members.push({
+        id: row.member_id,
+        accountId: row.member_account_id,
+        name: row.member_name,
+        profileImageUrl: row.member_profile_image_url,
       });
     });
 

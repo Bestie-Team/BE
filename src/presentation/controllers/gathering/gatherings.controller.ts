@@ -28,12 +28,9 @@ import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-
 import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
 import { gatheringInvitationConverter } from 'src/presentation/converters/gathering/gathering-invitation.converters';
-import {
-  FileRequest,
-  PaginationRequest,
-  UploadImageResponse,
-} from 'src/presentation/dto';
+import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
+import { GatheringInvitationListRequest } from 'src/presentation/dto/gathering/request/gathering-invitation-list.request';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 
 @ApiTags('/gathering')
@@ -143,6 +140,29 @@ export class GatheringsController {
   }
 
   @ApiOperation({ summary: '받은 모임 초대 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '받은 모임 초대 목록 조회 완료',
+    type: GatheringInvitationListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Get('invitations/received')
+  async getReceivedInvitations(
+    @Query() dto: GatheringInvitationListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<GatheringInvitationListResponse> {
+    const domain =
+      await this.gatheringInvitationsReadService.getReceivedInvitations(
+        userId,
+        dto,
+      );
+    return gatheringInvitationConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '받은 모임 초대 목록 조회' })
   @ApiQuery({
     name: 'cursor',
     description: '초대일',
@@ -157,15 +177,15 @@ export class GatheringsController {
     status: 400,
     description: '입력값 검증 실패',
   })
-  @Get('invitations/received')
-  async getReceivedInvitations(
-    @Query() paginationDto: PaginationRequest,
+  @Get('invitations/sent')
+  async getSentInvitations(
+    @Query() dto: GatheringInvitationListRequest,
     @CurrentUser() userId: string,
   ): Promise<GatheringInvitationListResponse> {
     const domain =
-      await this.gatheringInvitationsReadService.getReceivedInvitations(
+      await this.gatheringInvitationsReadService.getSentInvitations(
         userId,
-        paginationDto,
+        dto,
       );
     return gatheringInvitationConverter.toListDto(domain);
   }

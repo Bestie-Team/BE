@@ -18,3 +18,8 @@ export interface PaginationInput {
   readonly cursor: string;
   readonly limit: number;
 }
+
+export interface PaginatedDateRangeInput extends PaginationInput {
+  minDate: string;
+  maxDate: string;
+}

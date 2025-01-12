@@ -10,6 +10,6 @@ export class User {
   @ApiProperty()
   readonly name: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'string', nullable: true })
   readonly profileImageUrl: string | null;
 }

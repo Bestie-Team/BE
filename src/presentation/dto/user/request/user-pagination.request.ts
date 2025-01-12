@@ -2,10 +2,10 @@ import { plainToInstance, Transform, Type } from 'class-transformer';
 import { IsInt, Length, ValidateNested } from 'class-validator';
 
 class UserCursor {
-  @Length(2, 20, { message: '이름은 2자 이상 20자 이하입니다.' })
+  @Length(1, 20, { message: '이름 커서는 1자 이상 20자 이하입니다.' })
   readonly name: string;
 
-  @Length(5, 15, { message: '계정 아이디는 5자 이상 15자 이하입니다.' })
+  @Length(1, 15, { message: '계정 아이디 커서는 1자 이상 15자 이하입니다.' })
   readonly accountId: string;
 }
 

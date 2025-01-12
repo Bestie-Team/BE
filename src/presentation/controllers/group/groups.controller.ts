@@ -19,12 +19,12 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { ApiGroupPaginationQuery } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GroupCreateService } from 'src/domain/services/group/group-create.service';
@@ -96,11 +96,7 @@ export class GroupsController {
   }
 
   @ApiOperation({ summary: '참여 그룹 목록 조회' })
-  @ApiQuery({
-    name: 'cursor',
-    description: '그룹 참여일',
-    example: '2025-01-01T00:00:00.000Z',
-  })
+  @ApiGroupPaginationQuery()
   @ApiResponse({
     status: 200,
     description: '그룹 목록 조회 완료',

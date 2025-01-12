@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsInt, IsString } from 'class-validator';
+import { IsDateString, IsInt } from 'class-validator';
 
 export class UserCursor {
   @ApiProperty()
@@ -12,7 +12,7 @@ export class UserCursor {
 
 export class PaginationRequest {
   @ApiProperty()
-  @IsString()
+  @IsDateString()
   readonly cursor: string;
 
   @ApiProperty()

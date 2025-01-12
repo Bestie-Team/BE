@@ -61,13 +61,13 @@ export const generateGroupParticipationEntity = (
 
 export const generateGatheringEntity = (
   hostUserId: string,
-  gatheringDate = new Date().toISOString(),
+  stdDate: Date = new Date(),
   name = '두리집 청소 모임',
+  gatheringDate = new Date().toISOString(),
   address = '두리집',
   description = '두리집 청소를 위한 모임입니다.',
   invitationImageUrl = 'https://image.com',
   type: GatheringType = 'FRIEND',
-  stdDate: Date = new Date(),
   groupId: string | null = null,
 ): GatheringEntity => {
   return GatheringEntity.create(

@@ -77,7 +77,7 @@ export class FriendsService {
     userId: string,
     paginationInput: UserPaginationInput,
   ) {
-    const requests = await this.friendsRepository.findReceivedRequestsByUserId(
+    const requests = await this.friendsRepository.findSentRequestsByUserId(
       userId,
       paginationInput,
     );

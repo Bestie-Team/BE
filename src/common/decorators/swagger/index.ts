@@ -7,20 +7,20 @@ export const ApiUserPaginationQuery = () => {
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) => {
-    ApiQuery({
-      name: 'cursor',
-      type: UserCursor,
-      description: `첫 번째 요청 cursor: ${JSON.stringify(
-        { name: '가', accountId: 'a' },
-        null,
-        2,
-      )}`,
-    })(target, propertyKey, descriptor);
-    ApiQuery({ name: 'limit', type: 'number', example: 10 })(
-      target,
-      propertyKey,
-      descriptor,
-    );
+    // ApiQuery({
+    //   name: 'cursor',
+    //   type: UserCursor,
+    //   description: `첫 번째 요청 cursor: ${JSON.stringify(
+    //     { name: '가', accountId: 'a' },
+    //     null,
+    //     2,
+    //   )}`,
+    // })(target, propertyKey, descriptor);
+    // ApiQuery({ name: 'limit', type: 'number', example: 10 })(
+    //   target,
+    //   propertyKey,
+    //   descriptor,
+    // );
   };
 };
 

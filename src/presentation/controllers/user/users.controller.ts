@@ -16,6 +16,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -68,6 +69,11 @@ export class UsersController {
   @Get('search')
   @ApiOperation({ summary: '회원 검색' })
   @ApiUserPaginationQuery()
+  @ApiQuery({
+    name: 'search',
+    description: '검색어 (회원 계정 아이디)',
+    example: 'ligh',
+  })
   @ApiResponse({
     status: 200,
     description: '검색 성공',

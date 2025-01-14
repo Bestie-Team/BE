@@ -246,7 +246,6 @@ export class FriendsPrismaRepository implements FriendsRepository {
     return await this.prisma.friend.findFirst({
       select: { id: true, status: true },
       where: {
-        status: 'ACCEPTED',
         OR: [
           {
             AND: [{ senderId: firstUserId }, { receiverId: secondUserId }],

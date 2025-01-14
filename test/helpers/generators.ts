@@ -7,6 +7,7 @@ import { GroupEntity } from 'src/domain/entities/group/group.entity';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
+import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 
 export const generateUserEntity = (
   email: string,
@@ -99,4 +100,13 @@ export const generateGatheringParticipationEntity = (
     v4,
     stdDate,
   );
+};
+
+export const generateFeedEntity = (
+  writerId: string,
+  gatheringId: string | null = null,
+  stdDate = new Date(),
+  content = '안녕하세요 안녕하세요? 안녕하세요! 안녕하세요;',
+): FeedEntity => {
+  return FeedEntity.create({ writerId, content, gatheringId }, v4, stdDate);
 };

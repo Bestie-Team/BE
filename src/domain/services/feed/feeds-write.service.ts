@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { v4 } from 'uuid';
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
 import { FeedPrototype } from 'src/domain/types/feed.types';
-import { v4 } from 'uuid';
 
 @Injectable()
 export class FeedsWriteService {

@@ -20,6 +20,7 @@ import { ResponseResult } from 'test/helpers/types';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
+import { GatheringDetail } from 'src/domain/types/gathering.types';
 
 describe('GatheringsController (e2e)', () => {
   let app: INestApplication;
@@ -526,7 +527,6 @@ describe('GatheringsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GatheringListResponse> = response;
       const { gatherings, nextCursor } = body;
-      console.log(body);
 
       expect(status).toEqual(status);
       gatherings.forEach((gathering, i) => {
@@ -542,6 +542,70 @@ describe('GatheringsController (e2e)', () => {
       expect(nextCursor).toEqual(
         expectedGathering.at(-1)?.gatheringDate.toISOString(),
       );
+    });
+  });
+
+  describe('(GET) /gatherings/{gatheringId} - 모임 상세 조회', () => {
+    it('모임 상세 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const stdDate = new Date('2024-12-10T00:00:00.000Z');
+      const gatheringDate = new Date('2025-01-01T00:00:00.000Z');
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'),
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김민수'),
+      });
+      const user3 = await prisma.user.create({
+        data: generateUserEntity('test3@test.com', 'lighty_3', '조민수'),
+      });
+      const gathering1 = await prisma.gathering.create({
+        data: generateGatheringEntity(
+          loginedUser!.id,
+          stdDate,
+          '두리 모임',
+          gatheringDate,
+        ),
+      });
+      const gathering1Participation =
+        await prisma.gatheringParticipation.create({
+          data: generateGatheringParticipationEntity(gathering1.id, user1.id),
+        });
+      const gathering2Participation =
+        await prisma.gatheringParticipation.create({
+          data: generateGatheringParticipationEntity(gathering1.id, user2.id),
+        });
+      const gathering3Participation =
+        await prisma.gatheringParticipation.create({
+          data: generateGatheringParticipationEntity(gathering1.id, user3.id),
+        });
+
+      const response = await request(app.getHttpServer())
+        .get(`/gatherings/${gathering1.id}`)
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GatheringDetail> = response;
+      const { hostUser, members } = body;
+
+      expect(status).toEqual(status);
+      expect(body.id).toEqual(gathering1.id);
+      expect(body.name).toEqual(gathering1.name);
+      expect(body.address).toEqual(gathering1.address);
+      expect(body.description).toEqual(gathering1.description);
+      expect(body.invitationImageUrl).toEqual(gathering1.invitationImageUrl);
+      expect(body.gatheringDate).toEqual(
+        gathering1.gatheringDate.toISOString(),
+      );
+      expect(hostUser.id).toEqual(loginedUser!.id);
+      expect(hostUser.accountId).toEqual(loginedUser!.accountId);
+      expect(hostUser.name).toEqual(loginedUser!.name);
+      expect(hostUser.profileImageUrl).toEqual(loginedUser!.profileImageUrl);
+      expect(members.length).toEqual(3);
     });
   });
 });

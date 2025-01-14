@@ -21,7 +21,7 @@ export class CreateGroupRequest {
   @IsArray()
   @IsUUID(4, { each: true, message: '친구 번호 형식이 맞지 않습니다.' })
   @ArrayNotEmpty({ message: '그룹의 친구는 1명 이상이어야합니다.' })
-  @ArrayMaxSize(12)
+  @ArrayMaxSize(10, { message: '그룹원은 최대 10명까지 가능합니다.' })
   readonly friendIds: string[];
 
   @ApiProperty()

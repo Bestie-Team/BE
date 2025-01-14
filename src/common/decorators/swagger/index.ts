@@ -71,3 +71,32 @@ export const ApiGatheringPaginationQuery = () => {
     );
   };
 };
+
+export const ApiGatheringQuery = () => {
+  return (
+    target: any,
+    propertyKey: string | symbol,
+    descriptor: PropertyDescriptor,
+  ) => {
+    ApiQuery({
+      name: 'cursor',
+      description: '첫 커서는 minDate로 보내주세요.',
+      example: '2025-01-01T00:00:00.000Z',
+    })(target, propertyKey, descriptor);
+    ApiQuery({
+      name: 'minDate',
+      description: 'minDate도 검색 결과에 포함돼요.',
+      example: '2024-12-31T15:00:00.000Z',
+    })(target, propertyKey, descriptor);
+    ApiQuery({
+      name: 'maxDate',
+      description: 'maxDate도 검색 결과에 포함돼요.',
+      example: '2024-12-31T15:00:00.000Z',
+    })(target, propertyKey, descriptor);
+    ApiQuery({ name: 'limit', type: 'number', example: 10 })(
+      target,
+      propertyKey,
+      descriptor,
+    );
+  };
+};

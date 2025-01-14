@@ -2,6 +2,10 @@ import {
   Body,
   Controller,
   HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
   Post,
   UploadedFiles,
   UseGuards,
@@ -15,6 +19,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
 import { CreateFeedRequest } from 'src/presentation/dto/feed/request/create-feed.request';
+import { UpdateFeedRequest } from 'src/presentation/dto/feed/request/update-feed.request';
 import { FileListRequest } from 'src/presentation/dto/file/request/file-list.request';
 import { UploadImageListResponse } from 'src/presentation/dto/file/response/upload-image-list.response';
 
@@ -70,5 +75,17 @@ export class FeedsController {
       },
       imageUrls,
     );
+  }
+
+  @ApiOperation({ summary: '게시글 내용 수정' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch(':feedId')
+  async updateContent(
+    @Param('feedId', ParseUUIDPipe) feedId: string,
+    @Body() dto: UpdateFeedRequest,
+    @CurrentUser() userId: string,
+  ) {
+    const { content } = dto;
+    await this.feedsWriteService.updateContent(content, feedId, userId);
   }
 }

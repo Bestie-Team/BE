@@ -20,4 +20,25 @@ export class FeedsPrismaRepository implements FeedsRepository {
       },
     });
   }
+
+  async update(id: string, data: Partial<FeedEntity>): Promise<void> {
+    await this.prisma.feed.update({
+      data,
+      where: {
+        id,
+      },
+    });
+  }
+
+  async findOneByIdAndWriter(
+    feedId: string,
+    writerId: string,
+  ): Promise<{ id: string } | null> {
+    return await this.prisma.feed.findFirst({
+      where: {
+        id: feedId,
+        writerId,
+      },
+    });
+  }
 }

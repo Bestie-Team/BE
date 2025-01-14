@@ -31,7 +31,6 @@ enum GatheringType {
 enum FriendStatus {
   PENDING
   ACCEPTED
-  REJECTED
   REPORTED
 }
 

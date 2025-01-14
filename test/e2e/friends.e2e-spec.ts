@@ -77,6 +77,84 @@ describe('FriendsController (e2e)', () => {
 
       expect(status).toEqual(409);
     });
+
+    it('이미 친구인 회원에게 요청하는 경우 예외', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 3
+      });
+      const friendRealtion = await prisma.friend.create({
+        data: generateFriendEntity(user1.id, loginedUser!.id, 'ACCEPTED'),
+      });
+      const dto: CreateFriendRequest = { userId: user1.id };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post('/friends')
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(409);
+    });
+
+    it('자신에게 요청을 보낸 회원에게 요청하는 경우 예외', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 3
+      });
+      const friendRealtion = await prisma.friend.create({
+        data: generateFriendEntity(user1.id, loginedUser!.id, 'PENDING'),
+      });
+      const dto: CreateFriendRequest = { userId: user1.id };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post('/friends')
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(409);
+    });
+
+    it('신고한 회원에게 요청하는 경우 예외', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 3
+      });
+      const friendRealtion = await prisma.friend.create({
+        data: generateFriendEntity(loginedUser!.id, user1.id, 'REPORTED'),
+      });
+      const dto: CreateFriendRequest = { userId: user1.id };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post('/friends')
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(400);
+    });
   });
 
   describe('(POST) /friend/{friendId}/accept - 친구 요청 수락', () => {
@@ -425,7 +503,6 @@ describe('FriendsController (e2e)', () => {
       const { status, body }: ResponseResult<FriendRequestListResponse> =
         response;
 
-        console.log(JSON.stringify(body, null, 2))
       expect(status).toEqual(200);
       expect(body.nextCursor).toEqual({
         name: expectedUsers.at(-1)?.name,

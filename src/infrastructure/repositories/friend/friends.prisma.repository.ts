@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { FriendStatus, Prisma } from '@prisma/client';
+import { FriendStatus as PrismaFriendStatus, Prisma } from '@prisma/client';
 import { sql } from 'kysely';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FRIEND_REQUEST_ALREADY_EXIST_MESSAGE } from 'src/domain/error/messages';
@@ -8,26 +8,16 @@ import { FriendRequest } from 'src/domain/types/friend.types';
 import { User } from 'src/domain/types/user.types';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { SearchInput } from 'src/infrastructure/types/user.types';
-import { UserPaginationInput } from 'src/shared/types';
+import { FriendStatus, UserPaginationInput } from 'src/shared/types';
 
 @Injectable()
 export class FriendsPrismaRepository implements FriendsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async save(data: FriendEntity): Promise<void> {
-    try {
-      await this.prisma.friend.create({
-        data,
-      });
-    } catch (e: unknown) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2002') {
-          throw new ConflictException(FRIEND_REQUEST_ALREADY_EXIST_MESSAGE);
-        }
-        throw e;
-      }
-      throw e;
-    }
+    await this.prisma.friend.create({
+      data,
+    });
   }
 
   async findOneById(
@@ -70,7 +60,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
           .where(
             'f.status',
             '=',
-            sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
+            sql<PrismaFriendStatus>`${PrismaFriendStatus.ACCEPTED}::"FriendStatus"`,
           )
           .union((qb) =>
             qb
@@ -80,7 +70,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
               .where(
                 'f.status',
                 '=',
-                sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
+                sql<PrismaFriendStatus>`${PrismaFriendStatus.ACCEPTED}::"FriendStatus"`,
               ),
           ),
       )
@@ -124,7 +114,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
           .where(
             'f.status',
             '=',
-            sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
+            sql<PrismaFriendStatus>`${PrismaFriendStatus.ACCEPTED}::"FriendStatus"`,
           )
           .union((qb) =>
             qb
@@ -134,7 +124,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
               .where(
                 'f.status',
                 '=',
-                sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
+                sql<PrismaFriendStatus>`${PrismaFriendStatus.ACCEPTED}::"FriendStatus"`,
               ),
           ),
       )
@@ -176,7 +166,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
       .where(
         'f.status',
         '=',
-        sql<FriendStatus>`${FriendStatus.PENDING}::"FriendStatus"`,
+        sql<PrismaFriendStatus>`${PrismaFriendStatus.PENDING}::"FriendStatus"`,
       )
       .where(({ eb, or, and }) =>
         or([
@@ -222,7 +212,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
       .where(
         'f.status',
         '=',
-        sql<FriendStatus>`${FriendStatus.PENDING}::"FriendStatus"`,
+        sql<PrismaFriendStatus>`${PrismaFriendStatus.PENDING}::"FriendStatus"`,
       )
       .where(({ eb, or, and }) =>
         or([
@@ -252,11 +242,10 @@ export class FriendsPrismaRepository implements FriendsRepository {
   async findOneBySenderAndReceiverId(
     firstUserId: string,
     secondUserId: string,
-  ): Promise<{ id: string } | null> {
+  ): Promise<{ id: string; status: FriendStatus } | null> {
     return await this.prisma.friend.findFirst({
-      select: { id: true },
+      select: { id: true, status: true },
       where: {
-        status: 'ACCEPTED',
         OR: [
           {
             AND: [{ senderId: firstUserId }, { receiverId: secondUserId }],

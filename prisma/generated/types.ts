@@ -18,7 +18,6 @@ export type GatheringType = (typeof GatheringType)[keyof typeof GatheringType];
 export const FriendStatus = {
   PENDING: 'PENDING',
   ACCEPTED: 'ACCEPTED',
-  REJECTED: 'REJECTED',
   REPORTED: 'REPORTED',
 } as const;
 export type FriendStatus = (typeof FriendStatus)[keyof typeof FriendStatus];

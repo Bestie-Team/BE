@@ -77,7 +77,7 @@ export class GroupCreateService {
       friendId,
       userId,
     );
-    if (!friend) {
+    if (!friend || friend.status !== 'ACCEPTED') {
       throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
     }
   }

@@ -117,6 +117,7 @@ export class FriendsService {
       if (existFriend.status === 'PENDING') {
         throw new ConflictException(FRIEND_REQUEST_ALREADY_EXIST_MESSAGE);
       }
+      // TODO 요구사항 변경에 따라 수정 가능성 있음.
       if (existFriend.status === 'REPORTED') {
         throw new BadRequestException(CANT_REQUEST_REPORTED_FRIEND_MESSAGE);
       }

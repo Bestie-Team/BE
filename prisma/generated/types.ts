@@ -36,7 +36,7 @@ export type BlockedFeed = {
 export type Feed = {
   id: string;
   writer_id: string;
-  gathering_id: string;
+  gathering_id: string | null;
   content: string;
   created_at: Timestamp;
   updated_at: Timestamp;

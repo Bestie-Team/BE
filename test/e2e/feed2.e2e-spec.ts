@@ -8,7 +8,10 @@ import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { login } from 'test/helpers/login';
 import { CreateGatheringFeedRequest } from 'src/presentation/dto';
-import { generateFeedEntity, generateGatheringEntity } from 'test/helpers/generators';
+import {
+  generateFeedEntity,
+  generateGatheringEntity,
+} from 'test/helpers/generators';
 import { UpdateFeedRequest } from 'src/presentation/dto/feed/request/update-feed.request';
 
 describe('UsersController (e2e)', () => {
@@ -25,12 +28,6 @@ describe('UsersController (e2e)', () => {
     await app.init();
   });
 
-  beforeEach(async () => {
-    await prisma.feedImage.deleteMany();
-    await prisma.feed.deleteMany();
-    await prisma.gathering.deleteMany();
-    await prisma.user.deleteMany();
-  });
   afterEach(async () => {
     await prisma.feedImage.deleteMany();
     await prisma.feed.deleteMany();
@@ -38,8 +35,8 @@ describe('UsersController (e2e)', () => {
     await prisma.user.deleteMany();
   });
 
-  describe('(POST) /feeds - 피드 작성', () => {
-    it('개인 피드 작성 정상 동작', async () => {
+  describe('(POST) /feeds - 모임 피드 작성', () => {
+    it('모임 피드 작성 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
       const loginedUser = await prisma.user.findFirst({
@@ -74,7 +71,7 @@ describe('UsersController (e2e)', () => {
   });
 
   describe('(PATCH) /feeds/{feedId} - 피드 내용 수정', () => {
-    it('개인 피드 작성 정상 동작', async () => {
+    it('피드 수정 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
       const loginedUser = await prisma.user.findFirst({

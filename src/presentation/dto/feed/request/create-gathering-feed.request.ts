@@ -3,23 +3,19 @@ import {
   ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
-  IsNotEmpty,
   IsUrl,
   IsUUID,
   Length,
-  ValidateIf,
 } from 'class-validator';
 
-export class CreateFeedRequest {
+export class CreateGatheringFeedRequest {
   @ApiProperty({
     description: '모임 번호를 null로 하면 개인 피드로 인식합니다.',
     type: 'string',
     nullable: true,
   })
   @IsUUID(4, { each: true, message: '그룹 번호는 UUID여야 합니다.' })
-  @IsNotEmpty({ message: '그룹 번호가 없다면 null을 넣어주세요.' })
-  @ValidateIf((_, value) => value !== null)
-  readonly gatheringId: string | null;
+  readonly gatheringId: string;
 
   @ApiProperty({ type: [String] })
   @IsArray()

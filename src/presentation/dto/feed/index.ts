@@ -1,1 +1,1 @@
-export * from './request/create-feed.request';
+export * from './request/create-gathering-feed.request';

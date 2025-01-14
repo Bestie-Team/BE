@@ -18,7 +18,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
-import { CreateFeedRequest } from 'src/presentation/dto/feed/request/create-feed.request';
+import { CreateGatheringFeedRequest } from 'src/presentation/dto/feed/request/create-gathering-feed.request';
 import { UpdateFeedRequest } from 'src/presentation/dto/feed/request/update-feed.request';
 import { FileListRequest } from 'src/presentation/dto/file/request/file-list.request';
 import { UploadImageListResponse } from 'src/presentation/dto/file/response/upload-image-list.response';
@@ -63,10 +63,13 @@ export class FeedsController {
     description: 'gatheringId를 null로 주시면 개인 피드로 인식합니다.',
   })
   @ApiBody({
-    type: CreateFeedRequest,
+    type: CreateGatheringFeedRequest,
   })
   @Post()
-  async create(@Body() dto: CreateFeedRequest, @CurrentUser() userId: string) {
+  async createGatheringFeed(
+    @Body() dto: CreateGatheringFeedRequest,
+    @CurrentUser() userId: string,
+  ) {
     const { imageUrls, ...rest } = dto;
     await this.feedsWriteService.create(
       {
@@ -78,6 +81,9 @@ export class FeedsController {
   }
 
   @ApiOperation({ summary: '게시글 내용 수정' })
+  @ApiBody({
+    type: UpdateFeedRequest,
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch(':feedId')
   async updateContent(

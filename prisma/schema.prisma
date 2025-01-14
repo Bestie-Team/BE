@@ -60,6 +60,7 @@ model User {
   blockedFeeds BlockedFeed[]
   sentFriendRequest Friend[] @relation("SenderUser")
   receivedFriendRequests Friend[] @relation("ReceiverUser")
+  friendFeedVisibilities FriendFeedVisibility[]
 
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
@@ -118,6 +119,7 @@ model Feed {
   images FeedImage[]
   comments FeedComment[]
   blockedFeeds BlockedFeed[]
+  friendFeedVisibilities FriendFeedVisibility[]
 
   @@map("feed")
 }
@@ -147,6 +149,18 @@ model FeedComment {
   writer User @relation(fields: [writerId], references: [id])
 
   @@map("feed_comment")
+}
+
+model FriendFeedVisibility {
+  feedId String @map("feed_id")
+  userId String @map("user_id")
+  createdAt DateTime
+
+  @@id([feedId, userId])
+  feed Feed @relation(fields: [feedId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("friend_feed_visibility")
 }
 
 model BlockedFeed {

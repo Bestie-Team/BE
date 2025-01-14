@@ -66,6 +66,11 @@ export type Friend = {
   created_at: Timestamp;
   updated_at: Timestamp;
 };
+export type FriendFeedVisibility = {
+  feed_id: string;
+  user_id: string;
+  createdAt: Timestamp;
+};
 export type Gathering = {
   id: string;
   type: GatheringType;
@@ -123,6 +128,7 @@ export type DB = {
   feed_comment: FeedComment;
   feed_image: FeedImage;
   friend: Friend;
+  friend_feed_visibility: FriendFeedVisibility;
   gathering: Gathering;
   gathering_participation: GatheringParticipation;
   group: Group;

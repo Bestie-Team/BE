@@ -12,11 +12,11 @@ export class UserCursor {
 
 export class PaginationRequest {
   @ApiProperty()
-  @IsDateString()
+  @IsDateString({}, { message: 'cursor가 ISO8601이 아닙니다.' })
   readonly cursor: string;
 
   @ApiProperty()
-  @IsInt({ message: 'limit은 정수만 가능합니다.' })
+  @IsInt({ message: 'limit이 정수가 아닙니다.' })
   @Transform(({ value }) => Number(value), { toClassOnly: true })
   readonly limit: number;
 }

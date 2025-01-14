@@ -22,16 +22,24 @@ import {
 } from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { ApiGatheringPaginationQuery } from 'src/common/decorators/swagger';
+import {
+  ApiGatheringPaginationQuery,
+  ApiGatheringQuery,
+} from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
+import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
 import { gatheringInvitationConverter } from 'src/presentation/converters/gathering/gathering-invitation.converters';
+import { gatheringConverter } from 'src/presentation/converters/gathering/gathering.converters';
 import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 import { GatheringInvitationListRequest } from 'src/presentation/dto/gathering/request/gathering-invitation-list.request';
+import { GatheringListRequest } from 'src/presentation/dto/gathering/request/gathering-list.request';
+import { GatheringDetailResponse } from 'src/presentation/dto/gathering/response/gathering-detail.response';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
+import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
 
 @ApiTags('/gatherings')
 @ApiBearerAuth()
@@ -40,6 +48,7 @@ import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/
 export class GatheringsController {
   constructor(
     private readonly gatheringsWriteService: GatheringsWriteService,
+    private readonly gatheringsReadServvice: GatheringsReadService,
     private readonly gatheringInvitationsReadService: GatheringInvitationsReadService,
   ) {}
 
@@ -93,6 +102,40 @@ export class GatheringsController {
       { ...rest, hostUserId: userId },
       friendIds,
     );
+  }
+
+  @ApiOperation({ summary: '참여 중인 모임 목록 조회' })
+  @ApiGatheringQuery()
+  @ApiResponse({
+    status: 200,
+    description: '모임 목록 조회 완료',
+    type: GatheringListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Get()
+  async getGatherings(
+    @Query() dto: GatheringListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<GatheringListResponse> {
+    const domain = await this.gatheringsReadServvice.getGatherings(userId, dto);
+    return gatheringConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '모임 상세 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '모임 상세 조회 완료',
+    type: GatheringDetailResponse,
+  })
+  @Get(':gatheringId')
+  async getDetail(
+    @Param('gatheringId', ParseUUIDPipe) gatheringId: string,
+  ): Promise<GatheringDetailResponse> {
+    const domain = await this.gatheringsReadServvice.getDetail(gatheringId);
+    return gatheringConverter.toDto(domain);
   }
 
   @ApiOperation({ summary: '모임 초대 수락' })

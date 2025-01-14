@@ -4,10 +4,10 @@ import { PaginationRequest } from '../../shared';
 
 export class GatheringInvitationListRequest extends PaginationRequest {
   @ApiProperty()
-  @IsDateString()
+  @IsDateString({}, { message: 'ISO8601 형식이 아닙니다.' })
   minDate: string;
 
   @ApiProperty()
-  @IsDateString()
+  @IsDateString({}, { message: 'ISO8601 형식이 아닙니다.' })
   maxDate: string;
 }

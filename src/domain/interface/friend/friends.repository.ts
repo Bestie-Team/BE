@@ -2,7 +2,7 @@ import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendRequest } from 'src/domain/types/friend.types';
 import { User } from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
-import { UserPaginationInput } from 'src/shared/types';
+import { FriendStatus, UserPaginationInput } from 'src/shared/types';
 
 export interface FriendsRepository {
   save(data: FriendEntity): Promise<void>;
@@ -26,7 +26,7 @@ export interface FriendsRepository {
   findOneBySenderAndReceiverId(
     firstUserId: string,
     secondUserId: string,
-  ): Promise<{ id: string } | null>;
+  ): Promise<{ id: string; status: FriendStatus } | null>;
   update(id: string, data: Partial<FriendEntity>): Promise<void>;
   delete(id: string): Promise<void>;
 }

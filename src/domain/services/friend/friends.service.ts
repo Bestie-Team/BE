@@ -1,4 +1,6 @@
 import {
+  BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -6,7 +8,10 @@ import {
 } from '@nestjs/common';
 import { v4 } from 'uuid';
 import {
+  CANT_REQUEST_REPORTED_FRIEND_MESSAGE,
   FORBIDDEN_MESSAGE,
+  FRIEND_ALREADY_EXIST_MESSAGE,
+  FRIEND_REQUEST_ALREADY_EXIST_MESSAGE,
   NOT_FOUND_FRIEND_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
@@ -90,10 +95,32 @@ export class FriendsService {
   }
 
   async request(prototype: FriendPrototype) {
+    const { senderId, receiverId } = prototype;
+    await this.checkExistFriend(senderId, receiverId);
+
     const stdDate = new Date();
     const friend = FriendEntity.create(prototype, v4, stdDate);
 
     await this.friendsRepository.save(friend);
+  }
+
+  private async checkExistFriend(senderId: string, receiverId: string) {
+    const existFriend =
+      await this.friendsRepository.findOneBySenderAndReceiverId(
+        senderId,
+        receiverId,
+      );
+    if (existFriend) {
+      if (existFriend.status === 'ACCEPTED') {
+        throw new ConflictException(FRIEND_ALREADY_EXIST_MESSAGE);
+      }
+      if (existFriend.status === 'PENDING') {
+        throw new ConflictException(FRIEND_REQUEST_ALREADY_EXIST_MESSAGE);
+      }
+      if (existFriend.status === 'REPORTED') {
+        throw new BadRequestException(CANT_REQUEST_REPORTED_FRIEND_MESSAGE);
+      }
+    }
   }
 
   async accept(friendId: string, receiverId: string) {

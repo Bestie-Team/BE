@@ -37,6 +37,7 @@ import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 import { GatheringInvitationListRequest } from 'src/presentation/dto/gathering/request/gathering-invitation-list.request';
 import { GatheringListRequest } from 'src/presentation/dto/gathering/request/gathering-list.request';
+import { GatheringDetailResponse } from 'src/presentation/dto/gathering/response/gathering-detail.response';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
 
@@ -121,6 +122,20 @@ export class GatheringsController {
   ): Promise<GatheringListResponse> {
     const domain = await this.gatheringsReadServvice.getGatherings(userId, dto);
     return gatheringConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '모임 상세 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '모임 상세 조회 완료',
+    type: GatheringDetailResponse,
+  })
+  @Get(':gatheringId')
+  async getDetail(
+    @Param('gatheringId', ParseUUIDPipe) gatheringId: string,
+  ): Promise<GatheringDetailResponse> {
+    const domain = await this.gatheringsReadServvice.getDetail(gatheringId);
+    return gatheringConverter.toDto(domain);
   }
 
   @ApiOperation({ summary: '모임 초대 수락' })

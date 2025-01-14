@@ -3,7 +3,7 @@ import { FriendRequest } from './data.types';
 import { UserCursor } from '../../shared';
 
 export class FriendRequestListResponse {
-  @ApiProperty({ type: FriendRequest })
+  @ApiProperty({ type: [FriendRequest] })
   readonly requests: FriendRequest[];
 
   @ApiProperty({ type: UserCursor })

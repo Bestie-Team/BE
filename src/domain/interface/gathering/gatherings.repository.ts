@@ -1,5 +1,5 @@
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
-import { Gathering } from 'src/domain/types/gathering.types';
+import { Gathering, GatheringDetail } from 'src/domain/types/gathering.types';
 import { PaginatedDateRangeInput } from 'src/shared/types';
 
 export interface GatheringsRepository {
@@ -8,6 +8,7 @@ export interface GatheringsRepository {
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<Gathering[]>;
+  findDetailById(id: string): Promise<GatheringDetail | null>;
 }
 
 export const GatheringsRepository = Symbol('GatheringRepository');

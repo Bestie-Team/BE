@@ -3,7 +3,7 @@ import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-pr
 import { Injectable } from '@nestjs/common';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
-import { Gathering } from 'src/domain/types/gathering.types';
+import { Gathering, GatheringDetail } from 'src/domain/types/gathering.types';
 import { PaginatedDateRangeInput } from 'src/shared/types';
 
 @Injectable()
@@ -50,5 +50,56 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       gatheringDate: row.gathering_date,
       invitationImageUrl: row.invitation_image_url,
     }));
+  }
+
+  async findDetailById(id: string): Promise<GatheringDetail | null> {
+    const result = await this.txHost.tx.gathering.findUnique({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        gatheringDate: true,
+        address: true,
+        invitationImageUrl: true,
+        user: {
+          select: {
+            id: true,
+            accountId: true,
+            profileImageUrl: true,
+            name: true,
+          },
+        },
+        participations: {
+          select: {
+            participant: {
+              select: {
+                id: true,
+                accountId: true,
+                profileImageUrl: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      where: {
+        id,
+      },
+    });
+
+    return result
+      ? {
+          id: result.id,
+          address: result.address,
+          description: result.description,
+          gatheringDate: result.gatheringDate,
+          invitationImageUrl: result.invitationImageUrl,
+          name: result.name,
+          hostUser: result.user,
+          members: result.participations.map((participant) => ({
+            ...participant.participant,
+          })),
+        }
+      : null;
   }
 }

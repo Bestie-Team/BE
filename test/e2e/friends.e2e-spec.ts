@@ -393,17 +393,17 @@ describe('FriendsController (e2e)', () => {
       const user4 = await prisma.user.create({
         data: generateUserEntity('test4@test.com', 'lighty_4', '이수진'),
       });
-      const receivedRequest = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user3.id),
-      });
+      // const receivedRequest = await prisma.friend.create({
+      //   data: generateFriendEntity(user3.id, loginedUser!.id),
+      // });
       const sentRequest1 = await prisma.friend.create({
-        data: generateFriendEntity(user1.id, loginedUser!.id),
+        data: generateFriendEntity(loginedUser!.id, user1.id),
       });
       const sentRequest2 = await prisma.friend.create({
-        data: generateFriendEntity(user2.id, loginedUser!.id),
+        data: generateFriendEntity(loginedUser!.id, user2.id),
       });
       const sentRequest3 = await prisma.friend.create({
-        data: generateFriendEntity(user3.id, loginedUser!.id),
+        data: generateFriendEntity(loginedUser!.id, user3.id),
       });
       const expectedFriendRequests = [sentRequest2, sentRequest3];
       const expectedUsers = [user2, user3];
@@ -425,6 +425,7 @@ describe('FriendsController (e2e)', () => {
       const { status, body }: ResponseResult<FriendRequestListResponse> =
         response;
 
+        console.log(JSON.stringify(body, null, 2))
       expect(status).toEqual(200);
       expect(body.nextCursor).toEqual({
         name: expectedUsers.at(-1)?.name,

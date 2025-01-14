@@ -40,8 +40,13 @@ export class FriendsController {
     description: '요청 완료',
   })
   @ApiResponse({
+    status: 409,
+    description:
+      '이미 친구인 회원에게 요청을 보낸 경우, 이미 요청을 보냈거나 받은 회원에게 요청을 보낸 경우',
+  })
+  @ApiResponse({
     status: 400,
-    description: '입력값 검증 실패',
+    description: '입력값 검증 실패, 신고한 회원에게 요청을 보낸 경우',
   })
   @Post()
   async request(

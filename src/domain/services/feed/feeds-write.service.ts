@@ -16,7 +16,7 @@ export class FeedsWriteService {
     const stdDate = new Date();
     const feed = FeedEntity.create(prototype, v4, stdDate);
     const images: FeedImageEntity[] = imageUrls.map((url) =>
-      FeedImageEntity.create({ url, feedId: feed.id }, v4, stdDate),
+      FeedImageEntity.create(url, v4, stdDate),
     );
 
     await this.feedsRepository.save(feed, images);

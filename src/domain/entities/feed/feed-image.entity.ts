@@ -1,17 +1,16 @@
 export class FeedImageEntity {
   readonly id: string;
-  readonly feedId: string;
   readonly url: string;
   readonly createdAt: Date;
 
   static create(
-    prototype: { url: string; feedId: string },
+    url: string,
     idGen: () => string,
     stdDate: Date,
   ): FeedImageEntity {
     return {
-      ...prototype,
       id: idGen(),
+      url,
       createdAt: stdDate,
     };
   }

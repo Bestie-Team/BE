@@ -1,8 +1,7 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { FriendStatus as PrismaFriendStatus, Prisma } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { FriendStatus as PrismaFriendStatus } from '@prisma/client';
 import { sql } from 'kysely';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
-import { FRIEND_REQUEST_ALREADY_EXIST_MESSAGE } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { FriendRequest } from 'src/domain/types/friend.types';
 import { User } from 'src/domain/types/user.types';

@@ -35,8 +35,8 @@ export class CreateFriendFeedRequest {
 
   @ApiProperty({
     type: [String],
-    nullable: true,
     example: ['uuid', 'uuid', 'uuid'],
+    description: '비공개 피드의 경우 빈 배열로 주시면됩니다.',
   })
   @IsArray({ message: 'friendIds는 배열이어야 합니다' })
   @IsUUID(4, { each: true, message: 'friendIds중 UUID가 아닌 값이 있습니다.' })

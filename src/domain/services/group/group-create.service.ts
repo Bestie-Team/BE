@@ -13,10 +13,13 @@ import { FriendsRepository } from 'src/domain/interface/friend/friends.repositor
 import {
   FORBIDDEN_MESSAGE,
   GROUP_OWNER_CANT_LEAVE_MESSAGE,
-  IS_NOT_FRIEND_RELATION_MESSAGE,
 } from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
+import {
+  checkIsFriend,
+  checkIsFriendAll,
+} from 'src/domain/helpers/check-is-friend';
 
 @Injectable()
 export class GroupCreateService {
@@ -30,14 +33,18 @@ export class GroupCreateService {
   ) {}
 
   async create(prototype: GroupPrototype, friendIds: string[]) {
-    await this.checkIsFriendAll(prototype.ownerId, friendIds);
+    await checkIsFriendAll(
+      this.friendsRepository,
+      prototype.ownerId,
+      friendIds,
+    );
     const stdDate = new Date();
     const group = GroupEntity.create(prototype, v4, stdDate);
     await this.createTransaction(group, friendIds);
   }
 
   async addNewMember(userId: string, groupId: string, participantId: string) {
-    await this.checkIsFriend(userId, participantId);
+    await checkIsFriend(this.friendsRepository, userId, participantId);
     await this.addMember(groupId, participantId);
   }
 
@@ -62,24 +69,6 @@ export class GroupCreateService {
   private async createTransaction(group: GroupEntity, friendIds: string[]) {
     await this.createGroup(group);
     await this.createGroupParticipations(group.id, friendIds);
-  }
-
-  private async checkIsFriendAll(userId: string, friendIds: string[]) {
-    const friendChecks = friendIds.map(async (friendId) => {
-      await this.checkIsFriend(userId, friendId);
-    });
-
-    await Promise.all(friendChecks);
-  }
-
-  private async checkIsFriend(userId: string, friendId: string) {
-    const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
-      friendId,
-      userId,
-    );
-    if (!friend || friend.status !== 'ACCEPTED') {
-      throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
-    }
   }
 
   private async checkIsOwner(groupId: string, userId: string) {

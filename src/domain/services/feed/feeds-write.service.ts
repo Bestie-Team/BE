@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   Inject,
@@ -21,7 +20,6 @@ import {
   FEED_CREATION_PERIOD_EXCEEDED_MESSAGE,
   FORBIDDEN_MESSAGE,
   IS_NOT_DONE_GATHERING_MESSAGE,
-  IS_NOT_FRIEND_RELATION_MESSAGE,
   NOT_FOUND_GATHERING_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
@@ -29,6 +27,7 @@ import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.
 import { calcDiffDate } from 'src/utils/date';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
+import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 
 @Injectable()
 export class FeedsWriteService {
@@ -70,7 +69,7 @@ export class FeedsWriteService {
     friendIds: string[],
   ) {
     const { writerId } = prototype;
-    await this.checkIsFriendAll(writerId, friendIds);
+    await checkIsFriendAll(this.friendsRepository, writerId, friendIds);
     await this.createFriendFeedTransaction(prototype, imageUrls, friendIds);
   }
 
@@ -139,20 +138,6 @@ export class FeedsWriteService {
     await this.friendFeedVisibilitiesRepository.saveMany(
       friendFeedVisibilities,
     );
-  }
-
-  private async checkIsFriendAll(userId: string, friendIds: string[]) {
-    const friendChecks = friendIds.map(async (friendId) => {
-      const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
-        friendId,
-        userId,
-      );
-      if (!friend || friend.status !== 'ACCEPTED') {
-        throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
-      }
-    });
-
-    await Promise.all(friendChecks);
   }
 
   private async checkOwnership(feedId: string, ownerId: string) {

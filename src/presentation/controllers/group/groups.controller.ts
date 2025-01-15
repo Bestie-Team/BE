@@ -136,12 +136,17 @@ export class GroupsController {
     description: '입력값 검증 실패',
   })
   @Post(':groupId/members')
-  async addMember(
+  async addMembers(
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @Body() dto: AddGroupMemberRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.groupsCreateService.addNewMember(userId, groupId, dto.userId);
+    const { userIds: participantIds } = dto;
+    await this.groupsCreateService.addNewMembers(
+      groupId,
+      userId,
+      participantIds,
+    );
   }
 
   @ApiOperation({ summary: '그룹 나가기 (그룹원)' })

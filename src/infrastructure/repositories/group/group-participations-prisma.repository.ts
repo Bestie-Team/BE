@@ -18,6 +18,12 @@ export class GroupParticipationsPrismaRepository
     });
   }
 
+  async saveMany(data: GroupParticipationEntity[]): Promise<void> {
+    await this.txHost.tx.groupParticipation.createMany({
+      data,
+    });
+  }
+
   async delete(groupId: string, participantId: string): Promise<void> {
     await this.txHost.tx.groupParticipation.delete({
       where: {

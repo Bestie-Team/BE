@@ -13,7 +13,7 @@ import {
 import { UsersRepository } from 'src/domain/interface/users.repository';
 import { getUserCursor } from 'src/domain/shared/get-cursor';
 import { SearchInput } from 'src/domain/types/user.types';
-import { calcDateDiff, convertUnixToDate } from 'src/utils/date';
+import { calcDiff, convertUnixToDate } from 'src/utils/date';
 
 @Injectable()
 export class UsersService {
@@ -74,7 +74,7 @@ export class UsersService {
 
     if (
       createdAt.getTime() !== updatedAt.getTime() &&
-      convertUnixToDate(calcDateDiff(today, updatedAt)) < 30
+      convertUnixToDate(calcDiff(today, updatedAt)) < 30
     ) {
       throw new UnprocessableEntityException(
         ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE,

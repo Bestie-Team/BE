@@ -8,6 +8,10 @@ export interface FeedsRepository {
     feedId: string,
     writerId: string,
   ): Promise<{ id: string } | null>;
+  findOneByGatheringIdAndWriterId(
+    gatheringId: string,
+    writerId: string,
+  ): Promise<{ id: string } | null>;
 }
 
 export const FeedsRepository = Symbol('FeedsRepository');

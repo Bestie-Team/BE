@@ -1,3 +1,5 @@
+import { TransactionHost } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
@@ -6,10 +8,12 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
 export class FeedsPrismaRepository implements FeedsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly txHost: TransactionHost<TransactionalAdapterPrisma>,
+  ) {}
 
   async save(data: FeedEntity, images: FeedImageEntity[]): Promise<void> {
-    await this.prisma.feed.create({
+    await this.txHost.tx.feed.create({
       data: {
         ...data,
         images: {
@@ -22,7 +26,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
   }
 
   async update(id: string, data: Partial<FeedEntity>): Promise<void> {
-    await this.prisma.feed.update({
+    await this.txHost.tx.feed.update({
       data,
       where: {
         id,
@@ -34,9 +38,22 @@ export class FeedsPrismaRepository implements FeedsRepository {
     feedId: string,
     writerId: string,
   ): Promise<{ id: string } | null> {
-    return await this.prisma.feed.findFirst({
+    return await this.txHost.tx.feed.findFirst({
       where: {
         id: feedId,
+        writerId,
+      },
+    });
+  }
+
+  async findOneByGatheringIdAndWriterId(
+    gatheringId: string,
+    writerId: string,
+  ): Promise<{ id: string } | null> {
+    return await this.txHost.tx.feed.findFirst({
+      select: { id: true },
+      where: {
+        gatheringId,
         writerId,
       },
     });

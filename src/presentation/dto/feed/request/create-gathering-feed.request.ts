@@ -9,24 +9,30 @@ import {
 } from 'class-validator';
 
 export class CreateGatheringFeedRequest {
-  @ApiProperty({
-    description: '모임 번호를 null로 하면 개인 피드로 인식합니다.',
-    type: 'string',
-    nullable: true,
-  })
-  @IsUUID(4, { each: true, message: '그룹 번호는 UUID여야 합니다.' })
+  @ApiProperty({ example: 'uuid' })
+  @IsUUID(4, { each: true, message: 'gatheringId는 UUID여야 합니다.' })
   readonly gatheringId: string;
 
-  @ApiProperty({ type: [String] })
+  @ApiProperty({
+    type: [String],
+    example: [
+      'https://cdn.lighty.today/image1.jpeg',
+      'https://cdn.lighty.today/image2.jpeg',
+      'https://cdn.lighty.today/image3.jpeg',
+    ],
+  })
   @IsArray()
-  @IsUrl({}, { each: true, message: '친구 번호는 UUID여야 합니다.' })
+  @IsUrl(
+    {},
+    { each: true, message: 'imageUrls중 url 형식이 아닌 값이 있습니다.' },
+  )
   @ArrayNotEmpty({ message: '피드 이미지는 1장 이상이어야 합니다.' })
   @ArrayMaxSize(5, {
-    message: '피드 이미지는 최대 5장까지 가능합니다 가능합니다.',
+    message: 'imageUrls는 최대 5개까지 등록 가능합니다.',
   })
   readonly imageUrls: string[];
 
   @ApiProperty()
-  @Length(20, 150, { message: '피드 내용은 20 ~ 150자만 가능합니다.' })
+  @Length(20, 150, { message: 'content는 20 ~ 150자만 가능합니다.' })
   readonly content: string;
 }

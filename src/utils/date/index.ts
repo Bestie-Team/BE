@@ -1,5 +1,10 @@
-export const calcDateDiff = (firstDate: Date, secondDate: Date) => {
+export const calcDiff = (firstDate: Date, secondDate: Date) => {
   return Math.abs(firstDate.getTime() - secondDate.getTime());
+};
+
+export const calcDiffDate = (firstDate: Date, secondDate: Date) => {
+  const unixTime = Math.abs(firstDate.getTime() - secondDate.getTime());
+  return convertUnixToDate(unixTime);
 };
 
 export const convertUnixToDate = (time: number) => {

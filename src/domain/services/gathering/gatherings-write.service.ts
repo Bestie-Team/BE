@@ -10,7 +10,6 @@ import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity'
 import {
   FORBIDDEN_MESSAGE,
   GROUP_GATHERING_REQUIRED_GROUPID_MESSAGE,
-  IS_NOT_FRIEND_RELATION_MESSAGE,
   MINIMUM_FRIENDS_REQUIRED_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
@@ -19,6 +18,7 @@ import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
+import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 
 @Injectable()
 export class GatheringsWriteService {
@@ -49,7 +49,11 @@ export class GatheringsWriteService {
     if (friendIds === null || friendIds.length === 0) {
       throw new BadRequestException(MINIMUM_FRIENDS_REQUIRED_MESSAGE);
     }
-    await this.checkIsFriendAll(prototype.hostUserId, friendIds);
+    await checkIsFriendAll(
+      this.friendsRepository,
+      prototype.hostUserId,
+      friendIds,
+    );
     await this.createTransaction(prototype, friendIds);
   }
 
@@ -96,20 +100,6 @@ export class GatheringsWriteService {
     });
 
     await Promise.all(gatheringParticipations);
-  }
-
-  private async checkIsFriendAll(userId: string, friendIds: string[]) {
-    const friendChecks = friendIds.map(async (friendId) => {
-      const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
-        friendId,
-        userId,
-      );
-      if (!friend || friend.status !== 'ACCEPTED') {
-        throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
-      }
-    });
-
-    await Promise.all(friendChecks);
   }
 
   private async getGroupMemberIds(groupId: string) {

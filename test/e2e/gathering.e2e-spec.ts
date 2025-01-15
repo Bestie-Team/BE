@@ -21,6 +21,7 @@ import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/c
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
 import { GatheringDetail } from 'src/domain/types/gathering.types';
+import { User } from '@prisma/client';
 
 describe('GatheringsController (e2e)', () => {
   let app: INestApplication;
@@ -268,8 +269,31 @@ describe('GatheringsController (e2e)', () => {
       const friendRealtion3 = await prisma.friend.create({
         data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
       });
+      const group = await prisma.group.create({
+        data: generateGroupEntity(user1.id, '멋진 그룹'),
+      });
+      const groupPart1 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(group.id, user2.id, new Date()),
+      });
+      const groupPart2 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(
+          group.id,
+          loginedUser!.id,
+          new Date(),
+        ),
+      });
       const gathering1 = await prisma.gathering.create({
-        data: generateGatheringEntity(user1.id),
+        data: generateGatheringEntity(
+          user1.id,
+          new Date(),
+          '멋진 모임',
+          new Date(),
+          '두리집',
+          '멋진 모임입니다.',
+          'https://image.com',
+          'GROUP',
+          group.id,
+        ),
       });
       const gathering1Invitation1 = await prisma.gatheringParticipation.create({
         data: generateGatheringParticipationEntity(
@@ -285,7 +309,7 @@ describe('GatheringsController (e2e)', () => {
         data: generateGatheringParticipationEntity(gathering1.id, user3.id),
       });
       const gathering2 = await prisma.gathering.create({
-        data: generateGatheringEntity(user2.id),
+        data: generateGatheringEntity(user2.id, new Date(), '모임', new Date()),
       });
       const gathering2Invitation1 = await prisma.gatheringParticipation.create({
         data: generateGatheringParticipationEntity(
@@ -354,39 +378,39 @@ describe('GatheringsController (e2e)', () => {
       });
       const sentGroup1Invitation = new Date('2025-01-01T00:00:00.000Z');
       const sentGroup2Invitation = new Date('2025-01-05T00:00:00.000Z');
-      const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'),
+
+      const users: User[] = [];
+      for (let i = 0; i < 10; i++) {
+        const user = await prisma.user.create({
+          data: generateUserEntity(
+            `test${i}@test.com`,
+            `account${i}`,
+            `이민수${i}`,
+          ),
+        });
+        users.push(user);
+      }
+      for (let i = 0; i < 10; i++) {
+        await prisma.friend.create({
+          data: generateFriendEntity(loginedUser!.id, users[i].id, 'ACCEPTED'),
+        });
+      }
+      const group = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id),
       });
-      const user2 = await prisma.user.create({
-        data: generateUserEntity('test2@test.com', 'lighty_2', '김민수'),
-      });
-      const user3 = await prisma.user.create({
-        data: generateUserEntity('test3@test.com', 'lighty_3', '조민수'),
-      });
-      const friendRealtion1 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
-      });
-      const friendRealtion2 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user2.id, 'ACCEPTED'),
-      });
-      const friendRealtion3 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
-      });
+      // 모두와 친구다 난
       const gathering1 = await prisma.gathering.create({
         data: generateGatheringEntity(
           loginedUser!.id,
           sentGroup1Invitation,
           '두리집 오전 청소 모임',
+          new Date(),
+          '집',
+          '못진ㅁ ㅗ임',
+          'https://image.com',
+          'GROUP',
+          group.id,
         ),
-      });
-      const gathering1Invitation1 = await prisma.gatheringParticipation.create({
-        data: generateGatheringParticipationEntity(gathering1.id, user1.id),
-      });
-      const gathering1Invitation2 = await prisma.gatheringParticipation.create({
-        data: generateGatheringParticipationEntity(gathering1.id, user2.id),
-      });
-      const gathering1Invitation3 = await prisma.gatheringParticipation.create({
-        data: generateGatheringParticipationEntity(gathering1.id, user3.id),
       });
       const gathering2 = await prisma.gathering.create({
         data: generateGatheringEntity(
@@ -395,15 +419,22 @@ describe('GatheringsController (e2e)', () => {
           '두리집 오후 청소 모임',
         ),
       });
-      const gathering2Invitation1 = await prisma.gatheringParticipation.create({
-        data: generateGatheringParticipationEntity(gathering2.id, user1.id),
-      });
-      const gathering2Invitation2 = await prisma.gatheringParticipation.create({
-        data: generateGatheringParticipationEntity(gathering2.id, user2.id),
-      });
-      const gathering2Invitation3 = await prisma.gatheringParticipation.create({
-        data: generateGatheringParticipationEntity(gathering2.id, user3.id),
-      });
+      for (let i = 0; i < 5; i++) {
+        await prisma.gatheringParticipation.create({
+          data: generateGatheringParticipationEntity(
+            gathering1.id,
+            users[i].id,
+          ),
+        });
+      }
+      for (let i = 0; i < 5; i++) {
+        await prisma.gatheringParticipation.create({
+          data: generateGatheringParticipationEntity(
+            gathering2.id,
+            users[i].id,
+          ),
+        });
+      }
       const expectedGathering = [gathering2, gathering1];
 
       // 날짜 범위: 2025년
@@ -421,6 +452,7 @@ describe('GatheringsController (e2e)', () => {
       const { status, body }: ResponseResult<GatheringInvitationListResponse> =
         response;
       const { invitations, nextCursor } = body;
+      console.log(invitations);
 
       expect(status).toEqual(200);
       expect(nextCursor).toEqual(sentGroup1Invitation.toISOString());
@@ -435,12 +467,12 @@ describe('GatheringsController (e2e)', () => {
         );
       });
       expect(invitations[0].id).toEqual(gathering2.id);
-      expect(invitations[0].members.length).toEqual(3);
+      expect(invitations[0].members.length).toEqual(5);
       expect(invitations[0].createdAt).toEqual(
         gathering2.createdAt.toISOString(),
       );
       expect(invitations[1].id).toEqual(gathering1.id);
-      expect(invitations[1].members.length).toEqual(3);
+      expect(invitations[1].members.length).toEqual(5);
       expect(invitations[1].createdAt).toEqual(
         gathering1.createdAt.toISOString(),
       );

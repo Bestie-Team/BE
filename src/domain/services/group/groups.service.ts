@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
-import { getGroupCursor } from 'src/domain/shared/get-cursor';
+import { getGroupCursor } from 'src/domain/helpers/get-cursor';
 import { PaginationInput } from 'src/shared/types';
 
 @Injectable()

@@ -13,10 +13,10 @@ import { FriendsRepository } from 'src/domain/interface/friend/friends.repositor
 import {
   FORBIDDEN_MESSAGE,
   GROUP_OWNER_CANT_LEAVE_MESSAGE,
-  IS_NOT_FRIEND_RELATION_MESSAGE,
 } from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
+import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 
 @Injectable()
 export class GroupCreateService {
@@ -30,15 +30,36 @@ export class GroupCreateService {
   ) {}
 
   async create(prototype: GroupPrototype, friendIds: string[]) {
-    await this.checkIsFriendAll(prototype.ownerId, friendIds);
+    await checkIsFriendAll(
+      this.friendsRepository,
+      prototype.ownerId,
+      friendIds,
+    );
     const stdDate = new Date();
-    const group = GroupEntity.create(prototype, v4, stdDate);
-    await this.createTransaction(group, friendIds);
+    const group = GroupEntity.create(prototype, v4, new Date());
+    const groupParticipations = friendIds.map((participantId) =>
+      GroupParticipationEntity.create(
+        { groupId: group.id, participantId },
+        v4,
+        stdDate,
+      ),
+    );
+
+    await this.createTransaction(group, groupParticipations);
   }
 
-  async addNewMember(userId: string, groupId: string, participantId: string) {
-    await this.checkIsFriend(userId, participantId);
-    await this.addMember(groupId, participantId);
+  async addNewMembers(
+    groupId: string,
+    inviterId: string,
+    participantIds: string[],
+  ) {
+    await checkIsFriendAll(this.friendsRepository, inviterId, participantIds);
+    const stdDate = new Date();
+    const groupParticipations = participantIds.map((participantId) =>
+      GroupParticipationEntity.create({ groupId, participantId }, v4, stdDate),
+    );
+
+    await this.groupParticipationsRepository.saveMany(groupParticipations);
   }
 
   async leaveGroup(groupId: string, userId: string) {
@@ -59,27 +80,12 @@ export class GroupCreateService {
   }
 
   @Transactional()
-  private async createTransaction(group: GroupEntity, friendIds: string[]) {
-    await this.createGroup(group);
-    await this.createGroupParticipations(group.id, friendIds);
-  }
-
-  private async checkIsFriendAll(userId: string, friendIds: string[]) {
-    const friendChecks = friendIds.map(async (friendId) => {
-      await this.checkIsFriend(userId, friendId);
-    });
-
-    await Promise.all(friendChecks);
-  }
-
-  private async checkIsFriend(userId: string, friendId: string) {
-    const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
-      friendId,
-      userId,
-    );
-    if (!friend || friend.status !== 'ACCEPTED') {
-      throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
-    }
+  private async createTransaction(
+    group: GroupEntity,
+    groupParticipations: GroupParticipationEntity[],
+  ) {
+    await this.groupsRepository.save(group);
+    await this.groupParticipationsRepository.saveMany(groupParticipations);
   }
 
   private async checkIsOwner(groupId: string, userId: string) {
@@ -89,30 +95,5 @@ export class GroupCreateService {
     );
 
     return group;
-  }
-
-  private async createGroup(entity: GroupEntity) {
-    await this.groupsRepository.save(entity);
-  }
-
-  private async createGroupParticipations(
-    groupId: string,
-    friendIds: string[],
-  ) {
-    const groupParticipations = friendIds.map(async (friendId) => {
-      await this.addMember(groupId, friendId);
-    });
-
-    await Promise.all(groupParticipations);
-  }
-
-  async addMember(groupId: string, participantId: string) {
-    const stdDate = new Date();
-    const participation = GroupParticipationEntity.create(
-      { groupId, participantId },
-      v4,
-      stdDate,
-    );
-    await this.groupParticipationsRepository.save(participation);
   }
 }

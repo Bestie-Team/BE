@@ -45,6 +45,7 @@ export class GatheringParticipationsPrismaRepository
     const participationRows = await this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('gathering as g', 'gp.gathering_id', 'g.id')
+      .leftJoin('group as gr', 'g.group_id', 'gr.id')
       .innerJoin('user as hu', 'g.host_user_id', 'hu.id')
       .select([
         'gp.id',
@@ -55,6 +56,7 @@ export class GatheringParticipationsPrismaRepository
         'g.gathering_date',
         'g.address',
         'hu.account_id as sender',
+        'gr.name as group_name',
       ])
       .where('gp.participant_id', '=', participantId)
       .where('gp.created_at', '>=', new Date(minDate))
@@ -94,6 +96,7 @@ export class GatheringParticipationsPrismaRepository
         createdAt: row.created_at,
         description: row.description,
         gatheringDate: row.gathering_date,
+        groupName: row.group_name,
         name: row.name,
         sender: row.sender,
         members: [],
@@ -121,6 +124,7 @@ export class GatheringParticipationsPrismaRepository
       .innerJoin('user as hu', 'g.host_user_id', 'hu.id')
       .innerJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
       .innerJoin('user as mu', 'gp.participant_id', 'mu.id')
+      .leftJoin('group as gr', 'g.group_id', 'gr.id')
       .select([
         'g.id',
         'g.name',
@@ -128,6 +132,7 @@ export class GatheringParticipationsPrismaRepository
         'g.created_at',
         'g.gathering_date',
         'g.address',
+        'gr.name as group_name',
         'hu.account_id as sender',
         'mu.id as member_id',
         'mu.account_id as member_account_id',
@@ -157,6 +162,7 @@ export class GatheringParticipationsPrismaRepository
           description: row.description,
           address: row.address,
           createdAt: row.created_at,
+          groupName: row.group_name,
           gatheringDate: row.gathering_date,
           sender: row.sender,
           members: [],

@@ -21,7 +21,7 @@ import { UserPaginationInput } from 'src/shared/types';
 import {
   getFriendRequestCursor,
   getUserCursor,
-} from 'src/domain/shared/get-cursor';
+} from 'src/domain/helpers/get-cursor';
 import { SearchInput } from 'src/domain/types/user.types';
 
 @Injectable()

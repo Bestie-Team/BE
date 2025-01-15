@@ -81,7 +81,7 @@ export type Gathering = {
   gathering_date: Timestamp;
   address: string;
   invitation_image_url: string;
-  is_done: Generated<boolean>;
+  ended_at: Timestamp | null;
   created_at: Timestamp;
   updated_at: Timestamp;
   deleted_at: Timestamp | null;

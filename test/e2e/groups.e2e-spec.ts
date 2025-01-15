@@ -15,6 +15,7 @@ import {
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
 import { ResponseResult } from 'test/helpers/types';
 import { AddGroupMemberRequest, GroupListResponse } from 'src/presentation/dto';
+import { Friend, User } from '@prisma/client';
 
 describe('GroupsController (e2e)', () => {
   let app: INestApplication;
@@ -231,37 +232,41 @@ describe('GroupsController (e2e)', () => {
           accountId,
         },
       });
-      const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
-      });
-      const user2 = await prisma.user.create({
-        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
-      });
-      const user3 = await prisma.user.create({
-        data: generateUserEntity('test3@test.com', 'lighty_3', '이진수'), // 2
-      });
-      const friendRealtion1 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
-      });
-      const friendRealtion2 = await prisma.friend.create({
-        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
-      });
-      const friendRealtion3 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
-      });
+
+      const users: User[] = [];
+      const friendRelations: Friend[] = [];
+      for (let i = 0; i < 10; i++) {
+        const user = await prisma.user.create({
+          data: generateUserEntity(
+            `test${i}@test.com`,
+            `account${i}_id`,
+            `이민수${i}`,
+          ),
+        });
+        users.push(user);
+      }
+      for (let i = 0; i < 10; i++) {
+        const friendRelation = await prisma.friend.create({
+          data: generateFriendEntity(loginedUser!.id, users[i].id, 'ACCEPTED'),
+        });
+        friendRelations.push(friendRelation);
+      }
       const group = await prisma.group.create({
         data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
       });
       const group1Participation1 = await prisma.groupParticipation.create({
-        data: generateGroupParticipationEntity(group.id, user1.id, new Date()),
+        data: generateGroupParticipationEntity(
+          group.id,
+          users[9].id,
+          new Date(),
+        ),
       });
-      const group1Participation2 = await prisma.groupParticipation.create({
-        data: generateGroupParticipationEntity(group.id, user2.id, new Date()),
-      });
+      users.pop();
+
       const groupId = group.id;
-      const newMemberId = user3.id;
+      const newMemberIds = users.map((user) => user.id);
       const dto: AddGroupMemberRequest = {
-        userId: newMemberId,
+        userIds: newMemberIds,
       };
 
       // when
@@ -277,7 +282,7 @@ describe('GroupsController (e2e)', () => {
       });
 
       expect(status).toEqual(201);
-      expect(members.length).toEqual(3);
+      expect(members.length).toEqual(10);
     });
 
     it('친구가 아닌 회원을 추가하려고 하는 경우 예외', async () => {
@@ -315,7 +320,7 @@ describe('GroupsController (e2e)', () => {
       const groupId = group.id;
       const nonFriendUserId = user3.id;
       const dto: AddGroupMemberRequest = {
-        userId: nonFriendUserId,
+        userIds: [nonFriendUserId],
       };
 
       // when

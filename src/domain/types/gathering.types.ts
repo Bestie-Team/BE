@@ -34,5 +34,6 @@ export interface GatheringInvitation {
   readonly createdAt: Date;
   readonly gatheringDate: Date;
   readonly address: string;
+  readonly groupName: string | null;
   readonly members: User[];
 }

@@ -38,6 +38,14 @@ class GatheringInvitation {
   @ApiProperty()
   readonly address: string;
 
+  @ApiProperty({
+    type: 'string',
+    example: 'uuid 혹은 null',
+    description: '그룹 모임일 경우 그룹 이름, 아닐 경우 null',
+    nullable: true,
+  })
+  readonly groupName: string | null;
+
   @ApiProperty({ type: [User] })
   readonly members: User[];
 }

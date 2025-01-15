@@ -11,7 +11,7 @@ import {
   NOT_FOUND_USER_MESSAGE,
 } from 'src/domain/error/messages';
 import { UsersRepository } from 'src/domain/interface/users.repository';
-import { getUserCursor } from 'src/domain/shared/get-cursor';
+import { getUserCursor } from 'src/domain/helpers/get-cursor';
 import { SearchInput } from 'src/domain/types/user.types';
 import { calcDiff, convertUnixToDate } from 'src/utils/date';
 

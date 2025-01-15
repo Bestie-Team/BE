@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { NOT_FOUND_GATHERING_MESSAGE } from 'src/domain/error/messages';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
-import { getGatheringCursor } from 'src/domain/shared/get-cursor';
+import { getGatheringCursor } from 'src/domain/helpers/get-cursor';
 import { PaginatedDateRangeInput } from 'src/shared/types';
 
 @Injectable()

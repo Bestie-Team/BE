@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
-import { getGatheringInvitationCursor } from 'src/domain/shared/get-cursor';
+import { getGatheringInvitationCursor } from 'src/domain/helpers/get-cursor';
 import { PaginatedDateRangeInput } from 'src/shared/types';
 
 export class GatheringInvitationsReadService {

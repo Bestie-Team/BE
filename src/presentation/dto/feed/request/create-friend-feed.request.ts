@@ -3,16 +3,13 @@ import {
   ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
+  IsNotEmpty,
   IsUrl,
   IsUUID,
   Length,
 } from 'class-validator';
 
-export class CreateGatheringFeedRequest {
-  @ApiProperty({ example: 'uuid' })
-  @IsUUID(4, { each: true, message: 'gatheringId는 UUID여야 합니다.' })
-  readonly gatheringId: string;
-
+export class CreateFriendFeedRequest {
   @ApiProperty({
     type: [String],
     example: [
@@ -35,4 +32,15 @@ export class CreateGatheringFeedRequest {
   @ApiProperty()
   @Length(20, 150, { message: 'content는 20 ~ 150자만 가능합니다.' })
   readonly content: string;
+
+  @ApiProperty({
+    type: [String],
+    nullable: true,
+    example: ['uuid', 'uuid', 'uuid'],
+  })
+  @IsArray({ message: 'friendIds는 배열이어야 합니다' })
+  @IsUUID(4, { each: true, message: 'friendIds중 UUID가 아닌 값이 있습니다.' })
+  @ArrayMaxSize(10)
+  @IsNotEmpty()
+  readonly friendIds: string[];
 }

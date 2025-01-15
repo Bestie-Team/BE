@@ -59,10 +59,7 @@ export class FeedsController {
     };
   }
 
-  @ApiOperation({
-    summary: '모임 피드 작성',
-    description: 'gatheringId를 null로 주시면 개인 피드로 인식합니다.',
-  })
+  @ApiOperation({ summary: '모임 피드 작성' })
   @ApiBody({
     type: CreateGatheringFeedRequest,
   })
@@ -98,11 +95,35 @@ export class FeedsController {
     );
   }
 
+  @ApiOperation({ summary: '일반 피드 작성' })
+  @ApiBody({
+    type: CreateFriendFeedRequest,
+  })
+  @ApiResponse({
+    status: 201,
+    description: '피드 작성 완료',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      '입력값 검증 실패, friendIds에 친구가 아닌 회원 번호가 있는 경우',
+  })
   @Post('friends')
   async createFriendFeed(
     @Body() dto: CreateFriendFeedRequest,
     @CurrentUser() userId: string,
-  ) {}
+  ) {
+    const { imageUrls, content, friendIds } = dto;
+    await this.feedsWriteService.createFriendFeed(
+      {
+        writerId: userId,
+        gatheringId: null,
+        content,
+      },
+      imageUrls,
+      friendIds,
+    );
+  }
 
   @ApiOperation({ summary: '게시글 내용 수정' })
   @ApiBody({

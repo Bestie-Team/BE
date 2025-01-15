@@ -4,3 +4,4 @@ export * from './friend';
 export * from './group';
 export * from './user';
 export * from './shared';
+export * from './feed';

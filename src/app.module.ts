@@ -13,6 +13,7 @@ import { GatheringsModule } from 'src/modules/gathering/gatherings.module';
 import { clsOptions } from 'src/configs/cls/cls-options';
 import { GroupsModule } from 'src/modules/group/groups.module';
 import { InterceptorsModule } from 'src/common/interceptors/interceptors.module';
+import { FeedsModule } from 'src/modules/feed/feeds.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { InterceptorsModule } from 'src/common/interceptors/interceptors.module'
     FriendsModule,
     GatheringsModule,
     GroupsModule,
+    FeedsModule,
   ],
   controllers: [AppController],
 })

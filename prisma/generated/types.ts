@@ -36,7 +36,7 @@ export type BlockedFeed = {
 export type Feed = {
   id: string;
   writer_id: string;
-  gathering_id: string;
+  gathering_id: string | null;
   content: string;
   created_at: Timestamp;
   updated_at: Timestamp;
@@ -66,6 +66,11 @@ export type Friend = {
   created_at: Timestamp;
   updated_at: Timestamp;
 };
+export type FriendFeedVisibility = {
+  feed_id: string;
+  user_id: string;
+  createdAt: Timestamp;
+};
 export type Gathering = {
   id: string;
   type: GatheringType;
@@ -76,7 +81,7 @@ export type Gathering = {
   gathering_date: Timestamp;
   address: string;
   invitation_image_url: string;
-  is_done: Generated<boolean>;
+  ended_at: Timestamp | null;
   created_at: Timestamp;
   updated_at: Timestamp;
   deleted_at: Timestamp | null;
@@ -123,6 +128,7 @@ export type DB = {
   feed_comment: FeedComment;
   feed_image: FeedImage;
   friend: Friend;
+  friend_feed_visibility: FriendFeedVisibility;
   gathering: Gathering;
   gathering_participation: GatheringParticipation;
   group: Group;

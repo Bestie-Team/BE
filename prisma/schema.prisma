@@ -60,6 +60,7 @@ model User {
   blockedFeeds BlockedFeed[]
   sentFriendRequest Friend[] @relation("SenderUser")
   receivedFriendRequests Friend[] @relation("ReceiverUser")
+  friendFeedVisibilities FriendFeedVisibility[]
 
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
@@ -76,7 +77,7 @@ model Gathering {
   gatheringDate DateTime @map("gathering_date")
   address String @db.VarChar(100)
   invitationImageUrl String @map("invitation_image_url")
-  isDone Boolean @default(false) @map("is_done")
+  endedAt DateTime? @map("ended_at")
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
@@ -107,17 +108,18 @@ model GatheringParticipation {
 model Feed {
   id String @id
   writerId String @map("writer_id")
-  gatheringId String @map("gathering_id")
+  gatheringId String? @map("gathering_id")
   content String @db.VarChar(150)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
   writer User @relation(fields: [writerId], references: [id])
-  gathering Gathering @relation(fields: [gatheringId], references: [id])
+  gathering Gathering? @relation(fields: [gatheringId], references: [id])
   images FeedImage[]
   comments FeedComment[]
   blockedFeeds BlockedFeed[]
+  friendFeedVisibilities FriendFeedVisibility[]
 
   @@map("feed")
 }
@@ -147,6 +149,18 @@ model FeedComment {
   writer User @relation(fields: [writerId], references: [id])
 
   @@map("feed_comment")
+}
+
+model FriendFeedVisibility {
+  feedId String @map("feed_id")
+  userId String @map("user_id")
+  createdAt DateTime
+
+  @@id([feedId, userId])
+  feed Feed @relation(fields: [feedId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("friend_feed_visibility")
 }
 
 model BlockedFeed {

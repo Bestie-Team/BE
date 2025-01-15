@@ -9,6 +9,7 @@ export interface GatheringsRepository {
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<Gathering[]>;
   findDetailById(id: string): Promise<GatheringDetail | null>;
+  findOneById(id: string): Promise<{ id: string; endedAt: Date | null } | null>;
 }
 
 export const GatheringsRepository = Symbol('GatheringRepository');

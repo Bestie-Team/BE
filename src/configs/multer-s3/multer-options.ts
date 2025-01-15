@@ -43,3 +43,7 @@ export const CreateGatheringInvitationImageMulterOptions =
   (): MulterOptions => {
     return CreateMulterOptions('gathering', 'invitation');
   };
+
+export const CreateFeedImageMulterOptions = (): MulterOptions => {
+  return CreateMulterOptions('feed', 'image');
+};

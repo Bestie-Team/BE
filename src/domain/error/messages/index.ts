@@ -17,3 +17,8 @@ export const MINIMUM_FRIENDS_REQUIRED_MESSAGE =
 export const DUPLICATE_ACCOUNT_ID_MESSAGE = '이미 존재하는 계정 아이디입니다.';
 export const ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE =
   '계정 아이디는 30일에 한 번 변경 가능합니다.';
+export const IS_NOT_DONE_GATHERING_MESSAGE =
+  '완료되지 않은 모임에는 피드를 기록할 수 없습니다.';
+export const DUPLICATE_GATHERING_FEED = '이미 작성한 피드가 존재합니다.';
+export const FEED_CREATION_PERIOD_EXCEEDED_MESSAGE =
+  '모임 완료 후 30일이 지나 피드를 작성할 수 없습니다.';

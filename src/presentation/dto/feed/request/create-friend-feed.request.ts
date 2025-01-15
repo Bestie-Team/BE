@@ -3,7 +3,6 @@ import {
   ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
-  IsNotEmpty,
   IsUrl,
   IsUUID,
   Length,
@@ -41,6 +40,5 @@ export class CreateFriendFeedRequest {
   @IsArray({ message: 'friendIds는 배열이어야 합니다' })
   @IsUUID(4, { each: true, message: 'friendIds중 UUID가 아닌 값이 있습니다.' })
   @ArrayMaxSize(10)
-  @IsNotEmpty()
   readonly friendIds: string[];
 }

@@ -10,9 +10,13 @@ import { login } from 'test/helpers/login';
 import { CreateGatheringFeedRequest } from 'src/presentation/dto';
 import {
   generateFeedEntity,
+  generateFriendEntity,
   generateGatheringEntity,
+  generateUserEntity,
 } from 'test/helpers/generators';
 import { UpdateFeedRequest } from 'src/presentation/dto/feed/request/update-feed.request';
+import { Friend, User } from '@prisma/client';
+import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
@@ -29,13 +33,15 @@ describe('UsersController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.friendFeedVisibility.deleteMany();
+    await prisma.friend.deleteMany();
     await prisma.feedImage.deleteMany();
     await prisma.feed.deleteMany();
     await prisma.gathering.deleteMany();
     await prisma.user.deleteMany();
   });
 
-  describe('(POST) /feeds - 모임 피드 작성', () => {
+  describe('(POST) /feeds/gatherings - 모임 피드 작성', () => {
     it('모임 피드 작성 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
@@ -46,6 +52,10 @@ describe('UsersController (e2e)', () => {
       });
       const gathering = await prisma.gathering.create({
         data: generateGatheringEntity(loginedUser!.id),
+      });
+      await prisma.gathering.update({
+        data: { endedAt: new Date() },
+        where: { id: gathering.id },
       });
       const dto: CreateGatheringFeedRequest = {
         content:
@@ -61,10 +71,57 @@ describe('UsersController (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/feeds')
+        .post('/feeds/gatherings')
         .send(dto)
         .set('Authorization', accessToken);
-      const { status } = response;
+      const { status, body } = response;
+
+      expect(status).toEqual(201);
+    });
+  });
+
+  describe('(POST) /feeds/friends - 일반, 친구 피드 작성', () => {
+    it('일반, 친구 피드 작성 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const users: User[] = [];
+      const friendRelations: Friend[] = [];
+      for (let i = 0; i < 10; i++) {
+        const user = await prisma.user.create({
+          data: generateUserEntity(`test${i}test.com`, `account${i}_id`),
+        });
+        users.push(user);
+      }
+      for (let i = 0; i < 10; i++) {
+        const friendRelation = await prisma.friend.create({
+          data: generateFriendEntity(loginedUser!.id, users[i].id, 'ACCEPTED'),
+        });
+        friendRelations.push(friendRelation);
+      }
+
+      const dto: CreateFriendFeedRequest = {
+        content:
+          '안녕하세요 오늘은 두리집을 청소해볼게요, 너무 더러워서 청소가 힘드네요~',
+        imageUrls: [
+          'https://image.com',
+          'https://image.com',
+          'https://image.com',
+          'https://image.com',
+          'https://image.com',
+        ],
+        friendIds: users.map((user) => user.id),
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/feeds/friends')
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status, body } = response;
 
       expect(status).toEqual(201);
     });

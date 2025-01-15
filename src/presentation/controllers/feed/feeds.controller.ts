@@ -12,7 +12,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -25,6 +31,7 @@ import { FileListRequest } from 'src/presentation/dto/file/request/file-list.req
 import { UploadImageListResponse } from 'src/presentation/dto/file/response/upload-image-list.response';
 
 @ApiTags('/feeds')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('feeds')
 export class FeedsController {

@@ -15,6 +15,7 @@ export interface GatheringPrototype {
 export interface Gathering {
   readonly id: string;
   readonly name: string;
+  readonly description: string;
   readonly gatheringDate: Date;
   readonly invitationImageUrl: string;
 }

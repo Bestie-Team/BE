@@ -8,6 +8,9 @@ class Gathering {
   readonly name: string;
 
   @ApiProperty()
+  readonly description: string;
+
+  @ApiProperty()
   readonly gatheringDate: string;
 
   @ApiProperty()

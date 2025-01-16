@@ -1,6 +1,8 @@
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
+import { GatheringParticipationStatus } from '@prisma/client';
+import { sql } from 'kysely';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { Gathering, GatheringDetail } from 'src/domain/types/gathering.types';
@@ -25,11 +27,24 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const rows = await this.txHost.tx.$kysely
       .selectFrom('gathering as g')
-      .innerJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
-      .select(['g.id', 'g.name', 'g.gathering_date', 'g.invitation_image_url'])
+      .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
+      .select([
+        'g.id',
+        'g.name',
+        'g.gathering_date',
+        'g.invitation_image_url',
+        'g.description',
+      ])
       .where((eb) =>
         eb.or([
-          eb('gp.participant_id', '=', userId),
+          eb.and([
+            eb('gp.participant_id', '=', userId),
+            eb(
+              'gp.status',
+              '=',
+              sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+            ),
+          ]),
           eb('g.host_user_id', '=', userId),
         ]),
       )
@@ -47,6 +62,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     return rows.map((row) => ({
       id: row.id,
       name: row.name,
+      description: row.description,
       gatheringDate: row.gathering_date,
       invitationImageUrl: row.invitation_image_url,
     }));

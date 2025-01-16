@@ -59,13 +59,20 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       .limit(limit)
       .execute();
 
-    return rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      gatheringDate: row.gathering_date,
-      invitationImageUrl: row.invitation_image_url,
-    }));
+    const result: { [key: string]: Gathering } = {};
+    rows.forEach((row) => {
+      if (!result[row.id]) {
+        result[row.id] = {
+          id: row.id,
+          name: row.name,
+          description: row.description,
+          gatheringDate: row.gathering_date,
+          invitationImageUrl: row.invitation_image_url,
+        };
+      }
+    });
+
+    return Object.values(result);
   }
 
   async findDetailById(id: string): Promise<GatheringDetail | null> {

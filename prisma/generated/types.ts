@@ -54,6 +54,7 @@ export type FeedComment = {
 export type FeedImage = {
   id: string;
   feed_id: string;
+  index: number;
   url: string;
   created_at: Timestamp;
   deleted_at: Timestamp | null;

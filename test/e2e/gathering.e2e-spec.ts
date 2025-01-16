@@ -299,6 +299,7 @@ describe('GatheringsController (e2e)', () => {
         data: generateGatheringParticipationEntity(
           gathering1.id,
           loginedUser!.id,
+          'PENDING',
           receivedFirst,
         ),
       });
@@ -315,6 +316,7 @@ describe('GatheringsController (e2e)', () => {
         data: generateGatheringParticipationEntity(
           gathering2.id,
           loginedUser!.id,
+          'PENDING',
           receivedSecond,
         ),
       });
@@ -452,7 +454,6 @@ describe('GatheringsController (e2e)', () => {
       const { status, body }: ResponseResult<GatheringInvitationListResponse> =
         response;
       const { invitations, nextCursor } = body;
-      console.log(invitations);
 
       expect(status).toEqual(200);
       expect(nextCursor).toEqual(sentGroup1Invitation.toISOString());
@@ -530,6 +531,7 @@ describe('GatheringsController (e2e)', () => {
           data: generateGatheringParticipationEntity(
             gathering1.id,
             loginedUser!.id,
+            'ACCEPTED',
           ),
         });
       const gathering2Participation =
@@ -537,13 +539,15 @@ describe('GatheringsController (e2e)', () => {
           data: generateGatheringParticipationEntity(
             gathering2.id,
             loginedUser!.id,
+            'ACCEPTED',
           ),
         });
       const gathering3Participation =
         await prisma.gatheringParticipation.create({
           data: generateGatheringParticipationEntity(
             gathering3.id,
-            loginedUser!.id,
+            user3.id,
+            'ACCEPTED',
           ),
         });
       const expectedGathering = [gathering1, gathering3, gathering2];
@@ -559,6 +563,7 @@ describe('GatheringsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GatheringListResponse> = response;
       const { gatherings, nextCursor } = body;
+      console.log(gatherings);
 
       expect(status).toEqual(status);
       gatherings.forEach((gathering, i) => {

@@ -1,6 +1,10 @@
 import { v4 } from 'uuid';
 import { UserEntity } from 'src/domain/entities/user/user.entity';
-import { GatheringType, Provider } from 'src/shared/types';
+import {
+  GatheringParticipationStatus,
+  GatheringType,
+  Provider,
+} from 'src/shared/types';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendStatus } from '@prisma/client';
 import { GroupEntity } from 'src/domain/entities/group/group.entity';
@@ -92,12 +96,14 @@ export const generateGatheringEntity = (
 export const generateGatheringParticipationEntity = (
   gatheringId: string,
   participantId: string,
+  status: GatheringParticipationStatus = 'PENDING',
   stdDate = new Date(),
 ): GatheringParticipationEntity => {
   return GatheringParticipationEntity.create(
     {
       gatheringId,
       participantId,
+      status,
     },
     v4,
     stdDate,

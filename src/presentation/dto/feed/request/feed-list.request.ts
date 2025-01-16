@@ -11,7 +11,8 @@ export class FeedCursor {
   @IsUUID(4, { message: 'id가 UUID가 아닙니다' })
   readonly id: string;
 }
-
+// NOTE 오름 내림 구현
+// NOTE DTO 업데이트
 export class FeedListRequest {
   @ApiProperty({ description: 'minDate도 검색 결과에 포함돼요.' })
   @IsDateString({}, { message: 'minDate가 ISO8601 형식이 아닙니다.' })
@@ -23,7 +24,7 @@ export class FeedListRequest {
 
   @ApiProperty({
     type: FeedCursor,
-    description: '첫 번째 커서: { createdAt: minDate, id: uuid 아무 값이나 }',
+    description: '첫 번째 커서: { createdAt: maxDate, id: uuid 아무 값이나 }',
   })
   @Transform(({ value }) => {
     try {

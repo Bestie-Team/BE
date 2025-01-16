@@ -56,8 +56,8 @@ export class FeedsWriteService {
 
     const stdDate = new Date();
     const feed = FeedEntity.create(input, v4, stdDate);
-    const images: FeedImageEntity[] = imageUrls.map((url) =>
-      FeedImageEntity.create(url, v4, stdDate),
+    const images: FeedImageEntity[] = imageUrls.map((url, index) =>
+      FeedImageEntity.create({ url, index }, v4, stdDate),
     );
 
     await this.feedsRepository.save(feed, images);
@@ -119,8 +119,8 @@ export class FeedsWriteService {
   private async saveFeed(prototype: FeedPrototype, imageUrls: string[]) {
     const stdDate = new Date();
     const feed = FeedEntity.create(prototype, v4, stdDate);
-    const images: FeedImageEntity[] = imageUrls.map((url) =>
-      FeedImageEntity.create(url, v4, stdDate),
+    const images: FeedImageEntity[] = imageUrls.map((url, index) =>
+      FeedImageEntity.create({ url, index }, v4, stdDate),
     );
     await this.feedsRepository.save(feed, images);
 

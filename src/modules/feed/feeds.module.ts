@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
+import { FeedsReadService } from 'src/domain/services/feed/feeds-read.service';
 import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
 import { FeedsPrismaRepository } from 'src/infrastructure/repositories/feed/feeds-prisma.repository';
 import { FriendFeedVisibilitiesPrismaRepository } from 'src/infrastructure/repositories/feed/friend-feed-visibilities-prisma.repository';
@@ -13,6 +14,7 @@ import { FeedsController } from 'src/presentation/controllers/feed/feeds.control
   controllers: [FeedsController],
   providers: [
     FeedsWriteService,
+    FeedsReadService,
     { provide: FeedsRepository, useClass: FeedsPrismaRepository },
     {
       provide: FriendFeedVisibilitiesRepository,

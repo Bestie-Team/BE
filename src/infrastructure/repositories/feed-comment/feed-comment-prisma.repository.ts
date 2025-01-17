@@ -31,12 +31,20 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
       },
       where: {
         feedId,
+        deletedAt: null,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
 
   async findOneById(id: string): Promise<{ writerId: string } | null> {
-    return await this.findOneById(id);
+    return await this.prisma.feedComment.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 
   async delete(id: string): Promise<void> {

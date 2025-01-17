@@ -18,7 +18,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
         ...data,
         images: {
           createMany: {
-            data: images.map((image) => ({ ...image, index: 0 })),
+            data: images.map((image) => ({ ...image })),
           },
         },
       },

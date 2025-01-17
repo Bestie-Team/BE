@@ -13,7 +13,7 @@ export interface FeedsRepository {
     gatheringId: string,
     writerId: string,
   ): Promise<{ id: string } | null>;
-  findByUserId(
+  findAllByUserId(
     userId: string,
     feedPaginationInput: FeedPaginationInput,
   ): Promise<Feed[]>;

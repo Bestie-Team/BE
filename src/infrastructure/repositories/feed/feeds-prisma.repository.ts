@@ -61,7 +61,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
     });
   }
 
-  async findByUserId(
+  async findAllByUserId(
     userId: string,
     feedPaginationInput: FeedPaginationInput,
   ): Promise<Feed[]> {

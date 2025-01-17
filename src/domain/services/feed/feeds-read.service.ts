@@ -12,7 +12,7 @@ export class FeedsReadService {
 
   async getFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
     const { limit } = feedPaginationInput;
-    const feeds = await this.feedsRepository.findByUserId(
+    const feeds = await this.feedsRepository.findAllByUserId(
       userId,
       feedPaginationInput,
     );

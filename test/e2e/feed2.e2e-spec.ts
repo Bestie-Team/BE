@@ -7,7 +7,7 @@ import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { login } from 'test/helpers/login';
-import { CreateGatheringFeedRequest } from 'src/presentation/dto';
+import { CreateGatheringFeedRequest, Order } from 'src/presentation/dto';
 import {
   generateFeedEntity,
   generateFeedImageEntity,
@@ -273,6 +273,7 @@ describe('UsersController (e2e)', () => {
       );
       await prisma.friendFeedVisibility.createMany({ data: feedVisibilities });
 
+      const order: Order = 'DESC';
       const minDate = new Date('2024-01-01T00:00:00.000Z').toISOString();
       const maxDate = new Date('2024-12-31T23:59:59.000Z').toISOString();
       const cursor = {
@@ -283,7 +284,7 @@ describe('UsersController (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .get(
-          `/feeds?minDate=${minDate}&maxDate=${maxDate}&cursor=${JSON.stringify(
+          `/feeds?order=${order}&minDate=${minDate}&maxDate=${maxDate}&cursor=${JSON.stringify(
             cursor,
           )}&limit=${limit}`,
         )

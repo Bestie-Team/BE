@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -23,10 +25,14 @@ import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-options';
+import { FeedsReadService } from 'src/domain/services/feed/feeds-read.service';
 import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
+import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
 import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
 import { CreateGatheringFeedRequest } from 'src/presentation/dto/feed/request/create-gathering-feed.request';
+import { FeedListRequest } from 'src/presentation/dto/feed/request/feed-list.request';
 import { UpdateFeedRequest } from 'src/presentation/dto/feed/request/update-feed.request';
+import { FeedListResponse } from 'src/presentation/dto/feed/response/feed-list.response';
 import { FileListRequest } from 'src/presentation/dto/file/request/file-list.request';
 import { UploadImageListResponse } from 'src/presentation/dto/file/response/upload-image-list.response';
 
@@ -35,7 +41,10 @@ import { UploadImageListResponse } from 'src/presentation/dto/file/response/uplo
 @UseGuards(AuthGuard)
 @Controller('feeds')
 export class FeedsController {
-  constructor(private readonly feedsWriteService: FeedsWriteService) {}
+  constructor(
+    private readonly feedsWriteService: FeedsWriteService,
+    private readonly feedsReadService: FeedsReadService,
+  ) {}
 
   @ApiOperation({
     summary: '피드 사진 업로드',
@@ -132,7 +141,21 @@ export class FeedsController {
     );
   }
 
-  @ApiOperation({ summary: '게시글 내용 수정' })
+  @ApiOperation({ summary: '피드 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    type: FeedListResponse,
+  })
+  @Get()
+  async getFeeds(
+    @Query() dto: FeedListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<FeedListResponse> {
+    const domain = await this.feedsReadService.getFeeds(userId, dto);
+    return feedConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '피드 내용 수정' })
   @ApiBody({
     type: UpdateFeedRequest,
   })

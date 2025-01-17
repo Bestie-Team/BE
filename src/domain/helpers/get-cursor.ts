@@ -1,3 +1,4 @@
+import { Feed } from 'src/domain/types/feed.types';
 import { FriendRequest } from 'src/domain/types/friend.types';
 import {
   Gathering,
@@ -40,4 +41,13 @@ export const getGatheringInvitationCursor = (
 
 export const getGatheringCursor = (invitations: Gathering[], limit: number) => {
   return invitations[limit - 1]?.gatheringDate.toISOString() || null;
+};
+
+export const getFeedCursor = (feeds: Feed[], limit: number) => {
+  return feeds[limit - 1]
+    ? {
+        createdAt: feeds[limit - 1].createdAt.toISOString(),
+        id: feeds[limit - 1].id,
+      }
+    : null;
 };

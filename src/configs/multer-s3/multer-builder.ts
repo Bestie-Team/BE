@@ -2,6 +2,7 @@ import * as multerS3 from 'multer-s3';
 import { Request } from 'express';
 import { S3Client } from '@aws-sdk/client-s3';
 import * as dotenv from 'dotenv';
+import { v4 } from 'uuid';
 
 dotenv.config();
 
@@ -58,9 +59,9 @@ export class MulterBuilder {
         const extension = splitedFileNames.at(splitedFileNames.length - 1);
 
         if (this.path) {
-          filename = `${this.path}/${new Date().getTime()}.${extension}`;
+          filename = `${this.path}/${v4()}.${extension}`;
         } else {
-          filename = `${new Date().getTime()}.${extension}`;
+          filename = `${v4()}.${extension}`;
         }
         return callback(null, encodeURI(`${this.resource}/${filename}`));
       },

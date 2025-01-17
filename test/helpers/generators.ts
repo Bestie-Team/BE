@@ -12,6 +12,8 @@ import { GroupParticipationEntity } from 'src/domain/entities/group/group-partic
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
+import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
+import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 
 export const generateUserEntity = (
   email: string,
@@ -116,3 +118,15 @@ export const generateFeedEntity = (
 ): FeedEntity => {
   return FeedEntity.create({ writerId, content, gatheringId }, v4, stdDate);
 };
+
+export const generateFeedImageEntity = (
+  index: number,
+  url = 'https://cdn.lighty.today/image',
+  stdDate: Date = new Date(),
+) => FeedImageEntity.create({ url, index }, v4, stdDate);
+
+export const generateFriendFeedVisibilityEntity = (
+  feedId: string,
+  userId: string,
+  stdDate: Date = new Date(),
+) => FriendFeedVisibilityEntity.create({ feedId, userId }, stdDate);

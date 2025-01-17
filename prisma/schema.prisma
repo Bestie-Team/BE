@@ -127,6 +127,7 @@ model Feed {
 model FeedImage {
   id String @id
   feedId String @map("feed_id")
+  index Int
   url String
   createdAt DateTime @map("created_at")
   deletedAt DateTime? @map("deleted_at")

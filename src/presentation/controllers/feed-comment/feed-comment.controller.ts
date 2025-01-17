@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   ParseUUIDPipe,
   Post,
   Query,
@@ -43,5 +45,22 @@ export class FeedCommentController {
   ): Promise<FeedCommentResponse[]> {
     const domain = await this.feedCommentService.getComment(feedId);
     return FeedCommentConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '피드 댓글 조회' })
+  @ApiResponse({
+    status: 204,
+    description: '댓글 삭제 완료',
+  })
+  @ApiResponse({
+    status: 403,
+    description: '작성자 불일치 삭제 실패',
+  })
+  @Delete(':commentId')
+  async delete(
+    @Param('commentId') commentId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.feedCommentService.delete(commentId, userId);
   }
 }

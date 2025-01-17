@@ -34,4 +34,19 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
       },
     });
   }
+
+  async findOneById(id: string): Promise<{ writerId: string } | null> {
+    return await this.findOneById(id);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.feedComment.update({
+      data: {
+        deletedAt: new Date(),
+      },
+      where: {
+        id,
+      },
+    });
+  }
 }

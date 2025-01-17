@@ -14,6 +14,7 @@ import { clsOptions } from 'src/configs/cls/cls-options';
 import { GroupsModule } from 'src/modules/group/groups.module';
 import { InterceptorsModule } from 'src/common/interceptors/interceptors.module';
 import { FeedsModule } from 'src/modules/feed/feeds.module';
+import { FeedCommentsModule } from 'src/modules/feed-comment/feed-comments.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { FeedsModule } from 'src/modules/feed/feeds.module';
     GatheringsModule,
     GroupsModule,
     FeedsModule,
+    FeedCommentsModule,
   ],
   controllers: [AppController],
 })

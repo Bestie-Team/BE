@@ -563,7 +563,6 @@ describe('GatheringsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GatheringListResponse> = response;
       const { gatherings, nextCursor } = body;
-      console.log(gatherings);
 
       expect(status).toEqual(status);
       gatherings.forEach((gathering, i) => {

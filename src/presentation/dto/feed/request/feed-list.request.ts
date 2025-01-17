@@ -26,7 +26,7 @@ export class FeedListRequest {
     enum: ['DESC', 'ACS'],
     example: 'DESC',
   })
-  @IsIn(['DESC', 'ASC'])
+  @IsIn(['DESC', 'ASC'], { message: 'order는 DESC, ASC만 가능합니다.' })
   readonly order: Order;
 
   @ApiProperty({ description: 'minDate도 검색 결과에 포함돼요.' })

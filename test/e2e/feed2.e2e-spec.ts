@@ -192,6 +192,7 @@ describe('UsersController (e2e)', () => {
       const loginedUserParticipation = generateGatheringParticipationEntity(
         gathering.id,
         loginedUser!.id,
+        'ACCEPTED',
       );
       await prisma.gatheringParticipation.createMany({
         data: [
@@ -291,7 +292,6 @@ describe('UsersController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<FeedListResponse> = response;
       const { feeds: resFeeds, nextCursor } = body;
-      console.log(JSON.stringify(body, null, 2));
 
       expect(status).toEqual(200);
       expect(resFeeds.length).toEqual(14);

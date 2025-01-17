@@ -14,6 +14,7 @@ import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gath
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
+import { FeedCommentEntity } from 'src/domain/entities/feed-comment/feed-comment.entity';
 
 export const generateUserEntity = (
   email: string,
@@ -130,3 +131,11 @@ export const generateFriendFeedVisibilityEntity = (
   userId: string,
   stdDate: Date = new Date(),
 ) => FriendFeedVisibilityEntity.create({ feedId, userId }, stdDate);
+
+export const generateFeedCommentEntity = (
+  feedId: string,
+  writerId: string,
+  content = '안녕하세요? 안녕하세요! 안녕하세요; 안녕하세요 안녕',
+  stdDate = new Date(),
+): FeedCommentEntity =>
+  FeedCommentEntity.create({ content, feedId, writerId }, v4, stdDate);

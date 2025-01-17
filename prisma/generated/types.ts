@@ -48,7 +48,6 @@ export type FeedComment = {
   writer_id: string;
   content: string;
   created_at: Timestamp;
-  updated_at: Timestamp;
   deleted_at: Timestamp | null;
 };
 export type FeedImage = {

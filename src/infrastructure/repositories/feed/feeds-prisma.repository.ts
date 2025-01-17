@@ -1,6 +1,8 @@
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
+import { GatheringParticipationStatus } from '@prisma/client';
+import { sql } from 'kysely';
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
@@ -99,7 +101,14 @@ export class FeedsPrismaRepository implements FeedsRepository {
           .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
           .where((eb) =>
             eb.or([
-              eb('gp.participant_id', '=', userId),
+              eb.and([
+                eb('gp.participant_id', '=', userId),
+                eb(
+                  'gp.status',
+                  '=',
+                  sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+                ),
+              ]),
               eb('g.host_user_id', '=', userId),
               eb('fv.user_id', '=', userId),
             ]),

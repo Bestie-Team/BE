@@ -18,7 +18,7 @@ export class FeedCursor {
   @IsUUID(4, { message: 'id가 UUID가 아닙니다' })
   readonly id: string;
 }
-// NOTE DTO 업데이트
+
 export class FeedListRequest {
   @ApiProperty({
     description: 'DESC: 내림차순, ASC: 오름차순',

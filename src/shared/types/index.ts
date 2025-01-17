@@ -1,10 +1,8 @@
 export type Provider = 'GOOGLE' | 'KAKAO' | 'APPLE';
-
 export type FriendStatus = 'PENDING' | 'ACCEPTED' | 'REPORTED';
-
 export type GatheringType = 'GROUP' | 'FRIEND';
-
 export type GatheringParticipationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+export type Order = 'DESC' | 'ASC';
 
 export interface UserPaginationInput {
   readonly cursor: {

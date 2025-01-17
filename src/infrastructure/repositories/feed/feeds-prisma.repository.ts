@@ -63,7 +63,9 @@ export class FeedsPrismaRepository implements FeedsRepository {
     userId: string,
     feedPaginationInput: FeedPaginationInput,
   ): Promise<Feed[]> {
-    const { cursor, limit, minDate, maxDate } = feedPaginationInput;
+    const { cursor, limit, minDate, maxDate, order } = feedPaginationInput;
+    const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
+    const cursorComparison = order === 'ASC' ? '>' : '<';
     const rows = await this.txHost.tx.$kysely
       .selectFrom('feed as f')
       .innerJoin('user as u', 'f.writer_id', 'u.id')
@@ -107,7 +109,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
           .where('f.created_at', '<=', new Date(maxDate))
           .where((eb) =>
             eb.or([
-              eb('f.created_at', '<', new Date(cursor.createdAt)),
+              eb('f.created_at', cursorComparison, new Date(cursor.createdAt)),
               eb.and([
                 eb('f.created_at', '=', new Date(cursor.createdAt)),
                 eb('f.id', '>', cursor.id),
@@ -115,11 +117,11 @@ export class FeedsPrismaRepository implements FeedsRepository {
             ]),
           )
           .groupBy('f.id')
-          .orderBy('f.created_at', 'desc')
+          .orderBy('f.created_at', feedCreatedAtOrder)
           .orderBy('f.id')
           .limit(limit),
       )
-      .orderBy('f.created_at', 'desc')
+      .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id')
       .orderBy('fi.index')
       .orderBy('gm.name')

@@ -1,4 +1,5 @@
 import { User } from 'src/domain/types/user.types';
+import { Order } from 'src/shared/types';
 
 export interface FeedPrototype {
   readonly writerId: string;
@@ -27,6 +28,7 @@ export interface Feed {
 }
 
 export interface FeedPaginationInput {
+  readonly order: Order;
   readonly minDate: string;
   readonly maxDate: string;
   readonly cursor: {

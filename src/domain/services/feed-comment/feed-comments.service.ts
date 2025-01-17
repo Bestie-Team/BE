@@ -16,4 +16,8 @@ export class FeedCommentsService {
     const comment = FeedCommentEntity.create(prototype, v4, stdDate);
     await this.feedCommentRepository.save(comment);
   }
+
+  async getComment(feedId: string) {
+    return await this.feedCommentRepository.findByFeedId(feedId);
+  }
 }

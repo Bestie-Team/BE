@@ -1,9 +1,19 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { FeedCommentsService } from 'src/domain/services/feed-comment/feed-comments.service';
+import { FeedCommentConverter } from 'src/presentation/converters/feed-comment/feed-comment.converters';
 import { CreateFeedCommentRequest } from 'src/presentation/dto/comment/request/create-feed-comment.request';
+import { FeedCommentResponse } from 'src/presentation/dto/comment/response/feed-comment-list.response';
 
 @ApiTags('/feed-comments')
 @UseGuards(AuthGuard)
@@ -19,5 +29,19 @@ export class FeedCommentController {
     @CurrentUser() userId: string,
   ) {
     await this.feedCommentService.save({ ...dto, writerId: userId });
+  }
+
+  @ApiOperation({ summary: '피드 댓글 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '댓글 조회 완료',
+    type: [FeedCommentResponse],
+  })
+  @Get()
+  async getComments(
+    @Query('feedId', ParseUUIDPipe) feedId: string,
+  ): Promise<FeedCommentResponse[]> {
+    const domain = await this.feedCommentService.getComment(feedId);
+    return FeedCommentConverter.toListDto(domain);
   }
 }

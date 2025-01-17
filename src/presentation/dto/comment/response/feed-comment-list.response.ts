@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../user';
 
 export class FeedCommentResponse {
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid' })
   readonly id: string;
 
   @ApiProperty({ type: User })

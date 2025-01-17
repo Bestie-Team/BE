@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -56,6 +58,7 @@ export class FeedCommentController {
     status: 403,
     description: '작성자 불일치 삭제 실패',
   })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':commentId')
   async delete(
     @Param('commentId') commentId: string,

@@ -3,10 +3,6 @@ import { IsUUID, Length } from 'class-validator';
 
 export class CreateFeedCommentRequest {
   @ApiProperty({ example: 'uuid' })
-  @IsUUID(4, { message: 'writerId 형식이 UUID가 아닙니다.' })
-  readonly writerId: string;
-
-  @ApiProperty({ example: 'uuid' })
   @IsUUID(4, { message: 'feedId 형식이 UUID가 아닙니다.' })
   readonly feedId: string;
 

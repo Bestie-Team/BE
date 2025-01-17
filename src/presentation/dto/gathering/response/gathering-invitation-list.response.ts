@@ -35,6 +35,9 @@ class GatheringInvitation {
   })
   readonly gatheringDate: string;
 
+  @ApiProperty({ example: 'https://cdn.lighty.today/image.jpg' })
+  readonly invitation_image_url: string;
+
   @ApiProperty()
   readonly address: string;
 

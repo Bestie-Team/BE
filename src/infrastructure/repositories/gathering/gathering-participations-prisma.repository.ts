@@ -55,6 +55,7 @@ export class GatheringParticipationsPrismaRepository
         'gp.created_at',
         'g.gathering_date',
         'g.address',
+        'g.invitation_image_url',
         'hu.account_id as sender',
         'gr.name as group_name',
       ])
@@ -96,6 +97,7 @@ export class GatheringParticipationsPrismaRepository
         createdAt: row.created_at,
         description: row.description,
         gatheringDate: row.gathering_date,
+        invitation_image_url: row.invitation_image_url,
         groupName: row.group_name,
         name: row.name,
         sender: row.sender,
@@ -132,6 +134,7 @@ export class GatheringParticipationsPrismaRepository
         'g.created_at',
         'g.gathering_date',
         'g.address',
+        'g.invitation_image_url',
         'gr.name as group_name',
         'hu.account_id as sender',
         'mu.id as member_id',
@@ -141,13 +144,18 @@ export class GatheringParticipationsPrismaRepository
       ])
       .where('g.id', 'in', (qb) =>
         qb
-          .selectFrom('gathering_participation as gp2')
-          .innerJoin('gathering as g2', 'gp2.gathering_id', 'g2.id')
-          .select('gp.gathering_id')
-          .where('g2.host_user_id', '=', senderId)
-          .where('g2.created_at', '>=', new Date(minDate))
-          .where('g2.created_at', '<=', new Date(maxDate))
-          .where('g2.created_at', '<', new Date(cursor))
+          .selectFrom('gathering as gs')
+          .innerJoin(
+            'gathering_participation as gps',
+            'gs.id',
+            'gps.gathering_id',
+          )
+          .select('gs.id')
+          .where('gs.host_user_id', '=', senderId)
+          .where('gs.created_at', '>=', new Date(minDate))
+          .where('gs.created_at', '<=', new Date(maxDate))
+          .where('gs.created_at', '<', new Date(cursor))
+          .groupBy('gs.id')
           .limit(limit),
       )
       .orderBy('g.created_at', 'desc')
@@ -164,6 +172,7 @@ export class GatheringParticipationsPrismaRepository
           createdAt: row.created_at,
           groupName: row.group_name,
           gatheringDate: row.gathering_date,
+          invitation_image_url: row.invitation_image_url,
           sender: row.sender,
           members: [],
         };

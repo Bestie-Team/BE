@@ -151,7 +151,21 @@ export class FeedsController {
     @Query() dto: FeedListRequest,
     @CurrentUser() userId: string,
   ): Promise<FeedListResponse> {
-    const domain = await this.feedsReadService.getFeeds(userId, dto);
+    const domain = await this.feedsReadService.getAllFeeds(userId, dto);
+    return feedConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '자신이 작성한 피드 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    type: FeedListResponse,
+  })
+  @Get('my')
+  async getMyFeeds(
+    @Query() dto: FeedListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<FeedListResponse> {
+    const domain = await this.feedsReadService.getMyFeeds(userId, dto);
     return feedConverter.toListDto(domain);
   }
 

@@ -61,7 +61,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
     });
   }
 
-  async findByUserId(
+  async findAllByUserId(
     userId: string,
     feedPaginationInput: FeedPaginationInput,
   ): Promise<Feed[]> {
@@ -91,6 +91,13 @@ export class FeedsPrismaRepository implements FeedsRepository {
         'gm.name as member_name',
         'gm.profile_image_url as member_profile_image_url',
         'gm.account_id as member_account_id',
+      ])
+      .select((qb) => [
+        qb
+          .selectFrom('feed_comment as fc')
+          .whereRef('fc.feed_id', '=', 'f.id')
+          .select(({ fn }) => [fn.count<number>('fc.id').as('comment_count')])
+          .as('comment_count'),
       ])
       .where('f.id', 'in', (qb) =>
         qb
@@ -143,7 +150,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
         result[row.id] = {
           id: row.id,
           content: row.content,
-          commentCount: 0,
+          commentCount: Number(row.comment_count ?? 0),
           createdAt: row.created_at,
           images: [],
           gathering: null,
@@ -196,20 +203,123 @@ export class FeedsPrismaRepository implements FeedsRepository {
       }
     });
 
-    const feeds = Object.values(result);
-    for (const feed of feeds) {
-      feed.commentCount = Number(await this.countComments(feed.id));
-    }
-
-    return feeds;
+    return Object.values(result);
   }
 
-  async countComments(feedId: string) {
-    const row = await this.txHost.tx.$kysely
-      .selectFrom('feed_comment as c')
-      .select(({ fn }) => [fn.count<number>('c.id').as('comment_count')])
-      .where('c.feed_id', '=', feedId)
-      .executeTakeFirst();
-    return row?.comment_count || 0;
+  async findByUserId(
+    userId: string,
+    feedPaginationInput: FeedPaginationInput,
+  ): Promise<Feed[]> {
+    const { cursor, limit, minDate, maxDate, order } = feedPaginationInput;
+    const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
+    const cursorComparison = order === 'ASC' ? '>' : '<';
+
+    // NOTE 그룹원인지 확인
+    const rows = await this.txHost.tx.$kysely
+      .selectFrom('feed as f')
+      .innerJoin('user as w', 'w.id', 'f.writer_id')
+      .leftJoin('gathering as g', 'g.id', 'f.gathering_id')
+      .leftJoin('gathering_participation as gp', 'gp.gathering_id', 'g.id')
+      .leftJoin('feed_image as fi', 'fi.feed_id', 'f.id')
+      .leftJoin('user as gm', 'gm.id', 'gp.participant_id')
+      .select([
+        'f.id',
+        'f.content',
+        'f.created_at',
+        'w.id as writer_id',
+        'w.account_id as writer_account_id',
+        'w.name as writer_name',
+        'w.profile_image_url as writer_profile_image_url',
+        'fi.url as image_url',
+        'g.id as gathering_id',
+        'g.name as gathering_name',
+        'g.gathering_date',
+        'gm.id as member_id',
+        'gm.name as member_name',
+        'gm.profile_image_url as member_profile_image_url',
+        'gm.account_id as member_account_id',
+      ])
+      .select((qb) => [
+        qb
+          .selectFrom('feed_comment as fc')
+          .whereRef('fc.feed_id', '=', 'f.id')
+          .select(({ fn }) => [fn.count<number>('fc.id').as('comment_count')])
+          .as('comment_count'),
+      ])
+      .where('f.id', 'in', (qb) =>
+        qb
+          .selectFrom('feed as fs')
+          .select('fs.id')
+          .where('fs.writer_id', '=', userId)
+          .where('f.created_at', '>=', new Date(minDate))
+          .where('f.created_at', '<=', new Date(maxDate))
+          .where((eb) =>
+            eb.or([
+              eb('f.created_at', cursorComparison, new Date(cursor.createdAt)),
+              eb.and([
+                eb('f.created_at', '=', new Date(cursor.createdAt)),
+                eb('f.id', '>', cursor.id),
+              ]),
+            ]),
+          )
+          .groupBy('fs.id')
+          .orderBy('fs.created_at', feedCreatedAtOrder)
+          .orderBy('fs.id')
+          .limit(limit),
+      )
+      .orderBy('f.created_at', feedCreatedAtOrder)
+      .orderBy('f.id')
+      .orderBy('fi.index')
+      .orderBy('gm.name')
+      .execute();
+
+    const result: { [key: string]: Feed } = {};
+    rows.forEach((row) => {
+      if (!result.hasOwnProperty(row.id)) {
+        result[row.id] = {
+          id: row.id,
+          commentCount: Number(row.comment_count ?? 0),
+          content: row.content,
+          createdAt: row.created_at,
+          writer: {
+            id: row.writer_id,
+            accountId: row.writer_account_id,
+            name: row.writer_name,
+            profileImageUrl: row.writer_profile_image_url,
+          },
+          gathering: null,
+          images: [],
+        };
+      }
+
+      if (row.image_url && !result[row.id].images.includes(row.image_url)) {
+        result[row.id].images.push(row.image_url);
+      }
+
+      if (!result[row.id].gathering && row.gathering_id) {
+        result[row.id].gathering = {
+          // gathering의 컬럼들은 not null이므로 id가 있다면 다른 속성은 항상 존재함.
+          id: row.gathering_id,
+          gatheringDate: row.gathering_date!,
+          name: row.gathering_name!,
+          members: [],
+        };
+      }
+
+      if (
+        row.member_id &&
+        !result[row.id].gathering?.members.some((m) => m.id === row.member_id)
+      ) {
+        result[row.id].gathering?.members.push({
+          // user의 컬럼들은 모두 not null이므로 id가 있다면 다른 속성은 항상 존재함.
+          id: row.member_id,
+          accountId: row.member_account_id!,
+          name: row.member_name!,
+          profileImageUrl: row.member_profile_image_url!,
+        });
+      }
+    });
+
+    return Object.values(result);
   }
 }

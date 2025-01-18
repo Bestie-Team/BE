@@ -8,6 +8,7 @@ import {
 } from 'kysely';
 import kyselyExtension from 'prisma-extension-kysely';
 import { DB } from '../../../prisma/generated/types';
+import { filterSoftDeleted } from 'src/infrastructure/prisma/extensions/soft-delete.extension';
 
 declare module '@prisma/client' {
   interface PrismaClient {
@@ -39,5 +40,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
     this.$kysely = extension.$kysely;
     await this.$connect();
+    this.$extends(filterSoftDeleted);
   }
 }

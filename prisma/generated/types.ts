@@ -56,7 +56,6 @@ export type FeedImage = {
   index: number;
   url: string;
   created_at: Timestamp;
-  deleted_at: Timestamp | null;
 };
 export type Friend = {
   id: string;
@@ -93,7 +92,6 @@ export type GatheringParticipation = {
   status: Generated<GatheringParticipationStatus>;
   created_at: Timestamp;
   updated_at: Timestamp;
-  deleted_at: Timestamp | null;
 };
 export type Group = {
   id: string;

@@ -97,7 +97,6 @@ model GatheringParticipation {
   status GatheringParticipationStatus @default(PENDING)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
 
   gathering Gathering @relation(fields: [gatheringId], references: [id])
   participant User @relation(fields: [participantId], references: [id])
@@ -130,7 +129,6 @@ model FeedImage {
   index Int
   url String
   createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
 
   feed Feed @relation(fields: [feedId], references: [id])
 

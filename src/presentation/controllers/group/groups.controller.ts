@@ -184,7 +184,7 @@ export class GroupsController {
     description: '그룹장이 아닌 경우 변경 실패',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Patch(':groupId')
+  @Patch(':groupId/description')
   async updateDescription(
     @Param('groupId') groupId: string,
     @Body() dto: UpdateDescriptionRequest,

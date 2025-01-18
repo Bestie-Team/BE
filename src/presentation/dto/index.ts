@@ -5,3 +5,4 @@ export * from './group';
 export * from './user';
 export * from './shared';
 export * from './feed';
+export * from './comment';

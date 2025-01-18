@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
@@ -7,9 +8,16 @@ import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
 import { login } from 'test/helpers/login';
-import { generateUserEntity } from 'test/helpers/generators';
+import {
+  generateFeedEntity,
+  generateFriendEntity,
+  generateGroupEntity,
+  generateGroupParticipationEntity,
+  generateUserEntity,
+} from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
 import { ChangeAccountIdRequest } from 'src/presentation/dto';
+import { UserDetailResponse } from 'src/presentation/dto/user/response/user-detail.response';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
@@ -26,6 +34,10 @@ describe('UsersController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.friend.deleteMany();
+    await prisma.feed.deleteMany();
+    await prisma.groupParticipation.deleteMany();
+    await prisma.group.deleteMany();
     await prisma.user.deleteMany();
   });
 
@@ -127,6 +139,84 @@ describe('UsersController (e2e)', () => {
       const { status, body } = response;
 
       expect(status).toEqual(409);
+    });
+  });
+
+  describe('(GET) /users/my - 내 프로필 조회', () => {
+    it('내 프로필 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+
+      const users = Array.from({ length: 10 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `accound${i}`, `김철수${i}`),
+      );
+      await prisma.user.createMany({ data: users });
+
+      // 내가 요청 보낸 친구, 받은 친구, 대기 상태인 요청 각각 생성.
+      const sendFriendRelation = Array.from({ length: 4 }, (_, i) =>
+        generateFriendEntity(loginedUser!.id, users[i].id, 'ACCEPTED'),
+      );
+      const receivedFriendRelation = Array.from({ length: 4 }, (_, i) =>
+        generateFriendEntity(users[4 + i].id, loginedUser!.id, 'ACCEPTED'),
+      );
+      const pendingFriendRelation = Array.from({ length: 2 }, (_, i) =>
+        generateFriendEntity(users[8 + i].id, loginedUser!.id, 'PENDING'),
+      );
+      const friends = [
+        ...sendFriendRelation,
+        ...receivedFriendRelation,
+        ...pendingFriendRelation,
+      ];
+      await prisma.friend.createMany({ data: friends });
+
+      // 그룹 생성
+      const ownGroups = Array.from({ length: 5 }, (_, i) =>
+        generateGroupEntity(loginedUser!.id, `그룹명${i}`),
+      );
+      const notOwnGroups = Array.from({ length: 5 }, (_, i) =>
+        generateGroupEntity(users[0].id, `그룹명${i}`),
+      );
+      const groups = [...ownGroups, ...notOwnGroups];
+      await prisma.group.createMany({ data: groups });
+
+      // 오너가 아닌 그룹 일부에 참여
+      const groupJoin = Array.from({ length: 3 }, (_, i) =>
+        generateGroupParticipationEntity(
+          notOwnGroups[i].id,
+          loginedUser!.id,
+          new Date(),
+        ),
+      );
+      await prisma.groupParticipation.createMany({
+        data: groupJoin,
+      });
+
+      // 피드 생성
+      const feeds = Array.from({ length: 10 }, (_, i) =>
+        generateFeedEntity(loginedUser!.id),
+      );
+      await prisma.feed.createMany({
+        data: feeds,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get('/users/my')
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<UserDetailResponse> = response;
+
+      expect(status).toEqual(200);
+      expect(body.id).toEqual(loginedUser!.id);
+      expect(body.accountId).toEqual(loginedUser!.accountId);
+      expect(body.name).toEqual(loginedUser!.name);
+      expect(body.profileImageUrl).toEqual(loginedUser!.profileImageUrl);
+      expect(body.feedCount).toEqual(feeds.length);
+      expect(body.friendCount).toEqual(friends.length);
+      expect(body.groupCount).toEqual([...ownGroups, ...groupJoin].length);
     });
   });
 });

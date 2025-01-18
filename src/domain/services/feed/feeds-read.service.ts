@@ -10,12 +10,27 @@ export class FeedsReadService {
     private readonly feedsRepository: FeedsRepository,
   ) {}
 
-  async getFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
+  async getAllFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
+    return await this.getFeeds(userId, feedPaginationInput, 'ALL');
+  }
+
+  async getMyFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
+    return await this.getFeeds(userId, feedPaginationInput, 'MY');
+  }
+
+  private async getFeeds(
+    userId: string,
+    feedPaginationInput: FeedPaginationInput,
+    type: 'ALL' | 'MY',
+  ) {
     const { limit } = feedPaginationInput;
-    const feeds = await this.feedsRepository.findAllByUserId(
-      userId,
-      feedPaginationInput,
-    );
+    const feeds =
+      type === 'ALL'
+        ? await this.feedsRepository.findAllByUserId(
+            userId,
+            feedPaginationInput,
+          )
+        : await this.feedsRepository.findByUserId(userId, feedPaginationInput);
     const nextCursor = getFeedCursor(feeds, limit);
 
     return {

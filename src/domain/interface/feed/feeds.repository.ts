@@ -17,6 +17,10 @@ export interface FeedsRepository {
     userId: string,
     feedPaginationInput: FeedPaginationInput,
   ): Promise<Feed[]>;
+  findByUserId(
+    userId: string,
+    feedPaginationInput: FeedPaginationInput,
+  ): Promise<Feed[]>;
 }
 
 export const FeedsRepository = Symbol('FeedsRepository');

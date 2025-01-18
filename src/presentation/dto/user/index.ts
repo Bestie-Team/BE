@@ -5,3 +5,4 @@ export * from './request/change-account-id.request';
 export * from './response/login-fail.response';
 export * from './response/search-user.response';
 export * from './response/data.types';
+export * from './response/user-detail.response';

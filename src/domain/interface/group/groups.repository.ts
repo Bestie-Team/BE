@@ -13,6 +13,7 @@ export interface GroupsRepository {
     ownerId: string,
   ): Promise<{ id: string } | null>;
   findGroupMembersById(id: string): Promise<{ participantId: string }[]>;
+  update(id: string, data: Partial<GroupEntity>): Promise<void>;
   delete(groupId: string): Promise<void>;
 }
 

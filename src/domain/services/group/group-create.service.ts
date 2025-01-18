@@ -79,6 +79,11 @@ export class GroupCreateService {
     await this.groupsRepository.delete(groupId);
   }
 
+  async updateDescription(id: string, ownerId: string, description: string) {
+    await this.checkIsOwner(id, ownerId);
+    await this.groupsRepository.update(id, { description });
+  }
+
   @Transactional()
   private async createTransaction(
     group: GroupEntity,

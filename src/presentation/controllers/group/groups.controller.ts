@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -34,6 +35,7 @@ import { AddGroupMemberRequest, PaginationRequest } from 'src/presentation/dto';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
+import { UpdateDescriptionRequest } from 'src/presentation/dto/group/request/update-description.request';
 import { GroupListResponse } from 'src/presentation/dto/group/response/group-list.response';
 
 @ApiTags('/groups')
@@ -170,6 +172,29 @@ export class GroupsController {
     @CurrentUser() userId: string,
   ) {
     await this.groupsCreateService.leaveGroup(groupId, userId);
+  }
+
+  @ApiOperation({ summary: '그룹 설명 변경' })
+  @ApiResponse({
+    status: 204,
+    description: '그룹 설명 변경 완료',
+  })
+  @ApiResponse({
+    status: 403,
+    description: '그룹장이 아닌 경우 변경 실패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch(':groupId/description')
+  async updateDescription(
+    @Param('groupId') groupId: string,
+    @Body() dto: UpdateDescriptionRequest,
+    @CurrentUser() userId: string,
+  ) {
+    await this.groupsCreateService.updateDescription(
+      groupId,
+      userId,
+      dto.description,
+    );
   }
 
   @ApiOperation({ summary: '그룹 삭제 (그룹장)' })

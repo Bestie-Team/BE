@@ -126,6 +126,15 @@ export class GroupsPrismaRepository implements GroupsRepository {
     });
   }
 
+  async update(id: string, data: Partial<GroupEntity>): Promise<void> {
+    await this.txHost.tx.group.update({
+      data,
+      where: {
+        id,
+      },
+    });
+  }
+
   async delete(groupId: string): Promise<void> {
     await this.txHost.tx.group.delete({
       where: {

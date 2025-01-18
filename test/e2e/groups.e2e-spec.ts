@@ -14,7 +14,11 @@ import {
 } from 'test/helpers/generators';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
 import { ResponseResult } from 'test/helpers/types';
-import { AddGroupMemberRequest, GroupListResponse } from 'src/presentation/dto';
+import {
+  AddGroupMemberRequest,
+  GroupListResponse,
+  UpdateDescriptionRequest,
+} from 'src/presentation/dto';
 import { Friend, User } from '@prisma/client';
 
 describe('GroupsController (e2e)', () => {
@@ -519,6 +523,40 @@ describe('GroupsController (e2e)', () => {
       const { status } = response;
 
       expect(status).toEqual(403);
+    });
+  });
+
+  describe('(PATCH) /groups/{id}/description - 그룹 설명 변경', () => {
+    it('그룹 설명 변경 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const group = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+      const groupId = group.id;
+      const dto: UpdateDescriptionRequest = {
+        description: '변경된 설명',
+      };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .patch(`/groups/${groupId}/description`)
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+      const updatedGroup = await prisma.group.findUnique({
+        where: {
+          id: groupId,
+        },
+      });
+      console.log(updatedGroup);
+      expect(status).toEqual(204);
+      expect(updatedGroup?.description).toEqual(dto.description);
     });
   });
 });

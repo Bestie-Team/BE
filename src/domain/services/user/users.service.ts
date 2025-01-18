@@ -51,6 +51,15 @@ export class UsersService {
     await this.usersRepository.update({ id: userId, accountId });
   }
 
+  async getDetail(id: string) {
+    const user = await this.usersRepository.findDetailById(id);
+    if (!user) {
+      throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
+    }
+
+    return user;
+  }
+
   private async getUserByIdOrThrow(userId: string) {
     const user = await this.usersRepository.findOneById(userId);
     if (!user) {

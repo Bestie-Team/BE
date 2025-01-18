@@ -32,6 +32,7 @@ import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-i
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { ChangeProfileImageRequest } from 'src/presentation/dto/user/request/change-profile-image.request';
 import { ChangeAccountIdRequest } from 'src/presentation/dto';
+import { UserDetailResponse } from 'src/presentation/dto/user/response/user-detail.response';
 
 @ApiTags('/users')
 @ApiBearerAuth()
@@ -89,6 +90,17 @@ export class UsersController {
   ): Promise<SearchUserResponse> {
     const { search, ...paginationInput } = dto;
     return await this.usersService.search(userId, { search, paginationInput });
+  }
+
+  @ApiOperation({ summary: '회원 상세 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '회원 상세 정보 조회 완료',
+    type: UserDetailResponse,
+  })
+  @Get('my')
+  async getDetail(@CurrentUser() userId: string): Promise<UserDetailResponse> {
+    return await this.usersService.getDetail(userId);
   }
 
   @ApiOperation({ summary: '프로필 사진 변경' })

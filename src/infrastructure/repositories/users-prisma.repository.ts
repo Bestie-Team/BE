@@ -2,8 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/domain/entities/user/user.entity';
 import { UsersRepository } from 'src/domain/interface/users.repository';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
-import type { User, UserBasicInfo } from 'src/domain/types/user.types';
+import type {
+  User,
+  UserBasicInfo,
+  UserDetail,
+} from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
+import { userInfo } from 'os';
 
 @Injectable()
 export class UsersPrismaRepository implements UsersRepository {
@@ -97,6 +102,55 @@ export class UsersPrismaRepository implements UsersRepository {
       name: row.name,
       profileImageUrl: row.profile_image_url,
     }));
+  }
+
+  async findDetailById(id: string): Promise<UserDetail | null> {
+    const row = await this.prisma.$kysely
+      .selectFrom('user as u')
+      .leftJoin('friend as fr', (qb) =>
+        qb.on((eb) =>
+          eb.or([eb('fr.sender_id', '=', id), eb('fr.receiver_id', '=', id)]),
+        ),
+      )
+      .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
+      .select(({ fn }) => fn.count<number>('fr.id').as('friend_count'))
+      .select((qb) =>
+        qb
+          .selectFrom('feed as f')
+          .where((eb) =>
+            eb.or([eb('f.writer_id', '=', id), eb('f.deleted_at', 'is', null)]),
+          )
+          .select(({ fn }) => fn.countAll().as('feed_count'))
+          .as('feed_count'),
+      )
+      .select((qb) =>
+        qb
+          .selectFrom('group as g')
+          .leftJoin('group_participation as gp', 'gp.group_id', 'g.id')
+          .where((eb) =>
+            eb.or([
+              eb('g.owner_id', '=', id),
+              eb('gp.participant_id', '=', id),
+            ]),
+          )
+          .select(({ fn }) => fn.countAll().as('group_count'))
+          .as('group_count'),
+      )
+      .groupBy('u.id')
+      .where('u.id', '=', id)
+      .executeTakeFirst();
+
+    return row
+      ? {
+          id: row.id,
+          accountId: row.account_id,
+          feedCount: Number(row.feed_count ?? 0),
+          friendCount: Number(row.friend_count ?? 0),
+          groupCount: Number(row.group_count ?? 0),
+          name: row.name,
+          profileImageUrl: row.profile_image_url,
+        }
+      : null;
   }
 
   async update(data: Partial<UserEntity>): Promise<void> {

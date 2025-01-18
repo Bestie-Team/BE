@@ -554,7 +554,6 @@ describe('GroupsController (e2e)', () => {
           id: groupId,
         },
       });
-      console.log(updatedGroup);
       expect(status).toEqual(204);
       expect(updatedGroup?.description).toEqual(dto.description);
     });

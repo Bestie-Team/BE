@@ -23,6 +23,12 @@ export interface User {
   readonly profileImageUrl: string | null;
 }
 
+export interface UserDetail extends User {
+  groupCount: number;
+  feedCount: number;
+  friendCount: number;
+}
+
 export interface SearchInput {
   paginationInput: UserPaginationInput;
   search: string;

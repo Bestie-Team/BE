@@ -9,6 +9,7 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { login } from 'test/helpers/login';
 import { CreateGatheringFeedRequest, Order } from 'src/presentation/dto';
 import {
+  generateFeedCommentEntity,
   generateFeedEntity,
   generateFeedImageEntity,
   generateFriendEntity,
@@ -209,6 +210,7 @@ describe('UsersController (e2e)', () => {
           users[i].id,
           null,
           new Date(`2024-${12}-0${9 - i}T12:00:00.000Z`),
+          `일반 피드${i}`,
         );
         const feedImages = Array.from({ length: 1 }, (_, i) =>
           generateFeedImageEntity(i, `https://cdn.lighty.today/image${i}.jpg`),
@@ -230,6 +232,7 @@ describe('UsersController (e2e)', () => {
           users[i].id,
           ownGathering.id,
           new Date(`2024-0${8}-0${9 - i}T12:00:00.000Z`),
+          `내가 만든 그룹 피드${i}`,
         );
         const feedImages = Array.from({ length: 2 }, (_, i) =>
           generateFeedImageEntity(i, `https://cdn.lighty.today/image${i}.jpg`),
@@ -248,9 +251,10 @@ describe('UsersController (e2e)', () => {
       }
       for (let i = 0; i < 5; i++) {
         const feedEntity = generateFeedEntity(
-          users[i].id,
+          loginedUser!.id,
           gathering.id,
           new Date(`2024-0${1}-0${9 - i}T12:00:00.000Z`),
+          `참여 중인 그룹 피드${i}`,
         );
         const feedImages = Array.from({ length: 5 }, (_, i) =>
           generateFeedImageEntity(i, `https://cdn.lighty.today/image${i}.jpg`),
@@ -274,6 +278,33 @@ describe('UsersController (e2e)', () => {
       );
       await prisma.friendFeedVisibility.createMany({ data: feedVisibilities });
 
+      // 댓글 추가
+      for (let i = 0; i < 7; i++) {
+        await prisma.feedComment.create({
+          data: generateFeedCommentEntity(feeds[0].id, loginedUser!.id),
+        });
+      }
+      for (let i = 0; i < 8; i++) {
+        await prisma.feedComment.create({
+          data: generateFeedCommentEntity(feeds[1].id, loginedUser!.id),
+        });
+      }
+      for (let i = 0; i < 12; i++) {
+        await prisma.feedComment.create({
+          data: generateFeedCommentEntity(feeds[12].id, loginedUser!.id),
+        });
+      }
+      for (let i = 0; i < 13; i++) {
+        await prisma.feedComment.create({
+          data: generateFeedCommentEntity(feeds[13].id, loginedUser!.id),
+        });
+      }
+      for (let i = 0; i < 14; i++) {
+        await prisma.feedComment.create({
+          data: generateFeedCommentEntity(feeds[14].id, loginedUser!.id),
+        });
+      }
+
       const order: Order = 'DESC';
       const minDate = new Date('2024-01-01T00:00:00.000Z').toISOString();
       const maxDate = new Date('2024-12-31T23:59:59.000Z').toISOString();
@@ -281,7 +312,7 @@ describe('UsersController (e2e)', () => {
         createdAt: maxDate,
         id: 'f72cf60c-1988-4906-88a1-5e4ac04c34a4',
       };
-      const limit = 14;
+      const limit = 15;
 
       const response = await request(app.getHttpServer())
         .get(
@@ -290,12 +321,32 @@ describe('UsersController (e2e)', () => {
           )}&limit=${limit}`,
         )
         .set('Authorization', accessToken);
-      const { status, body }: ResponseResult<FeedListResponse> = response;
-      const { feeds: resFeeds, nextCursor } = body;
+      const myFeedsResponse = await request(app.getHttpServer())
+        .get(
+          `/feeds/my?order=${order}&minDate=${minDate}&maxDate=${maxDate}&cursor=${JSON.stringify(
+            cursor,
+          )}&limit=${limit}`,
+        )
+        .set('Authorization', accessToken);
 
-      expect(status).toEqual(200);
-      expect(resFeeds.length).toEqual(14);
-      resFeeds.forEach((feed, i) => {
+      const {
+        status: allFeedStatus,
+        body: allFeedsBody,
+      }: ResponseResult<FeedListResponse> = response;
+      const {
+        status: myFeedStaus,
+        body: myFeedBody,
+      }: ResponseResult<FeedListResponse> = myFeedsResponse;
+
+      const { feeds: allFeeds, nextCursor: allFeedCursor } = allFeedsBody;
+      const { feeds: myFeeds, nextCursor: myFeedCursor } = myFeedBody;
+
+      // TODO 검증 로직 추가해야함
+      expect(allFeedStatus).toEqual(200);
+      expect(myFeedStaus).toEqual(200);
+      expect(allFeeds.length).toEqual(10);
+      expect(myFeeds.length).toEqual(5);
+      allFeeds.forEach((feed, i) => {
         expect(feed.id).toEqual(feeds[i].id);
       });
     });

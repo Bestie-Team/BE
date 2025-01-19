@@ -519,4 +519,29 @@ describe('FriendsController (e2e)', () => {
       });
     });
   });
+
+  describe('(DELETE) /friends/{id} - 친구 삭제', () => {
+    it('친구 삭제 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 3
+      });
+      const friendRealtion = await prisma.friend.create({
+        data: generateFriendEntity(user1.id, loginedUser!.id, 'ACCEPTED'),
+      });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/friends/${friendRealtion.id}`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(204);
+    });
+  });
 });

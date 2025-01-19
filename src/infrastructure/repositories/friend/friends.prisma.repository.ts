@@ -257,6 +257,20 @@ export class FriendsPrismaRepository implements FriendsRepository {
     });
   }
 
+  async findOneFriendByUserId(
+    senderOrReceiverId: string,
+  ): Promise<{ senderId: string; receiverId: string } | null> {
+    return await this.prisma.friend.findFirst({
+      select: { senderId: true, receiverId: true },
+      where: {
+        OR: [
+          { senderId: senderOrReceiverId },
+          { receiverId: senderOrReceiverId },
+        ],
+      },
+    });
+  }
+
   async update(id: string, data: Partial<FriendEntity>): Promise<void> {
     await this.prisma.friend.update({
       data,

@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Query,
@@ -189,5 +192,23 @@ export class FriendsController {
       search,
       paginationInput,
     });
+  }
+
+  @ApiOperation({ summary: '절교' })
+  @ApiResponse({
+    status: 204,
+    description: '절교 성공!',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '친구가 아닌 경우 실패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':friendId')
+  async delete(
+    @Param('friendId') friendId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.friendsService.delete(friendId, userId);
   }
 }

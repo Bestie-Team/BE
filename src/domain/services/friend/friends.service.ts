@@ -5,6 +5,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { v4 } from 'uuid';
 import {
@@ -12,6 +13,7 @@ import {
   FORBIDDEN_MESSAGE,
   FRIEND_ALREADY_EXIST_MESSAGE,
   FRIEND_REQUEST_ALREADY_EXIST_MESSAGE,
+  IS_NOT_FRIEND_RELATION_MESSAGE,
   NOT_FOUND_FRIEND_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
@@ -146,5 +148,14 @@ export class FriendsService {
     if (friendRequest.receiverId !== receiverId) {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
+  }
+
+  async delete(friendId: string, userId: string) {
+    const friend = await this.friendsRepository.findOneFriendByUserId(userId);
+    if (!friend) {
+      throw new NotFoundException(IS_NOT_FRIEND_RELATION_MESSAGE);
+    }
+
+    await this.friendsRepository.delete(friendId);
   }
 }

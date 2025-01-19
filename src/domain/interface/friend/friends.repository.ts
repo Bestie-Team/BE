@@ -27,6 +27,10 @@ export interface FriendsRepository {
     firstUserId: string,
     secondUserId: string,
   ): Promise<{ id: string; status: FriendStatus } | null>;
+  findOneFriendByUserId(senderOrReceiverId: string): Promise<{
+    senderId: string;
+    receiverId: string;
+  } | null>;
   update(id: string, data: Partial<FriendEntity>): Promise<void>;
   delete(id: string): Promise<void>;
 }

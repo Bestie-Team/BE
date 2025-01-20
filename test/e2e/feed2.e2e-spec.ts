@@ -351,4 +351,31 @@ describe('UsersController (e2e)', () => {
       });
     });
   });
+
+  describe('(DELETE) /feeds/{id} - 피드 삭제', () => {
+    it('피드 삭제 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+
+      const feed = await prisma.feed.create({
+        data: generateFeedEntity(loginedUser!.id, null),
+      });
+      const comments = Array.from({ length: 5 }, (_, i) =>
+        generateFeedCommentEntity(feed.id, loginedUser!.id),
+      );
+      await prisma.feedComment.createMany({ data: comments });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/feeds/${feed.id}`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(204);
+    });
+  });
 });

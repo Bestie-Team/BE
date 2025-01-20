@@ -2,6 +2,31 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsDateString, IsInt } from 'class-validator';
 
+/**
+ * 모든 회원 타입이 공통으로 가지는 최소한의 타입.<br/>
+ *
+ * 주로 회원 아이콘에서 사용
+ *
+ * { id, accountId, name, profileImageUrl }
+ */
+export class User {
+  @ApiProperty({ example: 'uuid' })
+  readonly id: string;
+
+  @ApiProperty({ example: 'lighty_123' })
+  readonly accountId: string;
+
+  @ApiProperty({ example: '김해성' })
+  readonly name: string;
+
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+    example: 'https://cdn.lighty.today/image.png',
+  })
+  readonly profileImageUrl: string | null;
+}
+
 export class UserCursor {
   @ApiProperty()
   readonly name: string;

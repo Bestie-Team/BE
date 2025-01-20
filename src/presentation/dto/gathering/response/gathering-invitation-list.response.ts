@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../user';
+import { User } from '../../shared';
 
-class GatheringInvitation {
+export class GatheringInvitation {
   @ApiProperty()
   readonly id: string;
 

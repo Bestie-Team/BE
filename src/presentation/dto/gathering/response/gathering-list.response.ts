@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-class Gathering {
+export class Gathering {
   @ApiProperty()
   readonly id: string;
 

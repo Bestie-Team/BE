@@ -1,6 +1,6 @@
 {
   "name": "lighty-type",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "lighty dto type",
   "typings": "./types/index.d.ts",
   "files": [

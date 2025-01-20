@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../user';
+import { User } from '../../shared';
 
 export class GatheringDetailResponse {
   @ApiProperty()

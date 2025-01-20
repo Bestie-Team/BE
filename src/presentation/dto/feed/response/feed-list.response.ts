@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../user';
 import { FeedCursor } from '../request/feed-list.request';
+import { User } from '../../shared';
 
 class Gathering {
   @ApiProperty()

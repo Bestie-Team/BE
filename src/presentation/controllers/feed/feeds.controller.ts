@@ -204,7 +204,10 @@ export class FeedsController {
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':feedId')
-  async delete(@Param('feedId') feedId: string, @CurrentUser() userId: string) {
+  async delete(
+    @Param('feedId', ParseUUIDPipe) feedId: string,
+    @CurrentUser() userId: string,
+  ) {
     await this.feedsWriteService.delete(feedId, userId);
   }
 }

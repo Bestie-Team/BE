@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../user/response/data.types';
-import { UserCursor } from '../../shared';
+import { User, UserCursor } from '../../shared';
 
 export class FriendListResponse {
   @ApiProperty({ type: User })

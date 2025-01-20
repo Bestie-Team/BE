@@ -78,6 +78,11 @@ export class FeedsWriteService {
     await this.feedsRepository.update(feedId, { content });
   }
 
+  async delete(id: string, writerId: string) {
+    await this.checkOwnership(id, writerId);
+    await this.feedsRepository.delete(id);
+  }
+
   private async checkCreateGatheringFeedConstraints(
     gatheringId: string,
     writerId: string,

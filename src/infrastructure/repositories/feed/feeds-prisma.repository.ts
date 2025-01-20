@@ -106,6 +106,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
           .leftJoin('friend_feed_visibility as fv', 'f.id', 'fv.feed_id')
           .leftJoin('gathering as g', 'f.gathering_id', 'g.id')
           .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
+          .where('f.deleted_at', 'is', null)
           .where((eb) =>
             eb.or([
               eb.and([
@@ -250,6 +251,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
         qb
           .selectFrom('feed as fs')
           .select('fs.id')
+          .where('fs.deleted_at', 'is', null)
           .where('fs.writer_id', '=', userId)
           .where('f.created_at', '>=', new Date(minDate))
           .where('f.created_at', '<=', new Date(maxDate))
@@ -321,5 +323,14 @@ export class FeedsPrismaRepository implements FeedsRepository {
     });
 
     return Object.values(result);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.txHost.tx.feed.update({
+      data: { deletedAt: new Date() },
+      where: {
+        id,
+      },
+    });
   }
 }

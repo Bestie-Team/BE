@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -173,6 +174,14 @@ export class FeedsController {
   @ApiBody({
     type: UpdateFeedRequest,
   })
+  @ApiResponse({
+    status: 204,
+    description: '수정 완료',
+  })
+  @ApiResponse({
+    status: 403,
+    description: '작성자가 아닌 경우 수정 살패',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch(':feedId')
   async updateContent(
@@ -182,5 +191,20 @@ export class FeedsController {
   ) {
     const { content } = dto;
     await this.feedsWriteService.updateContent(content, feedId, userId);
+  }
+
+  @ApiOperation({ summary: '피드 삭제' })
+  @ApiResponse({
+    status: 204,
+    description: '삭제 완료',
+  })
+  @ApiResponse({
+    status: 403,
+    description: '작성자가 아닌 경우 삭제 살패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':feedId')
+  async delete(@Param('feedId') feedId: string, @CurrentUser() userId: string) {
+    await this.feedsWriteService.delete(feedId, userId);
   }
 }

@@ -322,4 +322,13 @@ export class FeedsPrismaRepository implements FeedsRepository {
 
     return Object.values(result);
   }
+
+  async delete(id: string): Promise<void> {
+    await this.txHost.tx.feed.update({
+      data: { deletedAt: new Date() },
+      where: {
+        id,
+      },
+    });
+  }
 }

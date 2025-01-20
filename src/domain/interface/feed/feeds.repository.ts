@@ -21,6 +21,7 @@ export interface FeedsRepository {
     userId: string,
     feedPaginationInput: FeedPaginationInput,
   ): Promise<Feed[]>;
+  delete(id: string): Promise<void>;
 }
 
 export const FeedsRepository = Symbol('FeedsRepository');

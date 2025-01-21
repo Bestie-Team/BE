@@ -109,6 +109,16 @@ export type GroupParticipation = {
   participant_id: string;
   created_at: Timestamp;
 };
+export type Notification = {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  related_id: string;
+  created_at: Timestamp;
+  read_at: Timestamp | null;
+};
 export type User = {
   id: string;
   email: string;
@@ -131,5 +141,6 @@ export type DB = {
   gathering_participation: GatheringParticipation;
   group: Group;
   group_participation: GroupParticipation;
+  notification: Notification;
   user: User;
 };

@@ -15,6 +15,7 @@ import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedCommentEntity } from 'src/domain/entities/feed-comment/feed-comment.entity';
+import { NotificationEntity } from 'src/domain/entities/notification/notification.entity';
 
 export const generateUserEntity = (
   email: string,
@@ -139,3 +140,18 @@ export const generateFeedCommentEntity = (
   stdDate = new Date(),
 ): FeedCommentEntity =>
   FeedCommentEntity.create({ content, feedId, writerId }, v4, stdDate);
+
+export const generateNotificationEntity = (
+  userId: string,
+  type: string,
+  relatedId: string | null = null,
+  stdDate = new Date(),
+  message = '알림 메시지입니다~',
+  title = '알림 제목입니다~~',
+): NotificationEntity => {
+  return NotificationEntity.create(
+    { message, relatedId, title, type, userId },
+    v4,
+    stdDate,
+  );
+};

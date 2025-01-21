@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsDateString, IsInt } from 'class-validator';
+import { IsDateString, IsInt, IsUUID } from 'class-validator';
 
 /**
  * 모든 회원 타입이 공통으로 가지는 최소한의 타입.<br/>
@@ -44,6 +44,16 @@ export class PaginationRequest {
   @IsInt({ message: 'limit이 정수가 아닙니다.' })
   @Transform(({ value }) => Number(value), { toClassOnly: true })
   readonly limit: number;
+}
+
+export class DateIdCursor {
+  @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
+  @IsDateString({}, { message: 'createdAt이 ISO8601 형식이 아닙니다.' })
+  readonly createdAt: string;
+
+  @ApiProperty()
+  @IsUUID(4, { message: 'id가 UUID가 아닙니다' })
+  readonly id: string;
 }
 
 export type Provider = 'GOOGLE' | 'KAKAO' | 'APPLE';

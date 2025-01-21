@@ -1,0 +1,51 @@
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { NotificationsService } from 'src/domain/services/notification/notifications.service';
+import { notificationConverter } from 'src/presentation/converters/notification/notification.converters';
+import { NotificationListRequest } from 'src/presentation/dto/notification/request/notification-list.request';
+import { NotificationListResponse } from 'src/presentation/dto/notification/response/notification-list.response';
+
+@ApiTags('/notifications')
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
+@Controller('notifications')
+export class NotificationsController {
+  constructor(private readonly notificationsService: NotificationsService) {}
+
+  @ApiOperation({ summary: '알림 목록 조회' })
+  @ApiResponse({ status: 200, type: NotificationListResponse })
+  @Get()
+  async getNotifications(
+    @Query() dto: NotificationListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<NotificationListResponse> {
+    const domain = await this.notificationsService.getAll(userId, dto);
+    return notificationConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '모든 알림 읽음 처리' })
+  @ApiResponse({
+    status: 204,
+    description: '읽음 처리 완료.',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('read')
+  async readAll(@CurrentUser() userId: string) {
+    await this.notificationsService.readAll(userId);
+  }
+}

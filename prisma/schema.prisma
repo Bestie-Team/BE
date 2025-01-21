@@ -61,6 +61,7 @@ model User {
   sentFriendRequest Friend[] @relation("SenderUser")
   receivedFriendRequests Friend[] @relation("ReceiverUser")
   friendFeedVisibilities FriendFeedVisibility[]
+  notifications Notification[]
 
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
@@ -216,4 +217,19 @@ model GroupParticipation {
 
   @@unique([groupId, participantId])
   @@map("group_participation")
+}
+
+model Notification {
+  id String @id
+  userId String @map("user_id")
+  type String @db.VarChar(30)
+  title String @db.VarChar(20)
+  message String @db.VarChar(100)
+  relatedId String? @map("related_id")
+  createdAt DateTime @map("created_at")
+  readAt DateTime? @map("read_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notification")
 }

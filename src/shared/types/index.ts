@@ -12,8 +12,19 @@ export interface UserPaginationInput {
   readonly limit: number;
 }
 
+// TODO 나중에 제거하고 아래의 타입으로 모두 변경
 export interface PaginationInput {
   readonly cursor: string;
+  readonly limit: number;
+}
+
+export interface DateIdCursor {
+  readonly createdAt: string;
+  readonly id: string;
+}
+
+export interface DateIdPaginationInput {
+  readonly cursor: DateIdCursor;
   readonly limit: number;
 }
 

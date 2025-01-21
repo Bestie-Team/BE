@@ -5,6 +5,7 @@ import {
   GatheringInvitation,
 } from 'src/domain/types/gathering.types';
 import { Group } from 'src/domain/types/group.types';
+import { Notification } from 'src/domain/types/notification.types';
 import { User } from 'src/domain/types/user.types';
 
 export const getUserCursor = (users: User[], limit: number) => {
@@ -48,6 +49,18 @@ export const getFeedCursor = (feeds: Feed[], limit: number) => {
     ? {
         createdAt: feeds[limit - 1].createdAt.toISOString(),
         id: feeds[limit - 1].id,
+      }
+    : null;
+};
+
+export const getNotificationCursor = (
+  notifications: Notification[],
+  limit: number,
+) => {
+  return notifications[limit - 1]
+    ? {
+        createdAt: notifications[limit - 1].createdAt.toISOString(),
+        id: notifications[limit - 1].id,
       }
     : null;
 };

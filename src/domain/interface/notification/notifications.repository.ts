@@ -8,6 +8,7 @@ export interface NotificationsRepository {
     userId: string,
     paginationInput: DateIdPaginationInput,
   ): Promise<Notification[]>;
+  readAllByUserId(userId: string): Promise<void>;
 }
 
 export const NotificationsRepository = Symbol('NotificationsRepository');

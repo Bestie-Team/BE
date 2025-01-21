@@ -1,4 +1,12 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -28,5 +36,16 @@ export class NotificationsController {
   ): Promise<NotificationListResponse> {
     const domain = await this.notificationsService.getAll(userId, dto);
     return notificationConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '모든 알림 읽음 처리' })
+  @ApiResponse({
+    status: 204,
+    description: '읽음 처리 완료.',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('read')
+  async readAll(@CurrentUser() userId: string) {
+    await this.notificationsService.readAll(userId);
   }
 }

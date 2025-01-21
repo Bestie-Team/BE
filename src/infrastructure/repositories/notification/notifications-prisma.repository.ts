@@ -44,4 +44,16 @@ export class NotificationsPrismaRepository implements NotificationsRepository {
       take: limit,
     });
   }
+
+  async readAllByUserId(userId: string): Promise<void> {
+    await this.prisma.notification.updateMany({
+      data: {
+        readAt: new Date(),
+      },
+      where: {
+        userId,
+        readAt: null,
+      },
+    });
+  }
 }

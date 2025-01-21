@@ -25,4 +25,8 @@ export class NotificationsService {
       nextCursor,
     };
   }
+
+  async readAll(userId: string) {
+    await this.notificationRepository.readAllByUserId(userId);
+  }
 }

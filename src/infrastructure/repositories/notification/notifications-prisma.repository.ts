@@ -31,12 +31,14 @@ export class NotificationsPrismaRepository implements NotificationsRepository {
       },
       where: {
         userId,
-        createdAt: {
-          lt: new Date(cursor.createdAt),
-        },
-        id: {
-          gt: cursor.id,
-        },
+        OR: [
+          {
+            createdAt: {
+              lt: new Date(cursor.createdAt),
+            },
+          },
+          { createdAt: new Date(cursor.createdAt), id: { gt: cursor.id } },
+        ],
       },
       orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
       take: limit,

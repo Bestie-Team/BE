@@ -115,7 +115,7 @@ export type Notification = {
   type: string;
   title: string;
   message: string;
-  related_id: string;
+  related_id: string | null;
   created_at: Timestamp;
   read_at: Timestamp | null;
 };

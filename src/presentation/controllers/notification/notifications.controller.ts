@@ -1,8 +1,11 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Patch,
   Query,
   UseGuards,
@@ -47,5 +50,27 @@ export class NotificationsController {
   @Patch('read')
   async readAll(@CurrentUser() userId: string) {
     await this.notificationsService.readAll(userId);
+  }
+
+  @ApiOperation({ summary: '알림 전체 삭제' })
+  @ApiResponse({
+    status: 204,
+    description: '알림 전체 삭제 완료',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('all')
+  async deleteAll(@CurrentUser() userId: string) {
+    await this.notificationsService.deleteAll(userId);
+  }
+
+  @ApiOperation({ summary: '알림 삭제' })
+  @ApiResponse({
+    status: 204,
+    description: '알림 삭제 완료',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  async delete(@Param('id', ParseUUIDPipe) id: string) {
+    await this.notificationsService.delete(id);
   }
 }

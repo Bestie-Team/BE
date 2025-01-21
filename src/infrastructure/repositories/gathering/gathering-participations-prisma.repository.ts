@@ -210,4 +210,29 @@ export class GatheringParticipationsPrismaRepository
       },
     });
   }
+
+  async deleteAllPendingInvitation(
+    firstUserId: string,
+    secondUserId: string,
+  ): Promise<void> {
+    await this.txHost.tx.gatheringParticipation.deleteMany({
+      where: {
+        OR: [
+          {
+            participantId: firstUserId,
+            gathering: {
+              hostUserId: secondUserId,
+            },
+          },
+          {
+            participantId: secondUserId,
+            gathering: {
+              hostUserId: firstUserId,
+            },
+          },
+        ],
+        status: GatheringParticipationStatus.PENDING,
+      },
+    });
+  }
 }

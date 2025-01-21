@@ -5,7 +5,6 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { v4 } from 'uuid';
 import {
@@ -25,12 +24,16 @@ import {
   getUserCursor,
 } from 'src/domain/helpers/get-cursor';
 import { SearchInput } from 'src/domain/types/user.types';
+import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
+import { Transactional } from '@nestjs-cls/transactional';
 
 @Injectable()
 export class FriendsService {
   constructor(
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,
+    @Inject(GatheringParticipationsRepository)
+    private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
   ) {}
 
   async getFriendsByUserId(
@@ -150,12 +153,34 @@ export class FriendsService {
     }
   }
 
-  async delete(friendId: string, userId: string) {
-    const friend = await this.friendsRepository.findOneFriendByUserId(userId);
-    if (!friend) {
+  async delete(friendUserId: string, userId: string) {
+    await this.checkExistAcceptedFriend(friendUserId, userId);
+    await this.deleteTransaction(friendUserId, userId);
+  }
+
+  @Transactional()
+  private async deleteTransaction(friendUserId: string, userId: string) {
+    await this.deleteAllPendingGatheringInvitation(friendUserId, userId);
+    await this.friendsRepository.deleteByUserIds(friendUserId, userId);
+  }
+
+  private async checkExistAcceptedFriend(friendUserId: string, userId: string) {
+    const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
+      friendUserId,
+      userId,
+    );
+    if (!friend || friend.status !== 'ACCEPTED') {
       throw new NotFoundException(IS_NOT_FRIEND_RELATION_MESSAGE);
     }
+  }
 
-    await this.friendsRepository.delete(friendId);
+  private deleteAllPendingGatheringInvitation(
+    firstUserId: string,
+    secondUserId: string,
+  ) {
+    return this.gatheringParticipationsRepository.deleteAllPendingInvitation(
+      firstUserId,
+      secondUserId,
+    );
   }
 }

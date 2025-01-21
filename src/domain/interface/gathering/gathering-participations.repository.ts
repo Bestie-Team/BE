@@ -24,6 +24,15 @@ export interface GatheringParticipationsRepository {
     status: GatheringParticipationStatus,
   ): Promise<void>;
   delete(invitationId: string): Promise<void>;
+  /**
+   * 초대장 송신자와 수신자 순서 상관 없이 입력.
+   * @param firstUserId
+   * @param secondUserId
+   */
+  deleteAllPendingInvitation(
+    firstUserId: string,
+    secondUserId: string,
+  ): Promise<void>;
 }
 
 export const GatheringParticipationsRepository = Symbol(

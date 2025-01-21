@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Query,
   UseGuards,
@@ -195,6 +196,11 @@ export class FriendsController {
   }
 
   @ApiOperation({ summary: '절교' })
+  @ApiQuery({
+    name: 'userId',
+    description:
+      '친구 관계를 끊을 회원의 번호. 회원 번호!! 친구 번호 말고 회원 번호',
+  })
   @ApiResponse({
     status: 204,
     description: '절교 성공!',
@@ -204,11 +210,11 @@ export class FriendsController {
     description: '친구가 아닌 경우 실패',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':friendId')
+  @Delete()
   async delete(
-    @Param('friendId') friendId: string,
+    @Query('userId', ParseUUIDPipe) friendUserId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.friendsService.delete(friendId, userId);
+    await this.friendsService.delete(friendUserId, userId);
   }
 }

@@ -47,7 +47,7 @@ export class PaginationRequest {
 }
 
 export class DateIdCursor {
-  @ApiProperty()
+  @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
   @IsDateString({}, { message: 'createdAt이 ISO8601 형식이 아닙니다.' })
   readonly createdAt: string;
 

@@ -1,5 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
@@ -8,6 +13,7 @@ import { NotificationListRequest } from 'src/presentation/dto/notification/reque
 import { NotificationListResponse } from 'src/presentation/dto/notification/response/notification-list.response';
 
 @ApiTags('/notifications')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('notifications')
 export class NotificationsController {

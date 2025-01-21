@@ -4,9 +4,6 @@ import { IsInt, ValidateNested } from 'class-validator';
 import { DateIdCursor } from '../../shared';
 
 export class NotificationListRequest {
-  @ApiProperty({ example: 'uuid' })
-  userId: string;
-
   @ApiProperty({
     type: DateIdCursor,
     description: '첫 번째 커서: { createdAt: 현재 날짜, id: uuid 아무 값이나 }',

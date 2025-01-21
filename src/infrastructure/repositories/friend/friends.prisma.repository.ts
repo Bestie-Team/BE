@@ -285,4 +285,22 @@ export class FriendsPrismaRepository implements FriendsRepository {
       },
     });
   }
+
+  async deleteByUserIds(
+    firstUserId: string,
+    secondUserId: string,
+  ): Promise<void> {
+    await this.prisma.friend.deleteMany({
+      where: {
+        OR: [
+          {
+            AND: [{ senderId: firstUserId }, { receiverId: secondUserId }],
+          },
+          {
+            AND: [{ senderId: secondUserId }, { receiverId: firstUserId }],
+          },
+        ],
+      },
+    });
+  }
 }

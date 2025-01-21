@@ -27,12 +27,16 @@ export interface FriendsRepository {
     firstUserId: string,
     secondUserId: string,
   ): Promise<{ id: string; status: FriendStatus } | null>;
-  findOneFriendByUserId(senderOrReceiverId: string): Promise<{
+  findOneFriendByUserId(
+    firstUserId: string,
+    secondUserId: string,
+  ): Promise<{
     senderId: string;
     receiverId: string;
   } | null>;
   update(id: string, data: Partial<FriendEntity>): Promise<void>;
   delete(id: string): Promise<void>;
+  deleteByUserIds(firstUserId: string, secondUserId: string): Promise<void>;
 }
 
 export const FriendsRepository = Symbol('FriendsRepository');

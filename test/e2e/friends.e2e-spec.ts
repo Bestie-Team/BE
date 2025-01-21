@@ -11,12 +11,15 @@ import { CreateFriendRequest } from 'src/presentation/dto/friend/request/create-
 import { login } from 'test/helpers/login';
 import {
   generateFriendEntity,
+  generateGatheringEntity,
+  generateGatheringParticipationEntity,
   generateUserEntity,
 } from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
 import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-list.response';
 import { UserCursor } from 'src/presentation/dto/shared';
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
+import { generate } from 'rxjs';
 
 describe('FriendsController (e2e)', () => {
   let app: INestApplication;
@@ -33,6 +36,8 @@ describe('FriendsController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.gatheringParticipation.deleteMany();
+    await prisma.gathering.deleteMany();
     await prisma.friend.deleteMany();
     await prisma.user.deleteMany();
   });
@@ -529,19 +534,70 @@ describe('FriendsController (e2e)', () => {
           accountId,
         },
       });
-      const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 3
+      const willDeletedFriend = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'),
       });
-      const friendRealtion = await prisma.friend.create({
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '이민수'),
+      });
+      const willDeleteRelation = await prisma.friend.create({
+        data: generateFriendEntity(
+          willDeletedFriend.id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      });
+      const friendRealtion1 = await prisma.friend.create({
         data: generateFriendEntity(user1.id, loginedUser!.id, 'ACCEPTED'),
       });
+      const friendRealtion2 = await prisma.friend.create({
+        data: generateFriendEntity(willDeletedFriend.id, user1.id, 'ACCEPTED'),
+      });
+
+      // 자신이 만든 모임과 타인이 만든 모임 초대 생성.
+      const ownGathering = await prisma.gathering.create({
+        data: generateGatheringEntity(loginedUser!.id),
+      });
+      const gathering = await prisma.gathering.create({
+        data: generateGatheringEntity(willDeletedFriend.id),
+      });
+      const sentInvitation = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(
+          ownGathering.id,
+          willDeletedFriend.id,
+        ),
+      });
+      const receivedInvitation = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(
+          gathering.id,
+          loginedUser!.id,
+        ),
+      });
+      // 삭제와 무관한 초대, 사라지면 안 됨.
+      const otherInvitation1 = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(gathering.id, user1.id),
+      });
+      const otherInvitation2 = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(ownGathering.id, user1.id),
+      });
+      const expectedInvitations = [otherInvitation1, otherInvitation2].sort(
+        (a, b) => (a.id > b.id ? 1 : -1),
+      );
 
       const response = await request(app.getHttpServer())
-        .delete(`/friends/${friendRealtion.id}`)
+        .delete(`/friends?userId=${willDeletedFriend.id}`)
         .set('Authorization', accessToken);
       const { status } = response;
+      const otherInvitationsAfterDelete =
+        await prisma.gatheringParticipation.findMany({
+          orderBy: { id: 'asc' },
+        });
 
       expect(status).toEqual(204);
+      expect(otherInvitationsAfterDelete.length).toEqual(2);
+      otherInvitationsAfterDelete.forEach((invitation, i) => {
+        expect(invitation.id).toEqual(expectedInvitations[i].id);
+      });
     });
   });
 });

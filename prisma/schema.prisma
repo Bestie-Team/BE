@@ -225,7 +225,7 @@ model Notification {
   type String @db.VarChar(30)
   title String @db.VarChar(20)
   message String @db.VarChar(100)
-  reladtedId String? @map("related_id")
+  relatedId String? @map("related_id")
   createdAt DateTime @map("created_at")
   readAt DateTime? @map("read_at")
 

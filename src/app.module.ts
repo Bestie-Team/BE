@@ -15,6 +15,7 @@ import { GroupsModule } from 'src/modules/group/groups.module';
 import { InterceptorsModule } from 'src/common/interceptors/interceptors.module';
 import { FeedsModule } from 'src/modules/feed/feeds.module';
 import { FeedCommentsModule } from 'src/modules/feed-comment/feed-comments.module';
+import { NotificationsModule } from 'src/modules/notification/notifications.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { FeedCommentsModule } from 'src/modules/feed-comment/feed-comments.modul
     GroupsModule,
     FeedsModule,
     FeedCommentsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
 })

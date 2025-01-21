@@ -29,4 +29,12 @@ export class NotificationsService {
   async readAll(userId: string) {
     await this.notificationRepository.readAllByUserId(userId);
   }
+
+  async delete(id: string) {
+    await this.notificationRepository.delete(id);
+  }
+
+  async deleteAll(userId: string) {
+    await this.notificationRepository.deleteAll(userId);
+  }
 }

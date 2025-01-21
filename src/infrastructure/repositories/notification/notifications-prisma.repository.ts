@@ -56,4 +56,14 @@ export class NotificationsPrismaRepository implements NotificationsRepository {
       },
     });
   }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.notification.delete({ where: { id } });
+  }
+
+  async deleteAll(userId: string): Promise<void> {
+    await this.prisma.notification.deleteMany({
+      where: { userId },
+    });
+  }
 }

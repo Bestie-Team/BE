@@ -1,6 +1,8 @@
+import { NotificationTypes } from 'src/common/constant';
+
 export interface NotificationPrototype {
   readonly userId: string;
-  readonly type: string;
+  readonly type: NotificationTypes;
   readonly title: string;
   readonly message: string;
   readonly relatedId: string | null;
@@ -9,7 +11,7 @@ export interface NotificationPrototype {
 export interface Notification {
   readonly id: string;
   readonly userId: string;
-  readonly type: string;
+  readonly type: NotificationTypes;
   readonly title: string;
   readonly message: string;
   readonly relatedId: string | null;

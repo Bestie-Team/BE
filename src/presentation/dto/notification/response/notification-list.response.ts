@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DateIdCursor } from '../../shared';
 
+export type NotificationTypes =
+  | 'GATHERING_INVITATION_RECEIVED'
+  | 'GATHERING_INVITATION_ACCEPTED'
+  | 'GROUP_INVITATION'
+  | 'FRIEND_REQUEST'
+  | 'FRIEND_REQUEST_ACCEPTED'
+  | 'FEED_COMMENT';
+
 export class Notification {
   @ApiProperty({ example: 'uuid' })
   readonly id: string;
@@ -8,8 +16,18 @@ export class Notification {
   @ApiProperty({ example: 'uuid' })
   readonly userId: string;
 
-  @ApiProperty()
-  readonly type: string;
+  @ApiProperty({
+    example: 'FRIEND_REQUEST',
+    enum: [
+      'GATHERING_INVITATION',
+      'GATHERING_INVITATION_ACCEPTED',
+      'GROUP_INVITATION',
+      'FRIEND_REQUEST',
+      'FRIEND_REQUEST_ACCEPTED',
+      'FEED_COMMENT',
+    ],
+  })
+  readonly type: NotificationTypes;
 
   @ApiProperty()
   readonly title: string;

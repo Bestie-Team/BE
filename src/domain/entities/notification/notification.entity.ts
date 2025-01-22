@@ -1,10 +1,11 @@
+import { NotificationTypes } from 'src/common/constant';
 import { NotificationPrototype } from 'src/domain/types/notification.types';
 
 export class NotificationEntity {
   constructor(
     readonly id: string,
     readonly userId: string,
-    readonly type: string,
+    readonly type: NotificationTypes,
     readonly title: string,
     readonly message: string,
     readonly createdAt: Date,

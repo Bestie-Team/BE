@@ -40,6 +40,15 @@ enum GatheringParticipationStatus {
   REJECTED
 }
 
+enum NotificationTypes {
+  GATHERING_INVITATION_RECEIVED
+  GATHERING_INVITATION_ACCEPTED
+  GROUP_INVITATION
+  FRIEND_REQUEST
+  FRIEND_REQUEST_ACCEPTED
+  FEED_COMMENT
+}
+
 model User {
   id String @id
   email String @db.VarChar(255) @unique
@@ -222,7 +231,7 @@ model GroupParticipation {
 model Notification {
   id String @id
   userId String @map("user_id")
-  type String @db.VarChar(30)
+  type NotificationTypes
   title String @db.VarChar(20)
   message String @db.VarChar(100)
   relatedId String? @map("related_id")

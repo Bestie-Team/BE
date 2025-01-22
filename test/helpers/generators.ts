@@ -143,7 +143,7 @@ export const generateFeedCommentEntity = (
 
 export const generateNotificationEntity = (
   userId: string,
-  type: string,
+  type: 'FRIEND_REQUEST',
   relatedId: string | null = null,
   stdDate = new Date(),
   message = '알림 메시지입니다~',

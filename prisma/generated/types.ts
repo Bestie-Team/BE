@@ -28,6 +28,16 @@ export const GatheringParticipationStatus = {
 } as const;
 export type GatheringParticipationStatus =
   (typeof GatheringParticipationStatus)[keyof typeof GatheringParticipationStatus];
+export const NotificationTypes = {
+  GATHERING_INVITATION_RECEIVED: 'GATHERING_INVITATION_RECEIVED',
+  GATHERING_INVITATION_ACCEPTED: 'GATHERING_INVITATION_ACCEPTED',
+  GROUP_INVITATION: 'GROUP_INVITATION',
+  FRIEND_REQUEST: 'FRIEND_REQUEST',
+  FRIEND_REQUEST_ACCEPTED: 'FRIEND_REQUEST_ACCEPTED',
+  FEED_COMMENT: 'FEED_COMMENT',
+} as const;
+export type NotificationTypes =
+  (typeof NotificationTypes)[keyof typeof NotificationTypes];
 export type BlockedFeed = {
   userId: string;
   feedId: string;
@@ -112,7 +122,7 @@ export type GroupParticipation = {
 export type Notification = {
   id: string;
   user_id: string;
-  type: string;
+  type: NotificationTypes;
   title: string;
   message: string;
   related_id: string | null;

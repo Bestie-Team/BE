@@ -39,8 +39,8 @@ export const NotificationTypes = {
 export type NotificationTypes =
   (typeof NotificationTypes)[keyof typeof NotificationTypes];
 export type BlockedFeed = {
-  userId: string;
-  feedId: string;
+  user_id: string;
+  feed_id: string;
   created_at: Timestamp;
 };
 export type Feed = {

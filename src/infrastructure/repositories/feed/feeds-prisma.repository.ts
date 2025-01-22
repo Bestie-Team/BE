@@ -70,7 +70,6 @@ export class FeedsPrismaRepository implements FeedsRepository {
   }
 
   async findFeeds(
-    userId: string,
     feedPaginationInput: FeedPaginationInput,
     generateSubquery: (
       qb: ExpressionBuilder<DB & any, any>,
@@ -78,7 +77,6 @@ export class FeedsPrismaRepository implements FeedsRepository {
   ): Promise<Feed[]> {
     const { order } = feedPaginationInput;
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
-
     const rows = await this.txHost.tx.$kysely
       .selectFrom('feed as f')
       .innerJoin('user as u', 'f.writer_id', 'u.id')
@@ -175,7 +173,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const cursorComparison = order === 'ASC' ? '>' : '<';
 
-    return await this.findFeeds(userId, feedPaginationInput, (qb) =>
+    return await this.findFeeds(feedPaginationInput, (qb) =>
       qb
         .selectFrom('feed as f')
         .select(['f.id'])
@@ -226,7 +224,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const cursorComparison = order === 'ASC' ? '>' : '<';
 
-    return await this.findFeeds(userId, feedPaginationInput, (qb) =>
+    return await this.findFeeds(feedPaginationInput, (qb) =>
       qb
         .selectFrom('feed as fs')
         .select('fs.id')

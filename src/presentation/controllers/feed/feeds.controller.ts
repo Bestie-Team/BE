@@ -213,8 +213,26 @@ export class FeedsController {
     await this.feedsWriteService.delete(feedId, userId);
   }
 
+  @ApiOperation({ summary: '피드 숨김' })
+  @ApiResponse({
+    status: 201,
+    description: '숨김 완료',
+  })
   @Post(':feedId/block')
   async block(@Param('feedId') feedId: string, @CurrentUser() userId: string) {
     await this.blockedFeedsService.block(userId, feedId);
+  }
+
+  @ApiOperation({ summary: '피드 숨김 해제' })
+  @ApiResponse({
+    status: 204,
+    description: '숨김 해제 완료',
+  })
+  @Delete(':feedId/block')
+  async unblock(
+    @Param('feedId') feedId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.blockedFeedsService.unblock(userId, feedId);
   }
 }

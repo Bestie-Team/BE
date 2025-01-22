@@ -14,4 +14,8 @@ export class BlockedFeedsService {
     const blockedFeed = BlockedFeedEntity.create({ userId, feedId }, stdDate);
     await this.blockedFeedsRepository.save(blockedFeed);
   }
+
+  async unblock(userId: string, feedId: string) {
+    await this.blockedFeedsRepository.delete(userId, feedId);
+  }
 }

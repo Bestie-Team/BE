@@ -12,4 +12,15 @@ export class BlockedFeedsPrismaRepository implements BlockedFeedsRepository {
       data,
     });
   }
+
+  async delete(userId: string, feedId: string): Promise<void> {
+    await this.prisma.blockedFeed.delete({
+      where: {
+        userId_feedId: {
+          userId,
+          feedId,
+        },
+      },
+    });
+  }
 }

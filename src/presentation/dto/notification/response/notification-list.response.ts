@@ -18,6 +18,7 @@ export class Notification {
 
   @ApiProperty({
     example: 'FRIEND_REQUEST',
+    description: '알림 종류입니다. 추가될 가능성 농후...',
     enum: [
       'GATHERING_INVITATION',
       'GATHERING_INVITATION_ACCEPTED',
@@ -29,10 +30,10 @@ export class Notification {
   })
   readonly type: NotificationTypes;
 
-  @ApiProperty()
+  @ApiProperty({ example: '지금 접속하면 스티커 24종이 무료?' })
   readonly title: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '거짓말입니다~' })
   readonly message: string;
 
   @ApiProperty({
@@ -51,7 +52,7 @@ export class Notification {
   })
   readonly readAt: string | null;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
   readonly createdAt: string;
 }
 

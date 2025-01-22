@@ -5,6 +5,7 @@ import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
 export interface FeedsRepository {
   save(data: FeedEntity, images: FeedImageEntity[]): Promise<void>;
   update(id: string, data: Partial<FeedEntity>): Promise<void>;
+  findOneById(id: string): Promise<{ writerId: string } | null>;
   findOneByIdAndWriter(
     feedId: string,
     writerId: string,

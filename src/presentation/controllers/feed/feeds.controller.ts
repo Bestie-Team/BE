@@ -26,6 +26,7 @@ import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-options';
+import { BlockedFeedsService } from 'src/domain/services/feed/blocked-feeds.service';
 import { FeedsReadService } from 'src/domain/services/feed/feeds-read.service';
 import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
 import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
@@ -45,6 +46,7 @@ export class FeedsController {
   constructor(
     private readonly feedsWriteService: FeedsWriteService,
     private readonly feedsReadService: FeedsReadService,
+    private readonly blockedFeedsService: BlockedFeedsService,
   ) {}
 
   @ApiOperation({
@@ -209,5 +211,10 @@ export class FeedsController {
     @CurrentUser() userId: string,
   ) {
     await this.feedsWriteService.delete(feedId, userId);
+  }
+
+  @Post(':feedId/block')
+  async block(@Param('feedId') feedId: string, @CurrentUser() userId: string) {
+    await this.blockedFeedsService.block(userId, feedId);
   }
 }

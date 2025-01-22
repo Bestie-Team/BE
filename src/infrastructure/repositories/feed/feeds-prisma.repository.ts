@@ -36,6 +36,13 @@ export class FeedsPrismaRepository implements FeedsRepository {
     });
   }
 
+  async findOneById(id: string): Promise<{ writerId: string } | null> {
+    return await this.txHost.tx.feed.findUnique({
+      select: { writerId: true },
+      where: { id },
+    });
+  }
+
   async findOneByIdAndWriter(
     feedId: string,
     writerId: string,
@@ -106,7 +113,9 @@ export class FeedsPrismaRepository implements FeedsRepository {
           .leftJoin('friend_feed_visibility as fv', 'f.id', 'fv.feed_id')
           .leftJoin('gathering as g', 'f.gathering_id', 'g.id')
           .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
+          .leftJoin('blocked_feed as bf', 'f.id', 'bf.feed_id')
           .where('f.deleted_at', 'is', null)
+          .where('bf.user_id', 'is', null)
           .where((eb) =>
             eb.or([
               eb.and([
@@ -251,6 +260,8 @@ export class FeedsPrismaRepository implements FeedsRepository {
         qb
           .selectFrom('feed as fs')
           .select('fs.id')
+          .leftJoin('blocked_feed as bf', 'f.id', 'bf.feed_id')
+          .where('bf.user_id', 'is', null)
           .where('fs.deleted_at', 'is', null)
           .where('fs.writer_id', '=', userId)
           .where('f.created_at', '>=', new Date(minDate))

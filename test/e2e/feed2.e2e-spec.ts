@@ -350,6 +350,9 @@ describe('FeedsController (e2e)', () => {
           )}&limit=${limit}`,
         )
         .set('Authorization', accessToken);
+      const blockedFeedsResponse = await request(app.getHttpServer())
+        .get(`/feeds/blocked?cursor=${JSON.stringify(cursor)}&limit=${limit}`)
+        .set('Authorization', accessToken);
 
       const {
         status: allFeedStatus,
@@ -357,17 +360,25 @@ describe('FeedsController (e2e)', () => {
       }: ResponseResult<FeedListResponse> = response;
       const {
         status: myFeedStaus,
-        body: myFeedBody,
+        body: myFeedsBody,
       }: ResponseResult<FeedListResponse> = myFeedsResponse;
+      const {
+        status: blockedFeedStatus,
+        body: blcokedFeedsBody,
+      }: ResponseResult<FeedListResponse> = blockedFeedsResponse;
 
       const { feeds: allFeeds, nextCursor: allFeedCursor } = allFeedsBody;
-      const { feeds: myFeeds, nextCursor: myFeedCursor } = myFeedBody;
+      const { feeds: myFeeds, nextCursor: myFeedCursor } = myFeedsBody;
+      const { feeds: blockedFeeds, nextCursor: blockedFeedCursor } =
+        blcokedFeedsBody;
 
       // TODO 검증 로직 추가해야함
       expect(allFeedStatus).toEqual(200);
       expect(myFeedStaus).toEqual(200);
+      expect(blockedFeedStatus).toEqual(200);
       expect(allFeeds.length).toEqual(9);
       expect(myFeeds.length).toEqual(4);
+      expect(blockedFeeds.length).toEqual(2);
       allFeeds.forEach((feed, i) => {
         expect(feed.id).toEqual(expectedFeeds[i].id);
       });

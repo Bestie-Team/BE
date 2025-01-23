@@ -1,6 +1,7 @@
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
+import { DateIdPaginationInput } from 'src/shared/types';
 
 export interface FeedsRepository {
   save(data: FeedEntity, images: FeedImageEntity[]): Promise<void>;
@@ -21,6 +22,10 @@ export interface FeedsRepository {
   findByUserId(
     userId: string,
     feedPaginationInput: FeedPaginationInput,
+  ): Promise<Feed[]>;
+  findBlockedFeedsByUserId(
+    userId: string,
+    paginationInput: DateIdPaginationInput,
   ): Promise<Feed[]>;
   delete(id: string): Promise<void>;
 }

@@ -30,6 +30,7 @@ import { BlockedFeedsService } from 'src/domain/services/feed/blocked-feeds.serv
 import { FeedsReadService } from 'src/domain/services/feed/feeds-read.service';
 import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
 import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
+import { BlockedFeedListRequest } from 'src/presentation/dto/feed/request/blocked-feed-list.request';
 import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
 import { CreateGatheringFeedRequest } from 'src/presentation/dto/feed/request/create-gathering-feed.request';
 import { FeedListRequest } from 'src/presentation/dto/feed/request/feed-list.request';
@@ -211,6 +212,21 @@ export class FeedsController {
     @CurrentUser() userId: string,
   ) {
     await this.feedsWriteService.delete(feedId, userId);
+  }
+
+  @ApiOperation({ summary: '숨김 피드 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '숨김 피드 목록 조회',
+    type: FeedListResponse,
+  })
+  @Get('blocked')
+  async getBlockedFeeds(
+    @Query() dto: BlockedFeedListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<FeedListResponse> {
+    const domain = await this.blockedFeedsService.getBlockedFeeds(userId, dto);
+    return feedConverter.toListDto(domain);
   }
 
   @ApiOperation({ summary: '피드 숨김' })

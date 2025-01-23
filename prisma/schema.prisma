@@ -172,8 +172,8 @@ model FriendFeedVisibility {
 }
 
 model BlockedFeed {
-  userId    String
-  feedId    String
+  userId    String @map("user_id")
+  feedId    String @map("feed_id")
   createdAt DateTime @map("created_at")
 
   user User @relation(fields: [userId], references: [id])

@@ -8,7 +8,6 @@ import type {
   UserDetail,
 } from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
-import { userInfo } from 'os';
 
 @Injectable()
 export class UsersPrismaRepository implements UsersRepository {

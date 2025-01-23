@@ -24,7 +24,7 @@ import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/creat
 import { ResponseResult } from 'test/helpers/types';
 import { FeedListResponse } from 'src/presentation/dto/feed/response/feed-list.response';
 
-describe('UsersController (e2e)', () => {
+describe('FeedsController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
 
@@ -39,6 +39,7 @@ describe('UsersController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.blockedFeed.deleteMany();
     await prisma.feedComment.deleteMany();
     await prisma.friendFeedVisibility.deleteMany();
     await prisma.friend.deleteMany();
@@ -204,7 +205,7 @@ describe('UsersController (e2e)', () => {
       });
 
       const feeds: Feed[] = [];
-      // 일반 피드
+      // 친구가 작성한 일반 피드 생성.
       for (let i = 0; i < 5; i++) {
         const feedEntity = generateFeedEntity(
           users[i].id,
@@ -227,6 +228,7 @@ describe('UsersController (e2e)', () => {
         });
         feeds.push(feed);
       }
+      // 내가 생성한 모임에 친구가 작성한 피드 생성.
       for (let i = 0; i < 5; i++) {
         const feedEntity = generateFeedEntity(
           users[i].id,
@@ -249,6 +251,7 @@ describe('UsersController (e2e)', () => {
         });
         feeds.push(feed);
       }
+      // 참가 중인 모임에 내가 작성한 피드 생성.
       for (let i = 0; i < 5; i++) {
         const feedEntity = generateFeedEntity(
           loginedUser!.id,
@@ -272,13 +275,13 @@ describe('UsersController (e2e)', () => {
         feeds.push(feed);
       }
 
-      // 일반 피드에 조회 가능 목록에 나를 추가
+      // 일반 피드에 조회 가능 목록에 나를 추가.
       const feedVisibilities = Array.from({ length: 5 }, (_, i) =>
         generateFriendFeedVisibilityEntity(feeds[i].id, loginedUser!.id),
       );
       await prisma.friendFeedVisibility.createMany({ data: feedVisibilities });
 
-      // 댓글 추가
+      // 댓글 추가.
       for (let i = 0; i < 7; i++) {
         await prisma.feedComment.create({
           data: generateFeedCommentEntity(feeds[0].id, loginedUser!.id),
@@ -305,6 +308,25 @@ describe('UsersController (e2e)', () => {
         });
       }
 
+      // 숨김 피드 추가.
+      const blockedFeed1Id = feeds[0].id;
+      const blockedFeed2Id = feeds[10].id;
+      await prisma.blockedFeed.create({
+        data: {
+          userId: loginedUser!.id,
+          feedId: blockedFeed1Id,
+          createdAt: new Date(),
+        },
+      });
+      await prisma.blockedFeed.create({
+        data: {
+          userId: loginedUser!.id,
+          feedId: blockedFeed2Id,
+          createdAt: new Date(),
+        },
+      });
+      const expectedFeeds = feeds.filter((_, i) => i !== 0 && i !== 10);
+
       const order: Order = 'DESC';
       const minDate = new Date('2024-01-01T00:00:00.000Z').toISOString();
       const maxDate = new Date('2024-12-31T23:59:59.000Z').toISOString();
@@ -328,6 +350,9 @@ describe('UsersController (e2e)', () => {
           )}&limit=${limit}`,
         )
         .set('Authorization', accessToken);
+      const blockedFeedsResponse = await request(app.getHttpServer())
+        .get(`/feeds/blocked?cursor=${JSON.stringify(cursor)}&limit=${limit}`)
+        .set('Authorization', accessToken);
 
       const {
         status: allFeedStatus,
@@ -335,19 +360,27 @@ describe('UsersController (e2e)', () => {
       }: ResponseResult<FeedListResponse> = response;
       const {
         status: myFeedStaus,
-        body: myFeedBody,
+        body: myFeedsBody,
       }: ResponseResult<FeedListResponse> = myFeedsResponse;
+      const {
+        status: blockedFeedStatus,
+        body: blcokedFeedsBody,
+      }: ResponseResult<FeedListResponse> = blockedFeedsResponse;
 
       const { feeds: allFeeds, nextCursor: allFeedCursor } = allFeedsBody;
-      const { feeds: myFeeds, nextCursor: myFeedCursor } = myFeedBody;
+      const { feeds: myFeeds, nextCursor: myFeedCursor } = myFeedsBody;
+      const { feeds: blockedFeeds, nextCursor: blockedFeedCursor } =
+        blcokedFeedsBody;
 
       // TODO 검증 로직 추가해야함
       expect(allFeedStatus).toEqual(200);
       expect(myFeedStaus).toEqual(200);
-      expect(allFeeds.length).toEqual(10);
-      expect(myFeeds.length).toEqual(5);
+      expect(blockedFeedStatus).toEqual(200);
+      expect(allFeeds.length).toEqual(9);
+      expect(myFeeds.length).toEqual(4);
+      expect(blockedFeeds.length).toEqual(2);
       allFeeds.forEach((feed, i) => {
-        expect(feed.id).toEqual(feeds[i].id);
+        expect(feed.id).toEqual(expectedFeeds[i].id);
       });
     });
   });

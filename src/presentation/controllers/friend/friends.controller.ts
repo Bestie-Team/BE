@@ -177,7 +177,7 @@ export class FriendsController {
   @ApiResponse({
     status: 200,
     description: '검색 성공',
-    type: FriendRequestListResponse,
+    type: FriendListResponse,
   })
   @ApiResponse({
     status: 400,
@@ -187,7 +187,7 @@ export class FriendsController {
   async search(
     @Query() dto: SearchFriendRequest,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<FriendListResponse> {
     const { search, ...paginationInput } = dto;
     return await this.friendsService.search(userId, {
       search,

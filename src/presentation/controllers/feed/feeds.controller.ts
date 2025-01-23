@@ -26,9 +26,11 @@ import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-options';
+import { BlockedFeedsService } from 'src/domain/services/feed/blocked-feeds.service';
 import { FeedsReadService } from 'src/domain/services/feed/feeds-read.service';
 import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
 import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
+import { BlockedFeedListRequest } from 'src/presentation/dto/feed/request/blocked-feed-list.request';
 import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
 import { CreateGatheringFeedRequest } from 'src/presentation/dto/feed/request/create-gathering-feed.request';
 import { FeedListRequest } from 'src/presentation/dto/feed/request/feed-list.request';
@@ -45,6 +47,7 @@ export class FeedsController {
   constructor(
     private readonly feedsWriteService: FeedsWriteService,
     private readonly feedsReadService: FeedsReadService,
+    private readonly blockedFeedsService: BlockedFeedsService,
   ) {}
 
   @ApiOperation({
@@ -209,5 +212,43 @@ export class FeedsController {
     @CurrentUser() userId: string,
   ) {
     await this.feedsWriteService.delete(feedId, userId);
+  }
+
+  @ApiOperation({ summary: '숨김 피드 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '숨김 피드 목록 조회',
+    type: FeedListResponse,
+  })
+  @Get('blocked')
+  async getBlockedFeeds(
+    @Query() dto: BlockedFeedListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<FeedListResponse> {
+    const domain = await this.blockedFeedsService.getBlockedFeeds(userId, dto);
+    return feedConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '피드 숨김' })
+  @ApiResponse({
+    status: 201,
+    description: '숨김 완료',
+  })
+  @Post(':feedId/block')
+  async block(@Param('feedId') feedId: string, @CurrentUser() userId: string) {
+    await this.blockedFeedsService.block(userId, feedId);
+  }
+
+  @ApiOperation({ summary: '피드 숨김 해제' })
+  @ApiResponse({
+    status: 204,
+    description: '숨김 해제 완료',
+  })
+  @Delete(':feedId/block')
+  async unblock(
+    @Param('feedId') feedId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.blockedFeedsService.unblock(userId, feedId);
   }
 }

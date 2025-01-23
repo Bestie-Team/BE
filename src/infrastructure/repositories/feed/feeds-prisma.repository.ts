@@ -2,12 +2,12 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { GatheringParticipationStatus } from '@prisma/client';
-import { ExpressionBuilder, SelectQueryBuilder, sql } from 'kysely';
-import { DB } from 'prisma/generated/types';
+import { SelectQueryBuilder, sql } from 'kysely';
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
 import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
+import { DateIdPaginationInput, Order } from 'src/shared/types';
 
 @Injectable()
 export class FeedsPrismaRepository implements FeedsRepository {
@@ -70,12 +70,9 @@ export class FeedsPrismaRepository implements FeedsRepository {
   }
 
   async findFeeds(
-    feedPaginationInput: FeedPaginationInput,
-    generateSubquery: (
-      qb: ExpressionBuilder<DB & any, any>,
-    ) => SelectQueryBuilder<DB, keyof DB, any>,
+    order: Order,
+    subquery: SelectQueryBuilder<any, any, any>,
   ): Promise<Feed[]> {
-    const { order } = feedPaginationInput;
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const rows = await this.txHost.tx.$kysely
       .selectFrom('feed as f')
@@ -108,7 +105,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
           .select(({ fn }) => [fn.count<number>('fc.id').as('comment_count')])
           .as('comment_count'),
       ])
-      .where('f.id', 'in', (qb) => generateSubquery(qb))
+      .where('f.id', 'in', () => subquery)
       .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id')
       .orderBy('fi.index')
@@ -173,47 +170,46 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const cursorComparison = order === 'ASC' ? '>' : '<';
 
-    return await this.findFeeds(feedPaginationInput, (qb) =>
-      qb
-        .selectFrom('feed as f')
-        .select(['f.id'])
-        .leftJoin('friend_feed_visibility as fv', 'f.id', 'fv.feed_id')
-        .leftJoin('gathering as g', 'f.gathering_id', 'g.id')
-        .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
-        .leftJoin('blocked_feed as bf', 'f.id', 'bf.feed_id')
-        .where('f.deleted_at', 'is', null)
-        .where('bf.user_id', 'is', null)
-        .where((eb) =>
-          eb.or([
-            eb.and([
-              eb('gp.participant_id', '=', userId),
-              eb(
-                'gp.status',
-                '=',
-                sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
-              ),
-            ]),
-            eb('g.host_user_id', '=', userId),
-            eb('fv.user_id', '=', userId),
+    const query = this.txHost.tx.$kysely
+      .selectFrom('feed as f')
+      .select(['f.id'])
+      .leftJoin('friend_feed_visibility as fv', 'f.id', 'fv.feed_id')
+      .leftJoin('gathering as g', 'f.gathering_id', 'g.id')
+      .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
+      .leftJoin('blocked_feed as bf', 'f.id', 'bf.feed_id')
+      .where('f.deleted_at', 'is', null)
+      .where('bf.user_id', 'is', null)
+      .where((eb) =>
+        eb.or([
+          eb.and([
+            eb('gp.participant_id', '=', userId),
+            eb(
+              'gp.status',
+              '=',
+              sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+            ),
           ]),
-        )
-        .where('f.writer_id', '!=', userId)
-        .where('f.created_at', '>=', new Date(minDate))
-        .where('f.created_at', '<=', new Date(maxDate))
-        .where((eb) =>
-          eb.or([
-            eb('f.created_at', cursorComparison, new Date(cursor.createdAt)),
-            eb.and([
-              eb('f.created_at', '=', new Date(cursor.createdAt)),
-              eb('f.id', '>', cursor.id),
-            ]),
+          eb('g.host_user_id', '=', userId),
+          eb('fv.user_id', '=', userId),
+        ]),
+      )
+      .where('f.writer_id', '!=', userId)
+      .where('f.created_at', '>=', new Date(minDate))
+      .where('f.created_at', '<=', new Date(maxDate))
+      .where((eb) =>
+        eb.or([
+          eb('f.created_at', cursorComparison, new Date(cursor.createdAt)),
+          eb.and([
+            eb('f.created_at', '=', new Date(cursor.createdAt)),
+            eb('f.id', '>', cursor.id),
           ]),
-        )
-        .groupBy('f.id')
-        .orderBy('f.created_at', feedCreatedAtOrder)
-        .orderBy('f.id')
-        .limit(limit),
-    );
+        ]),
+      )
+      .groupBy('f.id')
+      .orderBy('f.created_at', feedCreatedAtOrder)
+      .orderBy('f.id')
+      .limit(limit);
+    return await this.findFeeds(order, query);
   }
 
   async findByUserId(
@@ -224,30 +220,57 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const cursorComparison = order === 'ASC' ? '>' : '<';
 
-    return await this.findFeeds(feedPaginationInput, (qb) =>
-      qb
-        .selectFrom('feed as fs')
-        .select('fs.id')
-        .leftJoin('blocked_feed as bf', 'f.id', 'bf.feed_id')
-        .where('bf.user_id', 'is', null)
-        .where('fs.deleted_at', 'is', null)
-        .where('fs.writer_id', '=', userId)
-        .where('f.created_at', '>=', new Date(minDate))
-        .where('f.created_at', '<=', new Date(maxDate))
-        .where((eb) =>
-          eb.or([
-            eb('f.created_at', cursorComparison, new Date(cursor.createdAt)),
-            eb.and([
-              eb('f.created_at', '=', new Date(cursor.createdAt)),
-              eb('f.id', '>', cursor.id),
-            ]),
+    const query = this.txHost.tx.$kysely
+      .selectFrom('feed as fs')
+      .select('fs.id')
+      .leftJoin('blocked_feed as bf', 'fs.id', 'bf.feed_id')
+      .where('bf.user_id', 'is', null)
+      .where('fs.deleted_at', 'is', null)
+      .where('fs.writer_id', '=', userId)
+      .where('fs.created_at', '>=', new Date(minDate))
+      .where('fs.created_at', '<=', new Date(maxDate))
+      .where((eb) =>
+        eb.or([
+          eb('fs.created_at', cursorComparison, new Date(cursor.createdAt)),
+          eb.and([
+            eb('fs.created_at', '=', new Date(cursor.createdAt)),
+            eb('fs.id', '>', cursor.id),
           ]),
-        )
-        .groupBy('fs.id')
-        .orderBy('fs.created_at', feedCreatedAtOrder)
-        .orderBy('fs.id')
-        .limit(limit),
-    );
+        ]),
+      )
+      .groupBy('fs.id')
+      .orderBy('fs.created_at', feedCreatedAtOrder)
+      .orderBy('fs.id')
+      .limit(limit);
+    return await this.findFeeds(order, query);
+  }
+
+  async findBlockedFeedsByUserId(
+    userId: string,
+    paginationInput: DateIdPaginationInput,
+  ): Promise<Feed[]> {
+    const { cursor, limit } = paginationInput;
+
+    const query = this.txHost.tx.$kysely
+      .selectFrom('blocked_feed as bf')
+      .innerJoin('feed as f', 'bf.feed_id', 'f.id')
+      .select('f.id')
+      .where('bf.user_id', '=', userId)
+      .where('f.created_at', '<', new Date(cursor.createdAt))
+      .where((eb) =>
+        eb.or([
+          eb('f.created_at', '<', new Date(cursor.createdAt)),
+          eb.and([
+            eb('f.created_at', '=', new Date(cursor.createdAt)),
+            eb('f.id', '>', cursor.id),
+          ]),
+        ]),
+      )
+      .orderBy('f.created_at', 'desc')
+      .orderBy('f.id', 'asc')
+      .limit(limit);
+
+    return this.findFeeds('DESC', query);
   }
 
   async delete(id: string): Promise<void> {

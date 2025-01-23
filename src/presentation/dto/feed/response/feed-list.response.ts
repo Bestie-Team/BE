@@ -3,13 +3,13 @@ import { FeedCursor } from '../request/feed-list.request';
 import { User } from '../../shared';
 
 class Gathering {
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid' })
   readonly id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '멋쟁이들의 모임' })
   readonly name: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
   readonly gatheringDate: Date;
 
   @ApiProperty({ type: [User] })
@@ -17,10 +17,10 @@ class Gathering {
 }
 
 export class Feed {
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid' })
   readonly id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '우와 정말 재밌었다~~' })
   readonly content: string;
 
   @ApiProperty({
@@ -38,7 +38,7 @@ export class Feed {
   @ApiProperty()
   readonly writer: User;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2024-12-28T00:00:00.000Z' })
   readonly createdAt: string;
 
   @ApiProperty({ type: Gathering, nullable: true })

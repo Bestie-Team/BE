@@ -107,7 +107,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       ])
       .where('f.id', 'in', () => subquery)
       .orderBy('f.created_at', feedCreatedAtOrder)
-      .orderBy('f.id')
+      .orderBy('f.id', 'asc')
       .orderBy('fi.index')
       .orderBy('gm.name')
       .execute();
@@ -207,7 +207,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       )
       .groupBy('f.id')
       .orderBy('f.created_at', feedCreatedAtOrder)
-      .orderBy('f.id')
+      .orderBy('f.id', 'asc')
       .limit(limit);
     return await this.findFeeds(order, query);
   }
@@ -240,7 +240,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       )
       .groupBy('fs.id')
       .orderBy('fs.created_at', feedCreatedAtOrder)
-      .orderBy('fs.id')
+      .orderBy('fs.id', 'asc')
       .limit(limit);
     return await this.findFeeds(order, query);
   }
@@ -256,7 +256,6 @@ export class FeedsPrismaRepository implements FeedsRepository {
       .innerJoin('feed as f', 'bf.feed_id', 'f.id')
       .select('f.id')
       .where('bf.user_id', '=', userId)
-      .where('f.created_at', '<', new Date(cursor.createdAt))
       .where((eb) =>
         eb.or([
           eb('f.created_at', '<', new Date(cursor.createdAt)),

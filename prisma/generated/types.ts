@@ -39,7 +39,7 @@ export const NotificationTypes = {
 export type NotificationTypes =
   (typeof NotificationTypes)[keyof typeof NotificationTypes];
 export const ReportTypes = {
-  USER: 'USER',
+  FRIEND: 'FRIEND',
   FEED: 'FEED',
   GROUP: 'GROUP',
 } as const;

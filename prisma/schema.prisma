@@ -50,7 +50,7 @@ enum NotificationTypes {
 }
 
 enum ReportTypes {
-  USER
+  FRIEND
   FEED
   GROUP
 }

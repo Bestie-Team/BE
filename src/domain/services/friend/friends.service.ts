@@ -174,11 +174,11 @@ export class FriendsService {
     }
   }
 
-  private deleteAllPendingGatheringInvitation(
+  private async deleteAllPendingGatheringInvitation(
     firstUserId: string,
     secondUserId: string,
   ) {
-    return this.gatheringParticipationsRepository.deleteAllPendingInvitation(
+    return await this.gatheringParticipationsRepository.deleteAllPendingInvitation(
       firstUserId,
       secondUserId,
     );

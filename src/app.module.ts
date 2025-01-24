@@ -16,6 +16,7 @@ import { InterceptorsModule } from 'src/common/interceptors/interceptors.module'
 import { FeedsModule } from 'src/modules/feed/feeds.module';
 import { FeedCommentsModule } from 'src/modules/feed-comment/feed-comments.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
+import { ReportsModule } from 'src/modules/report/reports.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { NotificationsModule } from 'src/modules/notification/notifications.modu
     FeedsModule,
     FeedCommentsModule,
     NotificationsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
 })

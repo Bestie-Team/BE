@@ -12,7 +12,7 @@ export class CreateReportRequest {
   @IsUUID(4, { message: 'reportedId가 uuid 형식이 아닙니다.' })
   readonly reportedId: string;
 
-  @ApiProperty({ description: '자꾸 욕하고 조롱함.' })
+  @ApiProperty({ example: '자꾸 욕하고 조롱함.' })
   @Length(2, 200, { message: '신고 사유는 2 ~ 200자만 가능합니다.' })
   readonly reason: string;
 

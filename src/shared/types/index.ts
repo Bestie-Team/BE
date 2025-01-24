@@ -3,6 +3,7 @@ export type FriendStatus = 'PENDING' | 'ACCEPTED' | 'REPORTED';
 export type GatheringType = 'GROUP' | 'FRIEND';
 export type GatheringParticipationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 export type Order = 'DESC' | 'ASC';
+export type ReportTypes = 'FRIEND' | 'FEED' | 'GROUP';
 
 export interface UserPaginationInput {
   readonly cursor: {

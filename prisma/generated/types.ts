@@ -38,6 +38,12 @@ export const NotificationTypes = {
 } as const;
 export type NotificationTypes =
   (typeof NotificationTypes)[keyof typeof NotificationTypes];
+export const ReportTypes = {
+  USER: 'USER',
+  FEED: 'FEED',
+  GROUP: 'GROUP',
+} as const;
+export type ReportTypes = (typeof ReportTypes)[keyof typeof ReportTypes];
 export type BlockedFeed = {
   user_id: string;
   feed_id: string;
@@ -129,6 +135,15 @@ export type Notification = {
   created_at: Timestamp;
   read_at: Timestamp | null;
 };
+export type Report = {
+  id: string;
+  reporter_id: string;
+  reported_id: string;
+  type: ReportTypes;
+  reason: string;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+};
 export type User = {
   id: string;
   email: string;
@@ -152,5 +167,6 @@ export type DB = {
   group: Group;
   group_participation: GroupParticipation;
   notification: Notification;
+  report: Report;
   user: User;
 };

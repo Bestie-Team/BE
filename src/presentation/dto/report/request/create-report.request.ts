@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ReportTypes } from '../../shared';
 import { IsIn, IsUUID, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { ReportTypes } from '../../shared';
 
 export class CreateReportRequest {
   @ApiProperty({

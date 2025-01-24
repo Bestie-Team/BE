@@ -14,6 +14,7 @@ import {
   generateUserEntity,
 } from 'test/helpers/generators';
 import { CreateReportRequest } from 'src/presentation/dto/report/request/create-report.request';
+import { ReportTypes } from 'src/shared/types';
 
 describe('ReportsController (e2e)', () => {
   let app: INestApplication;
@@ -83,10 +84,11 @@ describe('ReportsController (e2e)', () => {
         reportedId: reportedUser.id,
         type: 'FRIEND',
       };
+      const type: ReportTypes = 'FRIEND';
 
       // when
       const response = await request(app.getHttpServer())
-        .post('/reports/friends')
+        .post(`/reports/${type}`)
         .send(dto)
         .set('Authorization', accessToken);
       const { status } = response;

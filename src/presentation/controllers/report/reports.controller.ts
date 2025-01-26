@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { ValidateReportTypePipe } from 'src/common/pipes/validate-report-type.pipe';
+import { FeedReportsWriteService } from 'src/domain/services/report/feed-reports-write.service';
 import { FriendReportsWriteSerivce } from 'src/domain/services/report/friend-reports-write.service';
 import { GroupReportsWriteService } from 'src/domain/services/report/group-reports.write.service';
 import { ReportPrototype } from 'src/domain/types/report.types';
@@ -17,6 +18,7 @@ export class ReportsController {
   constructor(
     private readonly friendReportWriteService: FriendReportsWriteSerivce,
     private readonly groupReportWriteService: GroupReportsWriteService,
+    private readonly feedReportsWriteService: FeedReportsWriteService,
   ) {}
 
   @Post(':type')
@@ -29,6 +31,8 @@ export class ReportsController {
     const input: ReportPrototype = { ...dto, reporterId: userId };
     type === 'FRIEND'
       ? await this.friendReportWriteService.report(input)
-      : await this.groupReportWriteService.report(input);
+      : type === 'GROUP'
+      ? await this.groupReportWriteService.report(input)
+      : await this.friendReportWriteService.report(input);
   }
 }

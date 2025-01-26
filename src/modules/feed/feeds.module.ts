@@ -29,5 +29,16 @@ import { FeedsController } from 'src/presentation/controllers/feed/feeds.control
       useClass: BlockedFeedsPrismaRepository,
     },
   ],
+  exports: [
+    { provide: FeedsRepository, useClass: FeedsPrismaRepository },
+    {
+      provide: FriendFeedVisibilitiesRepository,
+      useClass: FriendFeedVisibilitiesPrismaRepository,
+    },
+    {
+      provide: BlockedFeedsRepository,
+      useClass: BlockedFeedsPrismaRepository,
+    },
+  ],
 })
 export class FeedsModule {}

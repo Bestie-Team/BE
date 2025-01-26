@@ -40,6 +40,11 @@ enum GatheringParticipationStatus {
   REJECTED
 }
 
+enum GroupParticipationStatus {
+  ACCEPTED
+  REPORTED
+}
+
 enum NotificationTypes {
   GATHERING_INVITATION_RECEIVED
   GATHERING_INVITATION_ACCEPTED
@@ -226,6 +231,7 @@ model GroupParticipation {
   id String @id
   groupId String @map("group_id")
   participantId String @map("participant_id")
+  status GroupParticipationStatus @default(ACCEPTED)
   createdAt DateTime @map("created_at")
 
   group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)

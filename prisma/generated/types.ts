@@ -28,6 +28,12 @@ export const GatheringParticipationStatus = {
 } as const;
 export type GatheringParticipationStatus =
   (typeof GatheringParticipationStatus)[keyof typeof GatheringParticipationStatus];
+export const GroupParticipationStatus = {
+  ACCEPTED: 'ACCEPTED',
+  REPORTED: 'REPORTED',
+} as const;
+export type GroupParticipationStatus =
+  (typeof GroupParticipationStatus)[keyof typeof GroupParticipationStatus];
 export const NotificationTypes = {
   GATHERING_INVITATION_RECEIVED: 'GATHERING_INVITATION_RECEIVED',
   GATHERING_INVITATION_ACCEPTED: 'GATHERING_INVITATION_ACCEPTED',
@@ -123,6 +129,7 @@ export type GroupParticipation = {
   id: string;
   group_id: string;
   participant_id: string;
+  status: Generated<GroupParticipationStatus>;
   created_at: Timestamp;
 };
 export type Notification = {

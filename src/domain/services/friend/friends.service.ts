@@ -159,7 +159,7 @@ export class FriendsService {
   }
 
   @Transactional()
-  private async deleteTransaction(friendUserId: string, userId: string) {
+  async deleteTransaction(friendUserId: string, userId: string) {
     await this.deleteAllPendingGatheringInvitation(friendUserId, userId);
     await this.friendsRepository.deleteByUserIds(friendUserId, userId);
   }

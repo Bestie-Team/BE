@@ -1,7 +1,9 @@
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
+import { NOT_FOUND_GROUP } from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 
 @Injectable()
@@ -33,5 +35,24 @@ export class GroupParticipationsPrismaRepository
         },
       },
     });
+  }
+
+  async update(
+    id: string,
+    data: Partial<GroupParticipationEntity>,
+  ): Promise<void> {
+    try {
+      await this.txHost.tx.groupParticipation.update({
+        data,
+        where: {
+          id,
+        },
+      });
+    } catch (e: unknown) {
+      if (e instanceof PrismaClientKnownRequestError && e.code === 'P2025') {
+        throw new NotFoundException(NOT_FOUND_GROUP);
+      }
+      throw e;
+    }
   }
 }

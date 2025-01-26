@@ -2,6 +2,7 @@ export type Provider = 'GOOGLE' | 'KAKAO' | 'APPLE';
 export type FriendStatus = 'PENDING' | 'ACCEPTED' | 'REPORTED';
 export type GatheringType = 'GROUP' | 'FRIEND';
 export type GatheringParticipationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+export type GroupParticipationStatus = 'ACCEPTED' | 'REPORTED';
 export type Order = 'DESC' | 'ASC';
 export type ReportTypes = 'FRIEND' | 'FEED' | 'GROUP';
 

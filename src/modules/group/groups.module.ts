@@ -20,6 +20,12 @@ import { GroupsController } from 'src/presentation/controllers/group/groups.cont
       useClass: GroupParticipationsPrismaRepository,
     },
   ],
-  exports: [{ provide: GroupsRepository, useClass: GroupsPrismaRepository }],
+  exports: [
+    { provide: GroupsRepository, useClass: GroupsPrismaRepository },
+    {
+      provide: GroupParticipationsRepository,
+      useClass: GroupParticipationsPrismaRepository,
+    },
+  ],
 })
 export class GroupsModule {}

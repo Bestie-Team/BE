@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
-import { ReportUseCase } from 'src/application/use-case/report-use-case';
 import { ReportsRepository } from 'src/domain/interface/report/reports.repository';
 import { FriendReportsWriteSerivce } from 'src/domain/services/report/friend-reports-write.service';
+import { GroupReportsWriteService } from 'src/domain/services/report/group-reports.write.service';
 import { ReportsPrismaRepository } from 'src/infrastructure/repositories/report/reports-prisma.repository';
 import { FriendsModule } from 'src/modules/friend/friends.module';
 import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
+import { GroupsModule } from 'src/modules/group/groups.module';
 import { ReportsController } from 'src/presentation/controllers/report/reports.controller';
 
 @Module({
-  imports: [FriendsModule, GatheringParticipationModules],
+  imports: [FriendsModule, GatheringParticipationModules, GroupsModule],
   controllers: [ReportsController],
   providers: [
     FriendReportsWriteSerivce,
-    ReportUseCase,
+    GroupReportsWriteService,
     { provide: ReportsRepository, useClass: ReportsPrismaRepository },
   ],
 })

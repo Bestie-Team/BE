@@ -61,11 +61,13 @@ export class GatheringsWriteService {
     prototype: GatheringPrototype,
     groupId: string | null,
   ) {
+    const { hostUserId } = prototype;
     if (!groupId) {
       throw new BadRequestException(GROUP_GATHERING_REQUIRED_GROUPID_MESSAGE);
     }
     const friendIds = await this.getGroupMemberIds(groupId);
-    await this.createTransaction(prototype, friendIds);
+    const filteredIds = friendIds.filter((userId) => userId !== hostUserId);
+    await this.createTransaction(prototype, filteredIds);
   }
 
   @Transactional()

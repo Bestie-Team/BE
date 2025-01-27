@@ -116,14 +116,22 @@ export class GroupsPrismaRepository implements GroupsRepository {
   }
 
   async findGroupMembersById(id: string): Promise<{ participantId: string }[]> {
-    return await this.txHost.tx.groupParticipation.findMany({
+    const result = await this.txHost.tx.group.findUnique({
       select: {
-        participantId: true,
+        groupParticipation: {
+          select: {
+            participantId: true,
+          },
+        },
+        ownerId: true,
       },
       where: {
-        groupId: id,
+        id,
       },
     });
+    return result
+      ? [...result.groupParticipation, { participantId: result.ownerId }]
+      : [];
   }
 
   async update(id: string, data: Partial<GroupEntity>): Promise<void> {

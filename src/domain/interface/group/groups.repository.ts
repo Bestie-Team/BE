@@ -12,6 +12,9 @@ export interface GroupsRepository {
     groupId: string,
     ownerId: string,
   ): Promise<{ id: string } | null>;
+  /**
+   * 그룹장도 함꼐 모든 멤버를 조회
+   */
   findGroupMembersById(id: string): Promise<{ participantId: string }[]>;
   update(id: string, data: Partial<GroupEntity>): Promise<void>;
   delete(groupId: string): Promise<void>;

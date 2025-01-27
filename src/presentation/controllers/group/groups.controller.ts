@@ -137,6 +137,14 @@ export class GroupsController {
     status: 400,
     description: '입력값 검증 실패',
   })
+  @ApiResponse({
+    status: 409,
+    description: '이미 참여 중인 회원을 초대하는 경우 실패',
+  })
+  @ApiResponse({
+    status: 422,
+    description: '해당 그룹을 신고한 회원을 초대하려는 경우 실패',
+  })
   @Post(':groupId/members')
   async addMembers(
     @Param('groupId', ParseUUIDPipe) groupId: string,

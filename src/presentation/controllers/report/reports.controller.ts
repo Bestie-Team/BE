@@ -1,5 +1,10 @@
 import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { ValidateReportTypePipe } from 'src/common/pipes/validate-report-type.pipe';
@@ -21,6 +26,11 @@ export class ReportsController {
     private readonly feedReportsWriteService: FeedReportsWriteService,
   ) {}
 
+  @ApiOperation({ summary: '신고' })
+  @ApiResponse({
+    status: 201,
+    description: '신고 완료',
+  })
   @Post(':type')
   async reportFriend(
     @Param('type', ValidateReportTypePipe) type: ReportTypes,

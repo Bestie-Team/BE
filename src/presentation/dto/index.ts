@@ -8,3 +8,5 @@ export * from './user';
 export * from './shared';
 export * from './feed';
 export * from './comment';
+export * from './notification';
+export * from './report';

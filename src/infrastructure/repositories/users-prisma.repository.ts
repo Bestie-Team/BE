@@ -8,6 +8,8 @@ import type {
   UserDetail,
 } from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
+import { sql } from 'kysely';
+import { FriendStatus } from '@prisma/client';
 
 @Injectable()
 export class UsersPrismaRepository implements UsersRepository {
@@ -117,7 +119,10 @@ export class UsersPrismaRepository implements UsersRepository {
         qb
           .selectFrom('feed as f')
           .where((eb) =>
-            eb.or([eb('f.writer_id', '=', id), eb('f.deleted_at', 'is', null)]),
+            eb.and([
+              eb('f.writer_id', '=', id),
+              eb('f.deleted_at', 'is', null),
+            ]),
           )
           .select(({ fn }) => fn.countAll().as('feed_count'))
           .as('feed_count'),
@@ -136,6 +141,11 @@ export class UsersPrismaRepository implements UsersRepository {
           .as('group_count'),
       )
       .groupBy('u.id')
+      .where(
+        'fr.status',
+        '=',
+        sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
+      )
       .where('u.id', '=', id)
       .executeTakeFirst();
 

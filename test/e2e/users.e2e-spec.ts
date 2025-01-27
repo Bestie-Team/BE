@@ -203,6 +203,7 @@ describe('UsersController (e2e)', () => {
       await prisma.feed.createMany({
         data: feeds,
       });
+      const acceptedFriend = [...sendFriendRelation, ...receivedFriendRelation];
 
       const response = await request(app.getHttpServer())
         .get('/users/my')
@@ -215,7 +216,7 @@ describe('UsersController (e2e)', () => {
       expect(body.name).toEqual(loginedUser!.name);
       expect(body.profileImageUrl).toEqual(loginedUser!.profileImageUrl);
       expect(body.feedCount).toEqual(feeds.length);
-      expect(body.friendCount).toEqual(friends.length);
+      expect(body.friendCount).toEqual(acceptedFriend.length);
       expect(body.groupCount).toEqual([...ownGroups, ...groupJoin].length);
     });
   });

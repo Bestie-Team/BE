@@ -6,7 +6,7 @@ import {
   Provider,
 } from 'src/shared/types';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
-import { FriendStatus } from '@prisma/client';
+import { FriendStatus, GroupParticipationStatus } from '@prisma/client';
 import { GroupEntity } from 'src/domain/entities/group/group.entity';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
@@ -60,9 +60,10 @@ export const generateGroupParticipationEntity = (
   groupId: string,
   participantId: string,
   stdDate: Date,
+  status?: GroupParticipationStatus,
 ): GroupParticipationEntity => {
   return GroupParticipationEntity.create(
-    { groupId, participantId },
+    { groupId, participantId, status },
     v4,
     stdDate,
   );

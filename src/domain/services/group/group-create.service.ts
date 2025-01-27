@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { v4 } from 'uuid';
@@ -11,7 +13,9 @@ import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
 import { GroupPrototype } from 'src/domain/types/group.types';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import {
+  CANT_INVITE_REPORTED_USER,
   FORBIDDEN_MESSAGE,
+  GROUP_MEMBER_ALREADY_EXIST_MESSAGE,
   GROUP_OWNER_CANT_LEAVE_MESSAGE,
 } from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
@@ -54,12 +58,28 @@ export class GroupCreateService {
     participantIds: string[],
   ) {
     await checkIsFriendAll(this.friendsRepository, inviterId, participantIds);
+    await this.checkExisting(participantIds);
     const stdDate = new Date();
     const groupParticipations = participantIds.map((participantId) =>
       GroupParticipationEntity.create({ groupId, participantId }, v4, stdDate),
     );
 
     await this.groupParticipationsRepository.saveMany(groupParticipations);
+  }
+
+  private async checkExisting(userIds: string[]) {
+    const participations =
+      await this.groupParticipationsRepository.findByUserIds(userIds);
+    participations.forEach((participation) => {
+      if (participation) {
+        if (participation.status === 'REPORTED') {
+          throw new UnprocessableEntityException(CANT_INVITE_REPORTED_USER);
+        }
+        if (participation.status === 'ACCEPTED') {
+          throw new ConflictException(GROUP_MEMBER_ALREADY_EXIST_MESSAGE);
+        }
+      }
+    });
   }
 
   async leaveGroup(groupId: string, userId: string) {

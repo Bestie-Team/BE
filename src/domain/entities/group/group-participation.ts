@@ -10,7 +10,11 @@ export class GroupParticipationEntity {
   ) {}
 
   static create(
-    input: { groupId: string; participantId: string },
+    input: {
+      groupId: string;
+      participantId: string;
+      status?: GroupParticipationStatus;
+    },
     idGen: () => string,
     stdDate: Date,
   ) {
@@ -19,6 +23,7 @@ export class GroupParticipationEntity {
       input.groupId,
       input.participantId,
       stdDate,
+      input.status,
     );
   }
 }

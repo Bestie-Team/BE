@@ -5,6 +5,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
 import { NOT_FOUND_GROUP } from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
+import { GroupParticipationStatus } from 'src/shared/types';
 
 @Injectable()
 export class GroupParticipationsPrismaRepository
@@ -23,6 +24,22 @@ export class GroupParticipationsPrismaRepository
   async saveMany(data: GroupParticipationEntity[]): Promise<void> {
     await this.txHost.tx.groupParticipation.createMany({
       data,
+    });
+  }
+
+  async findByUserIds(
+    userIds: string[],
+  ): Promise<{ id: string; status: GroupParticipationStatus }[]> {
+    return await this.txHost.tx.groupParticipation.findMany({
+      select: {
+        id: true,
+        status: true,
+      },
+      where: {
+        participantId: {
+          in: userIds,
+        },
+      },
     });
   }
 

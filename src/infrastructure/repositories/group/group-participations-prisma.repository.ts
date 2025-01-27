@@ -1,8 +1,11 @@
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
+import { NOT_FOUND_GROUP } from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
+import { GroupParticipationStatus } from 'src/shared/types';
 
 @Injectable()
 export class GroupParticipationsPrismaRepository
@@ -24,6 +27,22 @@ export class GroupParticipationsPrismaRepository
     });
   }
 
+  async findByUserIds(
+    userIds: string[],
+  ): Promise<{ id: string; status: GroupParticipationStatus }[]> {
+    return await this.txHost.tx.groupParticipation.findMany({
+      select: {
+        id: true,
+        status: true,
+      },
+      where: {
+        participantId: {
+          in: userIds,
+        },
+      },
+    });
+  }
+
   async delete(groupId: string, participantId: string): Promise<void> {
     await this.txHost.tx.groupParticipation.delete({
       where: {
@@ -33,5 +52,24 @@ export class GroupParticipationsPrismaRepository
         },
       },
     });
+  }
+
+  async update(
+    id: string,
+    data: Partial<GroupParticipationEntity>,
+  ): Promise<void> {
+    try {
+      await this.txHost.tx.groupParticipation.update({
+        data,
+        where: {
+          id,
+        },
+      });
+    } catch (e: unknown) {
+      if (e instanceof PrismaClientKnownRequestError && e.code === 'P2025') {
+        throw new NotFoundException(NOT_FOUND_GROUP);
+      }
+      throw e;
+    }
   }
 }

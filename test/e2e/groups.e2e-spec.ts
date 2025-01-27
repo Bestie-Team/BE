@@ -289,6 +289,64 @@ describe('GroupsController (e2e)', () => {
       expect(members.length).toEqual(10);
     });
 
+    it('그룹을 신고한 회원을 초대하려는 경우 예외', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+
+      const users = Array.from({ length: 3 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `account${i}_id`),
+      );
+      await prisma.user.createMany({ data: users });
+
+      const friendRelations = Array.from({ length: 3 }, (_, i) =>
+        generateFriendEntity(loginedUser!.id, users[i].id, 'ACCEPTED'),
+      );
+      await prisma.friend.createMany({ data: friendRelations });
+
+      const group = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+
+      const acceptedGroupParticipations =
+        await prisma.groupParticipation.create({
+          data: generateGroupParticipationEntity(
+            group.id,
+            users[0].id,
+            new Date(),
+            'ACCEPTED',
+          ),
+        });
+      const reportedGroupParticipations =
+        await prisma.groupParticipation.create({
+          data: generateGroupParticipationEntity(
+            group.id,
+            users[1].id,
+            new Date(),
+            'REPORTED',
+          ),
+        });
+
+      const groupId = group.id;
+      const newMemberIds = [users[1].id, users[2].id];
+      const dto: AddGroupMemberRequest = {
+        userIds: newMemberIds,
+      };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post(`/groups/${groupId}/members`)
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(422);
+    });
+
     it('친구가 아닌 회원을 추가하려고 하는 경우 예외', async () => {
       const { accessToken, accountId } = await login(app);
 

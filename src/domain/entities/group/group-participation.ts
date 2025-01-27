@@ -1,13 +1,20 @@
+import { GroupParticipationStatus } from 'src/shared/types';
+
 export class GroupParticipationEntity {
   constructor(
     readonly id: string,
     readonly groupId: string,
     readonly participantId: string,
     readonly createdAt: Date,
+    readonly status?: GroupParticipationStatus,
   ) {}
 
   static create(
-    input: { groupId: string; participantId: string },
+    input: {
+      groupId: string;
+      participantId: string;
+      status?: GroupParticipationStatus;
+    },
     idGen: () => string,
     stdDate: Date,
   ) {
@@ -16,6 +23,7 @@ export class GroupParticipationEntity {
       input.groupId,
       input.participantId,
       stdDate,
+      input.status,
     );
   }
 }

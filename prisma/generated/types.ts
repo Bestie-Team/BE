@@ -28,6 +28,12 @@ export const GatheringParticipationStatus = {
 } as const;
 export type GatheringParticipationStatus =
   (typeof GatheringParticipationStatus)[keyof typeof GatheringParticipationStatus];
+export const GroupParticipationStatus = {
+  ACCEPTED: 'ACCEPTED',
+  REPORTED: 'REPORTED',
+} as const;
+export type GroupParticipationStatus =
+  (typeof GroupParticipationStatus)[keyof typeof GroupParticipationStatus];
 export const NotificationTypes = {
   GATHERING_INVITATION_RECEIVED: 'GATHERING_INVITATION_RECEIVED',
   GATHERING_INVITATION_ACCEPTED: 'GATHERING_INVITATION_ACCEPTED',
@@ -38,6 +44,12 @@ export const NotificationTypes = {
 } as const;
 export type NotificationTypes =
   (typeof NotificationTypes)[keyof typeof NotificationTypes];
+export const ReportTypes = {
+  FRIEND: 'FRIEND',
+  FEED: 'FEED',
+  GROUP: 'GROUP',
+} as const;
+export type ReportTypes = (typeof ReportTypes)[keyof typeof ReportTypes];
 export type BlockedFeed = {
   user_id: string;
   feed_id: string;
@@ -117,6 +129,7 @@ export type GroupParticipation = {
   id: string;
   group_id: string;
   participant_id: string;
+  status: Generated<GroupParticipationStatus>;
   created_at: Timestamp;
 };
 export type Notification = {
@@ -128,6 +141,15 @@ export type Notification = {
   related_id: string | null;
   created_at: Timestamp;
   read_at: Timestamp | null;
+};
+export type Report = {
+  id: string;
+  reporter_id: string;
+  reported_id: string;
+  type: ReportTypes;
+  reason: string;
+  created_at: Timestamp;
+  updated_at: Timestamp;
 };
 export type User = {
   id: string;
@@ -152,5 +174,6 @@ export type DB = {
   group: Group;
   group_participation: GroupParticipation;
   notification: Notification;
+  report: Report;
   user: User;
 };

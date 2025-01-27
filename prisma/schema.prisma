@@ -40,6 +40,11 @@ enum GatheringParticipationStatus {
   REJECTED
 }
 
+enum GroupParticipationStatus {
+  ACCEPTED
+  REPORTED
+}
+
 enum NotificationTypes {
   GATHERING_INVITATION_RECEIVED
   GATHERING_INVITATION_ACCEPTED
@@ -47,6 +52,12 @@ enum NotificationTypes {
   FRIEND_REQUEST
   FRIEND_REQUEST_ACCEPTED
   FEED_COMMENT
+}
+
+enum ReportTypes {
+  FRIEND
+  FEED
+  GROUP
 }
 
 model User {
@@ -71,6 +82,7 @@ model User {
   receivedFriendRequests Friend[] @relation("ReceiverUser")
   friendFeedVisibilities FriendFeedVisibility[]
   notifications Notification[]
+  reports Report[]
 
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
@@ -219,6 +231,7 @@ model GroupParticipation {
   id String @id
   groupId String @map("group_id")
   participantId String @map("participant_id")
+  status GroupParticipationStatus @default(ACCEPTED)
   createdAt DateTime @map("created_at")
 
   group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
@@ -241,4 +254,18 @@ model Notification {
   user User @relation(fields: [userId], references: [id])
 
   @@map("notification")
+}
+
+model Report {
+  id String @id
+  reporterId String @map("reporter_id")
+  reportedId String @map("reported_id")
+  type ReportTypes
+  reason String
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  reporter User @relation(fields: [reporterId], references: [id])
+
+  @@map("report")
 }

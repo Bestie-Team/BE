@@ -2,6 +2,7 @@ export const NOT_FOUND_USER_MESSAGE = (info: string) =>
   `${info}는 존재하지 않는 회원 정보입니다.`;
 export const NOT_FOUND_FRIEND_MESSAGE = '존재하지 않는 친구 혹은 요청입니다.';
 export const NOT_FOUND_GATHERING_MESSAGE = '존재하지 않는 모임입니다.';
+export const NOT_FOUND_GROUP = '존재하지 않는 그룹입니다.';
 export const NOT_FOUND_COMMENT_MESSAGE = '존재하지 않는 댓글입니다.';
 export const FRIEND_REQUEST_ALREADY_EXIST_MESSAGE = `이미 존재하는 요청입니다.`;
 export const FRIEND_ALREADY_EXIST_MESSAGE = '이미 친구인 회원입니다.';
@@ -23,3 +24,7 @@ export const IS_NOT_DONE_GATHERING_MESSAGE =
 export const DUPLICATE_GATHERING_FEED = '이미 작성한 피드가 존재합니다.';
 export const FEED_CREATION_PERIOD_EXCEEDED_MESSAGE =
   '모임 완료 후 30일이 지나 피드를 작성할 수 없습니다.';
+export const CANT_INVITE_REPORTED_USER =
+  '그룹을 신고한 회원은 초대할 수 없습니다.';
+export const GROUP_MEMBER_ALREADY_EXIST_MESSAGE =
+  '이미 존재하는 그룹 멤버입니다.';

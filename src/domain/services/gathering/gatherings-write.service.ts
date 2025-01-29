@@ -35,11 +35,9 @@ export class GatheringsWriteService {
 
   async create(prototype: GatheringPrototype, friendIds: string[] | null) {
     const { type, groupId } = prototype;
-    if (type === 'FRIEND') {
-      await this.createFriendGathering(prototype, friendIds);
-    } else {
-      await this.createGroupGathering(prototype, groupId);
-    }
+    type === 'FRIEND'
+      ? await this.createFriendGathering(prototype, friendIds)
+      : await this.createGroupGathering(prototype, groupId);
   }
 
   async createFriendGathering(

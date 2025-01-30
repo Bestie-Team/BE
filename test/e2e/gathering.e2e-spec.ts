@@ -9,6 +9,7 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
 import { login } from 'test/helpers/login';
 import {
+  generateFeedEntity,
   generateFriendEntity,
   generateGatheringEntity,
   generateGatheringParticipationEntity,
@@ -38,6 +39,7 @@ describe('GatheringsController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.feed.deleteMany();
     await prisma.gatheringParticipation.deleteMany();
     await prisma.gathering.deleteMany();
     await prisma.groupParticipation.deleteMany();
@@ -540,7 +542,6 @@ describe('GatheringsController (e2e)', () => {
       const { status, body }: ResponseResult<GatheringInvitationListResponse> =
         response;
       const { invitations, nextCursor } = body;
-      console.log(invitations);
 
       expect(status).toEqual(200);
       // expect(nextCursor?.createdAt).toEqual({
@@ -678,6 +679,129 @@ describe('GatheringsController (e2e)', () => {
       expect(nextCursor).toEqual({
         createdAt: expectedGathering.at(-1)?.gatheringDate.toISOString(),
         id: expectedGathering.at(-1)?.id,
+      });
+    });
+  });
+
+  describe('(GET) /gatherings/no-feed - 피드를 작성하지 않은 완료된 모임 조회', () => {
+    it('피드를 작성하지 않은 완료된 모임 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+
+      const stdDate = new Date('2024-12-10T00:00:00.000Z');
+      const gatheringDates = [
+        new Date('2025-01-01T00:00:00.000Z'),
+        new Date('2025-05-31T23:59:59.000Z'),
+        new Date('2025-12-31T23:59:59.000Z'),
+      ];
+      const users = Array.from({ length: 4 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `account${i}_id`, `이름${i}`),
+      );
+      await prisma.user.createMany({ data: users });
+
+      // 0 ~ 2 까지 owner.
+      const gatherings = Array.from({ length: 15 }, (_, i) =>
+        generateGatheringEntity(
+          i < 3 ? loginedUser!.id : users[i % users.length].id,
+          stdDate,
+          `두리 모임${i}`,
+          gatheringDates[i % 3],
+        ),
+      );
+      await prisma.gathering.createMany({ data: gatherings });
+      // 모임3 ~ 7 참여.
+      const acceptedGatherings = Array.from({ length: 5 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 3].id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      );
+      // 모임8, 9는 수락 대기 상태.
+      const pendingGatherings = Array.from({ length: 2 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 8].id,
+          loginedUser!.id,
+          'PENDING',
+        ),
+      );
+      // 타회원 무작위 참여.
+      const otherUserParticipation = Array.from({ length: 20 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i % gatherings.length].id,
+          users[i % users.length].id,
+          'ACCEPTED',
+        ),
+      );
+      await prisma.gatheringParticipation.createMany({
+        data: [
+          ...acceptedGatherings,
+          ...pendingGatherings,
+          ...otherUserParticipation,
+        ],
+      });
+
+      // 모임0 ~ 5 완료 처리.
+      for (let i = 0; i < 5; i++) {
+        await prisma.gathering.update({
+          data: {
+            endedAt: new Date(),
+          },
+          where: {
+            id: gatherings[i].id,
+          },
+        });
+      }
+
+      // 모임 0에 피드 작성
+      await prisma.feed.create({
+        data: generateFeedEntity(loginedUser!.id, gatherings[0].id),
+      });
+
+      const expectedGatherings = gatherings
+        .filter((_, i) => i !== 0 && i < 5)
+        .sort(
+          (a, b) =>
+            b.gatheringDate.getTime() - a.gatheringDate.getTime() ||
+            a.id.localeCompare(b.id),
+        );
+
+      // when
+      const cursor = {
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
+      };
+      const limit = 5;
+
+      // when
+      const response = await request(app.getHttpServer())
+        .get(
+          `/gatherings/no-feed?cursor=${JSON.stringify(cursor)}&limit=${limit}`,
+        )
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GatheringListResponse> = response;
+      const { gatherings: resGatherings, nextCursor } = body;
+
+      expect(status).toEqual(200);
+      expect(nextCursor).toEqual(null);
+      expect(resGatherings.length).toEqual(expectedGatherings.length);
+      resGatherings.forEach((gathering, i) => {
+        expect(gathering.id).toEqual(expectedGatherings[i].id);
+        expect(gathering.name).toEqual(expectedGatherings[i].name);
+        expect(gathering.description).toEqual(
+          expectedGatherings[i].description,
+        );
+        expect(gathering.gatheringDate).toEqual(
+          expectedGatherings[i].gatheringDate.toISOString(),
+        );
+        expect(gathering.invitationImageUrl).toEqual(
+          expectedGatherings[i].invitationImageUrl,
+        );
       });
     });
   });

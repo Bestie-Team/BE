@@ -6,7 +6,10 @@ import { SelectQueryBuilder, sql } from 'kysely';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { Gathering, GatheringDetail } from 'src/domain/types/gathering.types';
-import { PaginatedDateRangeInput } from 'src/shared/types';
+import {
+  DateIdPaginationInput,
+  PaginatedDateRangeInput,
+} from 'src/shared/types';
 
 @Injectable()
 export class GatheringsPrismaRepository implements GatheringsRepository {
@@ -64,6 +67,76 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       .groupBy('g.id')
       .limit(limit);
     return await this.findGatherings(subquery);
+  }
+
+  async findGatheringsWithoutFeedByUserId(
+    userId: string,
+    paginationInput: DateIdPaginationInput,
+  ): Promise<Gathering[]> {
+    const { cursor, limit } = paginationInput;
+    const rows = await this.txHost.tx.$kysely
+      .selectFrom('gathering as g')
+      .select([
+        'g.id',
+        'g.name',
+        'g.gathering_date',
+        'g.invitation_image_url',
+        'g.description',
+      ])
+      .where('g.id', 'in', (eb) =>
+        eb
+          .selectFrom('gathering as g')
+          .leftJoin('gathering_participation as gp', 'gp.gathering_id', 'g.id')
+          .leftJoin('feed as f', 'f.gathering_id', 'g.id')
+          .select(['g.id'])
+          .where((eb) =>
+            eb.or([
+              eb.and([
+                eb('gp.participant_id', '=', userId),
+                eb(
+                  'gp.status',
+                  '=',
+                  sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+                ),
+              ]),
+              eb('g.host_user_id', '=', userId),
+            ]),
+          )
+          .where('f.id', 'is', null)
+          .where('g.deleted_at', 'is', null)
+          .where('g.ended_at', 'is not', null)
+          .where((eb) =>
+            eb.or([
+              eb('g.gathering_date', '<', new Date(cursor.createdAt)),
+              eb.and([
+                eb('g.gathering_date', '=', new Date(cursor.createdAt)),
+                eb('g.id', '>', cursor.id),
+              ]),
+            ]),
+          )
+          .orderBy('g.gathering_date', 'desc')
+          .orderBy('g.id', 'asc')
+          .groupBy('g.id')
+          .limit(limit),
+      )
+      .orderBy('g.gathering_date', 'desc')
+      .orderBy('g.id', 'asc')
+      .execute();
+
+    const result: { [key: string]: Gathering } = {};
+    rows.forEach((row) => {
+      if (!result[row.id]) {
+        result[row.id] = {
+          id: row.id,
+          name: row.name,
+          description: row.description,
+          gatheringDate: row.gathering_date,
+          invitationImageUrl: row.invitation_image_url,
+        };
+      }
+    });
+
+    return Object.values(result);
   }
 
   async findGatherings(

@@ -37,6 +37,7 @@ import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 import { GatheringInvitationListRequest } from 'src/presentation/dto/gathering/request/gathering-invitation-list.request';
 import { GatheringListRequest } from 'src/presentation/dto/gathering/request/gathering-list.request';
+import { NoFeedGatheringListRequest } from 'src/presentation/dto/gathering/request/no-feed-gathering-list.request';
 import { GatheringDetailResponse } from 'src/presentation/dto/gathering/response/gathering-detail.response';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
@@ -102,6 +103,28 @@ export class GatheringsController {
       { ...rest, hostUserId: userId },
       friendIds,
     );
+  }
+
+  @ApiOperation({ summary: '피드를 작성하지 않은 모임 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '모임 목록 조회 완료',
+    type: GatheringListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Get('no-feed')
+  async getGatheringsWithoutFeed(
+    @Query() dto: NoFeedGatheringListRequest,
+    @CurrentUser() userId: string,
+  ) {
+    const domain = await this.gatheringsReadServvice.getGatheringsWithoutFeed(
+      userId,
+      dto,
+    );
+    return gatheringConverter.toListDto(domain);
   }
 
   @ApiOperation({ summary: '참여 중인 모임 목록 조회' })

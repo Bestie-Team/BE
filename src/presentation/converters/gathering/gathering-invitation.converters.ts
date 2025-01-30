@@ -1,5 +1,6 @@
 import { GatheringInvitation } from 'src/domain/types/gathering.types';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
+import { DateIdCursor } from 'src/shared/types';
 
 export const gatheringInvitationConverter = {
   toListDto: ({
@@ -7,7 +8,7 @@ export const gatheringInvitationConverter = {
     nextCursor,
   }: {
     invitations: GatheringInvitation[];
-    nextCursor: string | null;
+    nextCursor: DateIdCursor | null;
   }): GatheringInvitationListResponse => {
     return {
       invitations: invitations.map((invitation) => ({

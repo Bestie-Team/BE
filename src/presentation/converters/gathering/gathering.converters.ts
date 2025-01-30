@@ -1,5 +1,6 @@
 import { Gathering, GatheringDetail } from 'src/domain/types/gathering.types';
 import { GatheringDetailResponse } from 'src/presentation/dto/gathering/response/gathering-detail.response';
+import { DateIdCursor } from 'src/shared/types';
 
 export const gatheringConverter = {
   toListDto: ({
@@ -7,7 +8,7 @@ export const gatheringConverter = {
     nextCursor,
   }: {
     gatherings: Gathering[];
-    nextCursor: string | null;
+    nextCursor: DateIdCursor | null;
   }) => {
     return {
       gatherings: gatherings.map((gathering) => ({

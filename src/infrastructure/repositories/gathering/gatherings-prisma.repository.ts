@@ -2,7 +2,7 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { GatheringParticipationStatus } from '@prisma/client';
-import { sql } from 'kysely';
+import { SelectQueryBuilder, sql } from 'kysely';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { Gathering, GatheringDetail } from 'src/domain/types/gathering.types';
@@ -25,16 +25,10 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<Gathering[]> {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
-    const rows = await this.txHost.tx.$kysely
+    const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering as g')
-      .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
-      .select([
-        'g.id',
-        'g.name',
-        'g.gathering_date',
-        'g.invitation_image_url',
-        'g.description',
-      ])
+      .innerJoin('gathering_participation as gp', 'gp.gathering_id', 'g.id')
+      .select(['g.id'])
       .where((eb) =>
         eb.or([
           eb.and([
@@ -50,13 +44,43 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       )
       .where('g.gathering_date', '>=', new Date(minDate))
       .where('g.gathering_date', '<=', new Date(maxDate))
-      .where(
-        'g.gathering_date',
-        cursor === minDate ? '>=' : '>',
-        new Date(cursor),
+      .where((eb) =>
+        eb.or([
+          eb(
+            'g.gathering_date',
+            minDate === cursor.createdAt ? '>=' : '>',
+            new Date(cursor.createdAt),
+          ),
+          eb.and([
+            eb('g.gathering_date', '=', new Date(cursor.createdAt)),
+            eb('g.id', '>', cursor.id),
+          ]),
+        ]),
       )
-      .orderBy('g.gathering_date')
-      .limit(limit)
+      .where('g.deleted_at', 'is', null)
+      .where('g.ended_at', 'is', null)
+      .orderBy('g.gathering_date', 'asc')
+      .orderBy('g.id', 'asc')
+      .groupBy('g.id')
+      .limit(limit);
+    return await this.findGatherings(subquery);
+  }
+
+  async findGatherings(
+    subquery: SelectQueryBuilder<any, any, any>,
+  ): Promise<Gathering[]> {
+    const rows = await this.txHost.tx.$kysely
+      .selectFrom('gathering as g')
+      .select([
+        'g.id',
+        'g.name',
+        'g.gathering_date',
+        'g.invitation_image_url',
+        'g.description',
+      ])
+      .where('g.id', 'in', () => subquery)
+      .orderBy('g.gathering_date', 'asc')
+      .orderBy('g.id', 'asc')
       .execute();
 
     const result: { [key: string]: Gathering } = {};

@@ -12,7 +12,7 @@ class Gathering {
   @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
   readonly gatheringDate: Date;
 
-  @ApiProperty({ type: [User] })
+  @ApiProperty({ type: () => User, isArray: true })
   readonly members: User[];
 }
 
@@ -41,12 +41,12 @@ export class Feed {
   @ApiProperty({ example: '2024-12-28T00:00:00.000Z' })
   readonly createdAt: string;
 
-  @ApiProperty({ type: Gathering, nullable: true })
+  @ApiProperty({ type: () => Gathering, nullable: true })
   readonly gathering: Gathering | null;
 }
 
 export class FeedListResponse {
-  @ApiProperty({ type: [Feed] })
+  @ApiProperty({ type: () => Feed, isArray: true })
   readonly feeds: Feed[];
 
   @ApiProperty({ type: FeedCursor })

@@ -11,6 +11,10 @@ export interface GatheringsRepository {
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<Gathering[]>;
+  findEndedGatheringsByUserId(
+    userId: string,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
+  ): Promise<Gathering[]>;
   findGatheringsWithoutFeedByUserId(
     userId: string,
     paginationInput: DateIdPaginationInput,

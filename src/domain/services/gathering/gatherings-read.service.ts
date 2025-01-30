@@ -31,14 +31,35 @@ export class GatheringsReadService {
     };
   }
 
-  async getGatherings(
+  async getWaitingGatherings(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ) {
-    const gatherings = await this.gatheringsRepository.findByUserId(
-      userId,
-      paginatedDateRangeInput,
-    );
+    return await this.getGatherings(userId, paginatedDateRangeInput, 'WAITING');
+  }
+
+  async getEndedGatherings(
+    userId: string,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
+  ) {
+    return await this.getGatherings(userId, paginatedDateRangeInput, 'ENDED');
+  }
+
+  async getGatherings(
+    userId: string,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
+    type: 'WAITING' | 'ENDED',
+  ) {
+    const gatherings =
+      type === 'WAITING'
+        ? await this.gatheringsRepository.findByUserId(
+            userId,
+            paginatedDateRangeInput,
+          )
+        : await this.gatheringsRepository.findEndedGatheringsByUserId(
+            userId,
+            paginatedDateRangeInput,
+          );
     const nextCursor = getGatheringCursor(
       gatherings,
       paginatedDateRangeInput.limit,

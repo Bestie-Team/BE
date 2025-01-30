@@ -69,6 +69,52 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     return await this.findGatherings(subquery);
   }
 
+  async findEndedGatheringsByUserId(
+    userId: string,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
+  ): Promise<Gathering[]> {
+    const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
+    const subquery = this.txHost.tx.$kysely
+      .selectFrom('gathering as g')
+      .innerJoin('gathering_participation as gp', 'gp.gathering_id', 'g.id')
+      .select(['g.id'])
+      .where((eb) =>
+        eb.or([
+          eb.and([
+            eb('gp.participant_id', '=', userId),
+            eb(
+              'gp.status',
+              '=',
+              sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+            ),
+          ]),
+          eb('g.host_user_id', '=', userId),
+        ]),
+      )
+      .where('g.gathering_date', '>=', new Date(minDate))
+      .where('g.gathering_date', '<=', new Date(maxDate))
+      .where((eb) =>
+        eb.or([
+          eb(
+            'g.gathering_date',
+            minDate === cursor.createdAt ? '>=' : '>',
+            new Date(cursor.createdAt),
+          ),
+          eb.and([
+            eb('g.gathering_date', '=', new Date(cursor.createdAt)),
+            eb('g.id', '>', cursor.id),
+          ]),
+        ]),
+      )
+      .where('g.deleted_at', 'is', null)
+      .where('g.ended_at', 'is not', null)
+      .orderBy('g.gathering_date', 'asc')
+      .orderBy('g.id', 'asc')
+      .groupBy('g.id')
+      .limit(limit);
+    return await this.findGatherings(subquery);
+  }
+
   async findGatheringsWithoutFeedByUserId(
     userId: string,
     paginationInput: DateIdPaginationInput,

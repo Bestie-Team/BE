@@ -37,11 +37,21 @@ export const getGatheringInvitationCursor = (
   invitations: GatheringInvitation[],
   limit: number,
 ) => {
-  return invitations[limit - 1]?.createdAt.toISOString() || null;
+  return invitations[limit - 1]
+    ? {
+        createdAt: invitations[limit - 1].createdAt.toISOString(),
+        id: invitations[limit - 1].id,
+      }
+    : null;
 };
 
 export const getGatheringCursor = (invitations: Gathering[], limit: number) => {
-  return invitations[limit - 1]?.gatheringDate.toISOString() || null;
+  return invitations[limit - 1]
+    ? {
+        createdAt: invitations[limit - 1].gatheringDate.toISOString(),
+        id: invitations[limit - 1].id,
+      }
+    : null;
 };
 
 export const getFeedCursor = (feeds: Feed[], limit: number) => {

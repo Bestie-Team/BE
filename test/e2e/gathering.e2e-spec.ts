@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { Body, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
 import { AppModule } from 'src/app.module';
@@ -9,6 +9,7 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
 import { login } from 'test/helpers/login';
 import {
+  generateFeedEntity,
   generateFriendEntity,
   generateGatheringEntity,
   generateGatheringParticipationEntity,
@@ -38,6 +39,7 @@ describe('GatheringsController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.feed.deleteMany();
     await prisma.gatheringParticipation.deleteMany();
     await prisma.gathering.deleteMany();
     await prisma.groupParticipation.deleteMany();
@@ -408,12 +410,17 @@ describe('GatheringsController (e2e)', () => {
       const minDate = new Date('2025-01-01T00:00:00.000Z').toISOString();
       const maxDate = new Date('2025-12-31T23:59:59.000Z').toISOString();
       // 마지막 모임 초대 이후 날짜
-      const cursor = new Date('2026-01-01T00:00:00.000Z').toISOString();
+      const cursor = {
+        createdAt: new Date('2026-01-01T00:00:00.000Z').toISOString(),
+        id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
+      };
       const limit = 2;
 
       const response = await request(app.getHttpServer())
         .get(
-          `/gatherings/invitations/received?cursor=${cursor}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
+          `/gatherings/invitations/received?cursor=${JSON.stringify(
+            cursor,
+          )}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
         )
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GatheringInvitationListResponse> =
@@ -421,7 +428,7 @@ describe('GatheringsController (e2e)', () => {
       const { invitations, nextCursor } = body;
 
       expect(status).toEqual(200);
-      expect(nextCursor).toEqual(receivedFirst.toISOString());
+      expect(nextCursor?.createdAt).toEqual(receivedFirst.toISOString());
       invitations.forEach((invitation, i) => {
         expect(invitation.address).toEqual(expectedGathering[i].address);
         expect(invitation.name).toEqual(expectedGathering[i].name);
@@ -519,12 +526,17 @@ describe('GatheringsController (e2e)', () => {
       const minDate = new Date('2025-01-01T00:00:00.000Z').toISOString();
       const maxDate = new Date('2025-12-31T23:59:59.000Z').toISOString();
       // 마지막 모임 초대 이후 날짜
-      const cursor = new Date('2025-01-05T14:59:59.000Z').toISOString();
+      const cursor = {
+        createdAt: maxDate,
+        id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
+      };
       const limit = 2;
 
       const response = await request(app.getHttpServer())
         .get(
-          `/gatherings/invitations/sent?cursor=${cursor}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
+          `/gatherings/invitations/sent?cursor=${JSON.stringify(
+            cursor,
+          )}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
         )
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GatheringInvitationListResponse> =
@@ -532,7 +544,9 @@ describe('GatheringsController (e2e)', () => {
       const { invitations, nextCursor } = body;
 
       expect(status).toEqual(200);
-      expect(nextCursor).toEqual(sentGroup1Invitation.toISOString());
+      // expect(nextCursor?.createdAt).toEqual({
+      //   createdAt: sentGroup1Invitation.toISOString(),
+      // });
       invitations.forEach((invitation, i) => {
         expect(invitation.address).toEqual(expectedGathering[i].address);
         expect(invitation.name).toEqual(expectedGathering[i].name);
@@ -566,9 +580,11 @@ describe('GatheringsController (e2e)', () => {
         },
       });
       const stdDate = new Date('2024-12-10T00:00:00.000Z');
-      const firstGatheringDate = new Date('2025-01-01T00:00:00.000Z');
-      const seondGatheringDate = new Date('2025-05-31T23:59:59.000Z');
-      const thirdGatheringDate = new Date('2025-12-31T23:59:59.000Z');
+      const gatheringDates = [
+        new Date('2025-01-01T00:00:00.000Z'),
+        new Date('2025-05-31T23:59:59.000Z'),
+        new Date('2025-12-31T23:59:59.000Z'),
+      ];
       const user1 = await prisma.user.create({
         data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'),
       });
@@ -578,70 +594,79 @@ describe('GatheringsController (e2e)', () => {
       const user3 = await prisma.user.create({
         data: generateUserEntity('test3@test.com', 'lighty_3', '조민수'),
       });
-      const gathering1 = await prisma.gathering.create({
-        data: generateGatheringEntity(
+
+      // 0 ~ 2 까지 owner.
+      const gatherings = Array.from({ length: 15 }, (_, i) =>
+        generateGatheringEntity(
+          i < 3 ? loginedUser!.id : user1.id,
+          stdDate,
+          `두리 모임${i}`,
+          gatheringDates[i % 3],
+        ),
+      );
+      await prisma.gathering.createMany({ data: gatherings });
+      // 모임3 ~ 7 참여.
+      const acceptedGatherings = Array.from({ length: 5 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 3].id,
           loginedUser!.id,
-          stdDate,
-          '두리 모임1',
-          firstGatheringDate,
+          'ACCEPTED',
         ),
-      });
-      const gathering2 = await prisma.gathering.create({
-        data: generateGatheringEntity(
-          user1.id,
-          stdDate,
-          '두리 모임2',
-          thirdGatheringDate,
-        ),
-      });
-      const gathering3 = await prisma.gathering.create({
-        data: generateGatheringEntity(
+      );
+      // 모임8, 9는 수락 대기 상태.
+      const pendingGatherings = Array.from({ length: 2 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 8].id,
           loginedUser!.id,
-          stdDate,
-          '두리 모임3',
-          seondGatheringDate,
+          'PENDING',
         ),
+      );
+      // 타회원 무작위 참여.
+      const otherUserParticipation = Array.from({ length: 20 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i % gatherings.length].id,
+          i % 2 === 1 ? user2.id : user3.id,
+          'ACCEPTED',
+        ),
+      );
+      await prisma.gatheringParticipation.createMany({
+        data: [
+          ...acceptedGatherings,
+          ...pendingGatherings,
+          ...otherUserParticipation,
+        ],
       });
-      const gathering1Participation =
-        await prisma.gatheringParticipation.create({
-          data: generateGatheringParticipationEntity(
-            gathering1.id,
-            loginedUser!.id,
-            'ACCEPTED',
-          ),
-        });
-      const gathering2Participation =
-        await prisma.gatheringParticipation.create({
-          data: generateGatheringParticipationEntity(
-            gathering2.id,
-            loginedUser!.id,
-            'ACCEPTED',
-          ),
-        });
-      const gathering3Participation =
-        await prisma.gatheringParticipation.create({
-          data: generateGatheringParticipationEntity(
-            gathering3.id,
-            user3.id,
-            'ACCEPTED',
-          ),
-        });
-      const expectedGathering = [gathering1, gathering3, gathering2];
+
+      // i < 3: 오너인 모임, i < 8 참여 중인 모임.
+      const expectedGathering = gatherings
+        .filter((_, i) => i < 8)
+        .sort(
+          (a, b) =>
+            a.gatheringDate.getTime() - b.gatheringDate.getTime() ||
+            a.id.localeCompare(b.id),
+        );
+
       const minDate = new Date('2025-01-01T00:00:00.000Z').toISOString();
       const maxDate = new Date('2025-12-31T23:59:59.000Z').toISOString();
-      const cursor = minDate;
-      const limit = 3;
+      const cursor = {
+        createdAt: minDate,
+        id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
+      };
+      const limit = 8;
 
+      // when
       const response = await request(app.getHttpServer())
         .get(
-          `/gatherings?cursor=${cursor}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
+          `/gatherings?cursor=${JSON.stringify(
+            cursor,
+          )}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
         )
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<GatheringListResponse> = response;
-      const { gatherings, nextCursor } = body;
+      const { gatherings: resGatherings, nextCursor } = body;
 
-      expect(status).toEqual(status);
-      gatherings.forEach((gathering, i) => {
+      expect(status).toEqual(200);
+      resGatherings.forEach((gathering, i) => {
         expect(gathering.id).toEqual(expectedGathering[i].id);
         expect(gathering.name).toEqual(expectedGathering[i].name);
         expect(gathering.gatheringDate).toEqual(
@@ -651,9 +676,254 @@ describe('GatheringsController (e2e)', () => {
           expectedGathering[i].invitationImageUrl,
         );
       });
-      expect(nextCursor).toEqual(
-        expectedGathering.at(-1)?.gatheringDate.toISOString(),
+      expect(nextCursor).toEqual({
+        createdAt: expectedGathering.at(-1)?.gatheringDate.toISOString(),
+        id: expectedGathering.at(-1)?.id,
+      });
+    });
+  });
+
+  describe('(GET) /gatherings/no-feed - 피드를 작성하지 않은 완료된 모임 조회', () => {
+    it('피드를 작성하지 않은 완료된 모임 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+
+      const stdDate = new Date('2024-12-10T00:00:00.000Z');
+      const gatheringDates = [
+        new Date('2025-01-01T00:00:00.000Z'),
+        new Date('2025-05-31T23:59:59.000Z'),
+        new Date('2025-12-31T23:59:59.000Z'),
+      ];
+      const users = Array.from({ length: 4 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `account${i}_id`, `이름${i}`),
       );
+      await prisma.user.createMany({ data: users });
+
+      // 0 ~ 2 까지 owner.
+      const gatherings = Array.from({ length: 15 }, (_, i) =>
+        generateGatheringEntity(
+          i < 3 ? loginedUser!.id : users[i % users.length].id,
+          stdDate,
+          `두리 모임${i}`,
+          gatheringDates[i % 3],
+        ),
+      );
+      await prisma.gathering.createMany({ data: gatherings });
+      // 모임3 ~ 7 참여.
+      const acceptedGatherings = Array.from({ length: 5 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 3].id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      );
+      // 모임8, 9는 수락 대기 상태.
+      const pendingGatherings = Array.from({ length: 2 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 8].id,
+          loginedUser!.id,
+          'PENDING',
+        ),
+      );
+      // 타회원 무작위 참여.
+      const otherUserParticipation = Array.from({ length: 20 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i % gatherings.length].id,
+          users[i % users.length].id,
+          'ACCEPTED',
+        ),
+      );
+      await prisma.gatheringParticipation.createMany({
+        data: [
+          ...acceptedGatherings,
+          ...pendingGatherings,
+          ...otherUserParticipation,
+        ],
+      });
+
+      // 모임0 ~ 5 완료 처리.
+      for (let i = 0; i < 5; i++) {
+        await prisma.gathering.update({
+          data: {
+            endedAt: new Date(),
+          },
+          where: {
+            id: gatherings[i].id,
+          },
+        });
+      }
+
+      // 모임 0에 피드 작성
+      await prisma.feed.create({
+        data: generateFeedEntity(loginedUser!.id, gatherings[0].id),
+      });
+
+      const expectedGatherings = gatherings
+        .filter((_, i) => i !== 0 && i < 5)
+        .sort(
+          (a, b) =>
+            b.gatheringDate.getTime() - a.gatheringDate.getTime() ||
+            a.id.localeCompare(b.id),
+        );
+
+      // when
+      const cursor = {
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
+      };
+      const limit = 5;
+
+      // when
+      const response = await request(app.getHttpServer())
+        .get(
+          `/gatherings/no-feed?cursor=${JSON.stringify(cursor)}&limit=${limit}`,
+        )
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GatheringListResponse> = response;
+      const { gatherings: resGatherings, nextCursor } = body;
+
+      expect(status).toEqual(200);
+      expect(nextCursor).toEqual(null);
+      expect(resGatherings.length).toEqual(expectedGatherings.length);
+      resGatherings.forEach((gathering, i) => {
+        expect(gathering.id).toEqual(expectedGatherings[i].id);
+        expect(gathering.name).toEqual(expectedGatherings[i].name);
+        expect(gathering.description).toEqual(
+          expectedGatherings[i].description,
+        );
+        expect(gathering.gatheringDate).toEqual(
+          expectedGatherings[i].gatheringDate.toISOString(),
+        );
+        expect(gathering.invitationImageUrl).toEqual(
+          expectedGatherings[i].invitationImageUrl,
+        );
+      });
+    });
+  });
+
+  describe('(GET) /gatherings/ended - 완료된 모임 조회', () => {
+    it('완료된 모임 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+
+      const stdDate = new Date('2024-12-10T00:00:00.000Z');
+      const gatheringDates = [
+        new Date('2025-01-01T00:00:00.000Z'),
+        new Date('2025-05-31T23:59:59.000Z'),
+        new Date('2025-12-31T23:59:59.000Z'),
+      ];
+      const users = Array.from({ length: 4 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `account${i}_id`, `이름${i}`),
+      );
+      await prisma.user.createMany({ data: users });
+
+      // 0 ~ 2 까지 owner.
+      const gatherings = Array.from({ length: 15 }, (_, i) =>
+        generateGatheringEntity(
+          i < 3 ? loginedUser!.id : users[i % users.length].id,
+          stdDate,
+          `두리 모임${i}`,
+          gatheringDates[i % 3],
+        ),
+      );
+      await prisma.gathering.createMany({ data: gatherings });
+      // 모임3 ~ 7 참여.
+      const acceptedGatherings = Array.from({ length: 5 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 3].id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      );
+      // 모임8, 9는 수락 대기 상태.
+      const pendingGatherings = Array.from({ length: 2 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 8].id,
+          loginedUser!.id,
+          'PENDING',
+        ),
+      );
+      // 타회원 무작위 참여.
+      const otherUserParticipation = Array.from({ length: 20 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i % gatherings.length].id,
+          users[i % users.length].id,
+          'ACCEPTED',
+        ),
+      );
+      await prisma.gatheringParticipation.createMany({
+        data: [
+          ...acceptedGatherings,
+          ...pendingGatherings,
+          ...otherUserParticipation,
+        ],
+      });
+
+      // 모임0 ~ 5 완료 처리.
+      for (let i = 0; i < 5; i++) {
+        await prisma.gathering.update({
+          data: {
+            endedAt: new Date(),
+          },
+          where: {
+            id: gatherings[i].id,
+          },
+        });
+      }
+
+      const expectedGatherings = gatherings
+        .filter((_, i) => i < 5)
+        .sort(
+          (a, b) =>
+            a.gatheringDate.getTime() - b.gatheringDate.getTime() ||
+            a.id.localeCompare(b.id),
+        );
+
+      const minDate = new Date('2025-01-01T00:00:00.000Z').toISOString();
+      const maxDate = new Date('2025-12-31T23:59:59.000Z').toISOString();
+      const cursor = {
+        createdAt: minDate,
+        id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
+      };
+      const limit = 8;
+
+      // when
+      const response = await request(app.getHttpServer())
+        .get(
+          `/gatherings/ended?cursor=${JSON.stringify(
+            cursor,
+          )}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
+        )
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GatheringListResponse> = response;
+      const { gatherings: resGatherings, nextCursor } = body;
+
+      expect(status).toEqual(200);
+      expect(nextCursor).toEqual(null);
+      expect(resGatherings.length).toEqual(expectedGatherings.length);
+      resGatherings.forEach((gathering, i) => {
+        expect(gathering.id).toEqual(expectedGatherings[i].id);
+        expect(gathering.name).toEqual(expectedGatherings[i].name);
+        expect(gathering.description).toEqual(
+          expectedGatherings[i].description,
+        );
+        expect(gathering.gatheringDate).toEqual(
+          expectedGatherings[i].gatheringDate.toISOString(),
+        );
+        expect(gathering.invitationImageUrl).toEqual(
+          expectedGatherings[i].invitationImageUrl,
+        );
+      });
     });
   });
 

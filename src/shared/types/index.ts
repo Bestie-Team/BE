@@ -30,7 +30,7 @@ export interface DateIdPaginationInput {
   readonly limit: number;
 }
 
-export interface PaginatedDateRangeInput extends PaginationInput {
+export interface PaginatedDateRangeInput extends DateIdPaginationInput {
   minDate: string;
   maxDate: string;
 }

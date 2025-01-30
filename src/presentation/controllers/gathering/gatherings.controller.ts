@@ -37,6 +37,7 @@ import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 import { GatheringInvitationListRequest } from 'src/presentation/dto/gathering/request/gathering-invitation-list.request';
 import { GatheringListRequest } from 'src/presentation/dto/gathering/request/gathering-list.request';
+import { NoFeedGatheringListRequest } from 'src/presentation/dto/gathering/request/no-feed-gathering-list.request';
 import { GatheringDetailResponse } from 'src/presentation/dto/gathering/response/gathering-detail.response';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
@@ -48,7 +49,7 @@ import { GatheringListResponse } from 'src/presentation/dto/gathering/response/g
 export class GatheringsController {
   constructor(
     private readonly gatheringsWriteService: GatheringsWriteService,
-    private readonly gatheringsReadServvice: GatheringsReadService,
+    private readonly gatheringsReadService: GatheringsReadService,
     private readonly gatheringInvitationsReadService: GatheringInvitationsReadService,
   ) {}
 
@@ -104,6 +105,51 @@ export class GatheringsController {
     );
   }
 
+  @ApiOperation({ summary: '피드를 작성하지 않은 모임 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '모임 목록 조회 완료',
+    type: GatheringListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Get('no-feed')
+  async getGatheringsWithoutFeed(
+    @Query() dto: NoFeedGatheringListRequest,
+    @CurrentUser() userId: string,
+  ) {
+    const domain = await this.gatheringsReadService.getGatheringsWithoutFeed(
+      userId,
+      dto,
+    );
+    return gatheringConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '완료된 모임 목록 조회' })
+  @ApiGatheringQuery()
+  @ApiResponse({
+    status: 200,
+    description: '완료된 모임 목록 조회 완료',
+    type: GatheringListResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @Get('ended')
+  async getEndedGatherings(
+    @Query() dto: GatheringListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<GatheringListResponse> {
+    const domain = await this.gatheringsReadService.getEndedGatherings(
+      userId,
+      dto,
+    );
+    return gatheringConverter.toListDto(domain);
+  }
+
   @ApiOperation({ summary: '참여 중인 모임 목록 조회' })
   @ApiGatheringQuery()
   @ApiResponse({
@@ -120,7 +166,10 @@ export class GatheringsController {
     @Query() dto: GatheringListRequest,
     @CurrentUser() userId: string,
   ): Promise<GatheringListResponse> {
-    const domain = await this.gatheringsReadServvice.getGatherings(userId, dto);
+    const domain = await this.gatheringsReadService.getWaitingGatherings(
+      userId,
+      dto,
+    );
     return gatheringConverter.toListDto(domain);
   }
 
@@ -134,7 +183,7 @@ export class GatheringsController {
   async getDetail(
     @Param('gatheringId', ParseUUIDPipe) gatheringId: string,
   ): Promise<GatheringDetailResponse> {
-    const domain = await this.gatheringsReadServvice.getDetail(gatheringId);
+    const domain = await this.gatheringsReadService.getDetail(gatheringId);
     return gatheringConverter.toDto(domain);
   }
 

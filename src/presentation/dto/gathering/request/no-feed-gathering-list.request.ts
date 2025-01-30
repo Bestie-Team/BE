@@ -12,18 +12,10 @@ class Cursor {
   readonly id: string;
 }
 
-export class GatheringInvitationListRequest {
-  @ApiProperty()
-  @IsDateString({}, { message: 'ISO8601 형식이 아닙니다.' })
-  minDate: string;
-
-  @ApiProperty()
-  @IsDateString({}, { message: 'ISO8601 형식이 아닙니다.' })
-  maxDate: string;
-
+export class NoFeedGatheringListRequest {
   @ApiProperty({
     type: Cursor,
-    description: '첫 번째 커서: { createdAt: maxDate, id: uuid 아무 값이나 }',
+    description: '첫 번째 커서: { createdAt: 현재 날짜, id: uuid 아무 값이나 }',
   })
   @Transform(({ value }) => {
     try {

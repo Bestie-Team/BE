@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { DateIdCursor } from '../../shared';
 
 export class Gathering {
   @ApiProperty()
@@ -22,5 +23,5 @@ export class GatheringListResponse {
   readonly gatherings: Gathering[];
 
   @ApiProperty({ type: 'string', nullable: true })
-  readonly nextCursor: string | null;
+  readonly nextCursor: DateIdCursor | null;
 }

@@ -18,14 +18,14 @@ export class CreateGatheringRequest {
     example: '두리집 청소 모임',
     description: '2 ~ 20자',
   })
-  @Length(2, 20, { message: '모임 이름은 최소 2자 최대 20자만 가능합니다.' })
+  @Length(1, 20, { message: '모임 이름은 최소 1자 최대 20자만 가능합니다.' })
   readonly name: string;
 
   @ApiProperty({
     example: '두리집 청소부들의 모임입니다.',
     description: '10 ~ 40자',
   })
-  @Length(10, 40, { message: '모임 설명은 최소 10자 최대 40자만 가능합니다.' })
+  @Length(1, 40, { message: '모임 설명은 최소 1자 최대 40자만 가능합니다.' })
   readonly description: string;
 
   @ApiProperty({

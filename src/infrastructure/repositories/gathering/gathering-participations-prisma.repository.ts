@@ -170,13 +170,13 @@ export class GatheringParticipationsPrismaRepository
           .where((eb) =>
             eb.or([
               eb(
-                'g.gathering_date',
-                minDate === cursor.createdAt ? '<=' : '<',
+                'gs.created_at',
+                cursor.createdAt === maxDate ? '<=' : '<',
                 new Date(cursor.createdAt),
               ),
               eb.and([
-                eb('g.gathering_date', '=', new Date(cursor.createdAt)),
-                eb('g.id', '>', cursor.id),
+                eb('gs.created_at', '=', new Date(cursor.createdAt)),
+                eb('gs.id', '>', cursor.id),
               ]),
             ]),
           )
@@ -185,8 +185,8 @@ export class GatheringParticipationsPrismaRepository
             '=',
             sql<GatheringParticipationStatus>`${GatheringParticipationStatus.PENDING}::"GatheringParticipationStatus"`,
           )
-          .orderBy('gp.created_at', 'desc')
-          .orderBy('gp.id', 'asc')
+          .orderBy('gs.created_at', 'desc')
+          .orderBy('gs.id', 'asc')
           .groupBy('gs.id')
           .limit(limit),
       )

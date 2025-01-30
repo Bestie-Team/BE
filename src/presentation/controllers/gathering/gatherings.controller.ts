@@ -22,10 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import {
-  ApiGatheringPaginationQuery,
-  ApiGatheringQuery,
-} from 'src/common/decorators/swagger';
+import { ApiGatheringQuery } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
@@ -232,7 +229,6 @@ export class GatheringsController {
   }
 
   @ApiOperation({ summary: '받은 모임 초대 목록 조회' })
-  @ApiGatheringPaginationQuery()
   @ApiResponse({
     status: 200,
     description: '받은 모임 초대 목록 조회 완료',
@@ -256,7 +252,6 @@ export class GatheringsController {
   }
 
   @ApiOperation({ summary: '보낸 모임 초대 목록 조회' })
-  @ApiGatheringPaginationQuery()
   @ApiResponse({
     status: 200,
     description: '보낸 모임 초대 목록 조회 완료',

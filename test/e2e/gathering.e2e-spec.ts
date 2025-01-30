@@ -806,6 +806,127 @@ describe('GatheringsController (e2e)', () => {
     });
   });
 
+  describe('(GET) /gatherings/ended - 완료된 모임 조회', () => {
+    it('완료된 모임 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+
+      const stdDate = new Date('2024-12-10T00:00:00.000Z');
+      const gatheringDates = [
+        new Date('2025-01-01T00:00:00.000Z'),
+        new Date('2025-05-31T23:59:59.000Z'),
+        new Date('2025-12-31T23:59:59.000Z'),
+      ];
+      const users = Array.from({ length: 4 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `account${i}_id`, `이름${i}`),
+      );
+      await prisma.user.createMany({ data: users });
+
+      // 0 ~ 2 까지 owner.
+      const gatherings = Array.from({ length: 15 }, (_, i) =>
+        generateGatheringEntity(
+          i < 3 ? loginedUser!.id : users[i % users.length].id,
+          stdDate,
+          `두리 모임${i}`,
+          gatheringDates[i % 3],
+        ),
+      );
+      await prisma.gathering.createMany({ data: gatherings });
+      // 모임3 ~ 7 참여.
+      const acceptedGatherings = Array.from({ length: 5 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 3].id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      );
+      // 모임8, 9는 수락 대기 상태.
+      const pendingGatherings = Array.from({ length: 2 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i + 8].id,
+          loginedUser!.id,
+          'PENDING',
+        ),
+      );
+      // 타회원 무작위 참여.
+      const otherUserParticipation = Array.from({ length: 20 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i % gatherings.length].id,
+          users[i % users.length].id,
+          'ACCEPTED',
+        ),
+      );
+      await prisma.gatheringParticipation.createMany({
+        data: [
+          ...acceptedGatherings,
+          ...pendingGatherings,
+          ...otherUserParticipation,
+        ],
+      });
+
+      // 모임0 ~ 5 완료 처리.
+      for (let i = 0; i < 5; i++) {
+        await prisma.gathering.update({
+          data: {
+            endedAt: new Date(),
+          },
+          where: {
+            id: gatherings[i].id,
+          },
+        });
+      }
+
+      const expectedGatherings = gatherings
+        .filter((_, i) => i < 5)
+        .sort(
+          (a, b) =>
+            a.gatheringDate.getTime() - b.gatheringDate.getTime() ||
+            a.id.localeCompare(b.id),
+        );
+
+      const minDate = new Date('2025-01-01T00:00:00.000Z').toISOString();
+      const maxDate = new Date('2025-12-31T23:59:59.000Z').toISOString();
+      const cursor = {
+        createdAt: minDate,
+        id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
+      };
+      const limit = 8;
+
+      // when
+      const response = await request(app.getHttpServer())
+        .get(
+          `/gatherings/ended?cursor=${JSON.stringify(
+            cursor,
+          )}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
+        )
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GatheringListResponse> = response;
+      const { gatherings: resGatherings, nextCursor } = body;
+
+      expect(status).toEqual(200);
+      expect(nextCursor).toEqual(null);
+      expect(resGatherings.length).toEqual(expectedGatherings.length);
+      resGatherings.forEach((gathering, i) => {
+        expect(gathering.id).toEqual(expectedGatherings[i].id);
+        expect(gathering.name).toEqual(expectedGatherings[i].name);
+        expect(gathering.description).toEqual(
+          expectedGatherings[i].description,
+        );
+        expect(gathering.gatheringDate).toEqual(
+          expectedGatherings[i].gatheringDate.toISOString(),
+        );
+        expect(gathering.invitationImageUrl).toEqual(
+          expectedGatherings[i].invitationImageUrl,
+        );
+      });
+    });
+  });
+
   describe('(GET) /gatherings/{gatheringId} - 모임 상세 조회', () => {
     it('모임 상세 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);

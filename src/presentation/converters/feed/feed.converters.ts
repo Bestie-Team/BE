@@ -12,6 +12,12 @@ export const feedConverter = {
     return {
       feeds: feeds.map((feed) => ({
         ...feed,
+        gathering: feed.gathering
+          ? {
+              ...feed.gathering,
+              gatheringDate: feed.gathering?.gatheringDate.toISOString(),
+            }
+          : null,
         createdAt: feed.createdAt.toISOString(),
       })),
       nextCursor,

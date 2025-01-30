@@ -10,7 +10,7 @@ class Gathering {
   readonly name: string;
 
   @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
-  readonly gatheringDate: Date;
+  readonly gatheringDate: string;
 
   @ApiProperty({ type: () => User, isArray: true })
   readonly members: User[];

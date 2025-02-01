@@ -33,6 +33,6 @@ export class CreateGatheringFeedRequest {
   readonly imageUrls: string[];
 
   @ApiProperty()
-  @Length(20, 150, { message: 'content는 20 ~ 150자만 가능합니다.' })
+  @Length(1, 150, { message: 'content는 1 ~ 150자만 가능합니다.' })
   readonly content: string;
 }

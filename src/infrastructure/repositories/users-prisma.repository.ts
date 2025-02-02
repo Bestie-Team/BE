@@ -108,13 +108,21 @@ export class UsersPrismaRepository implements UsersRepository {
   async findDetailById(id: string): Promise<UserDetail | null> {
     const row = await this.prisma.$kysely
       .selectFrom('user as u')
-      .leftJoin('friend as fr', (qb) =>
-        qb.on((eb) =>
-          eb.or([eb('fr.sender_id', '=', id), eb('fr.receiver_id', '=', id)]),
-        ),
-      )
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
-      .select(({ fn }) => fn.count<number>('fr.id').as('friend_count'))
+      .select((qb) =>
+        qb
+          .selectFrom('friend as f')
+          .where((eb) =>
+            eb.or([eb('f.sender_id', '=', id), eb('f.receiver_id', '=', id)]),
+          )
+          .where(
+            'f.status',
+            '=',
+            sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
+          )
+          .select(({ fn }) => fn.countAll().as('friend_count'))
+          .as('friend_count'),
+      )
       .select((qb) =>
         qb
           .selectFrom('feed as f')
@@ -139,12 +147,6 @@ export class UsersPrismaRepository implements UsersRepository {
           )
           .select(({ fn }) => fn.countAll().as('group_count'))
           .as('group_count'),
-      )
-      .groupBy('u.id')
-      .where(
-        'fr.status',
-        '=',
-        sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
       )
       .where('u.id', '=', id)
       .executeTakeFirst();

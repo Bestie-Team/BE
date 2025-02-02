@@ -1,5 +1,4 @@
-export const NOT_FOUND_USER_MESSAGE = (info: string) =>
-  `${info}는 존재하지 않는 회원 정보입니다.`;
+export const NOT_FOUND_USER_MESSAGE = '존재하지 않는 회원 정보입니다.';
 export const NOT_FOUND_FRIEND_MESSAGE = '존재하지 않는 친구 혹은 요청입니다.';
 export const NOT_FOUND_GATHERING_MESSAGE = '존재하지 않는 모임입니다.';
 export const NOT_FOUND_GROUP = '존재하지 않는 그룹입니다.';

@@ -130,6 +130,23 @@ export class UsersController {
     return await this.usersService.getProfile(userId);
   }
 
+  @ApiOperation({
+    summary: '닉네임 중복 체크',
+    description: '상태 코드로만 판단하시면 됩니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용 가능한 닉네임',
+  })
+  @ApiResponse({
+    status: 409,
+    description: '이미 존재하는 닉네임',
+  })
+  @Get('availability')
+  async existAccountId(@Query('accountId') accountId: string) {
+    await this.usersService.checkDuplicateAccountId(accountId);
+  }
+
   @ApiOperation({ summary: '프로필 사진 변경' })
   @ApiResponse({
     status: 204,

@@ -78,7 +78,7 @@ export class UsersService {
     return user;
   }
 
-  private async checkDuplicateAccountId(accountId: string) {
+  async checkDuplicateAccountId(accountId: string) {
     const userByAccountId = await this.usersRepository.findOneByAccountId(
       accountId,
     );

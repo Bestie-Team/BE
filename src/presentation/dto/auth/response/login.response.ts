@@ -1,10 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginResponse {
-  @ApiProperty()
+  @ApiProperty({ example: 'uuid' })
+  readonly id: string;
+
+  @ApiProperty({ example: '토큰' })
   readonly accessToken: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'bad_orange' })
   readonly accountId: string;
 
   @ApiProperty({ type: 'string', nullable: true })

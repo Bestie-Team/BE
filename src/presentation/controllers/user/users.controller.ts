@@ -21,7 +21,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { ApiUserPaginationQuery } from 'src/common/decorators/swagger';
+import {
+  ApiFileOperation,
+  ApiUserPaginationQuery,
+} from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateProfileImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { UsersService } from 'src/domain/services/user/users.service';
@@ -42,7 +45,7 @@ import { UserProfileResponse } from 'src/presentation/dto/user/response/user-pro
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiOperation({ summary: '프로필 사진 업로드' })
+  @ApiFileOperation()
   @ApiBody({ type: FileRequest })
   @ApiResponse({
     status: 200,

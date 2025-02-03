@@ -51,8 +51,8 @@ export class FeedsController {
   ) {}
 
   @ApiOperation({
-    summary: '피드 사진 업로드',
-    description: 'files입니다 파일즈 ssssssss',
+    summary: '이미지 업로드',
+    description: 'files입니다 파일즈 ssssssss, 한 파일당 4MB 최대 5개.',
   })
   @ApiBody({ type: FileListRequest })
   @ApiResponse({

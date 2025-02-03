@@ -1,15 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class LoginResponse {
+export class UserProfileResponse {
   @ApiProperty({ example: 'uuid' })
   readonly id: string;
 
-  @ApiProperty({ example: '토큰' })
-  readonly accessToken: string;
+  @ApiProperty({ example: '최은제' })
+  readonly name: string;
 
   @ApiProperty({ example: 'bad_orange' })
   readonly accountId: string;
 
-  @ApiProperty({ type: 'string', nullable: true })
+  @ApiProperty({
+    example: 'https://cdn.lighty.today/image.com',
+    nullable: true,
+    type: 'string',
+  })
   readonly profileImageUrl: string | null;
 }

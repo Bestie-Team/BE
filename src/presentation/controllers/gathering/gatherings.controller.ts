@@ -22,7 +22,10 @@ import {
 } from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { ApiGatheringQuery } from 'src/common/decorators/swagger';
+import {
+  ApiFileOperation,
+  ApiGatheringQuery,
+} from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
@@ -50,7 +53,7 @@ export class GatheringsController {
     private readonly gatheringInvitationsReadService: GatheringInvitationsReadService,
   ) {}
 
-  @ApiOperation({ summary: '모임 초대장 이미지 업로드' })
+  @ApiFileOperation()
   @ApiBody({ type: FileRequest })
   @ApiResponse({
     status: 200,

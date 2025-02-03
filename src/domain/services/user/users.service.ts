@@ -60,6 +60,15 @@ export class UsersService {
     return user;
   }
 
+  async getProfile(id: string) {
+    const user = await this.usersRepository.findProfileById(id);
+    if (!user) {
+      throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
+    }
+
+    return user;
+  }
+
   private async getUserByIdOrThrow(userId: string) {
     const user = await this.usersRepository.findOneById(userId);
     if (!user) {
@@ -69,7 +78,7 @@ export class UsersService {
     return user;
   }
 
-  private async checkDuplicateAccountId(accountId: string) {
+  async checkDuplicateAccountId(accountId: string) {
     const userByAccountId = await this.usersRepository.findOneByAccountId(
       accountId,
     );

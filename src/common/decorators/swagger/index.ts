@@ -1,4 +1,4 @@
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { UserCursor } from 'src/presentation/dto';
 
 export const ApiUserPaginationQuery = () => {
@@ -98,5 +98,18 @@ export const ApiGatheringQuery = () => {
       propertyKey,
       descriptor,
     );
+  };
+};
+
+export const ApiFileOperation = () => {
+  return (
+    target: any,
+    propertyKey: string | symbol,
+    descriptor: PropertyDescriptor,
+  ) => {
+    ApiOperation({
+      summary: '이미지 업로드',
+      description: '이미지 최대 용량 4MB',
+    })(target, propertyKey, descriptor);
   };
 };

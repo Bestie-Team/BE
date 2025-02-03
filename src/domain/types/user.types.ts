@@ -24,12 +24,19 @@ export interface User {
 }
 
 export interface UserDetail extends User {
-  groupCount: number;
-  feedCount: number;
-  friendCount: number;
+  readonly groupCount: number;
+  readonly feedCount: number;
+  readonly friendCount: number;
+}
+
+export interface Profile {
+  readonly id: string;
+  readonly accountId: string;
+  readonly name: string;
+  readonly profileImageUrl: string | null;
 }
 
 export interface SearchInput {
-  paginationInput: UserPaginationInput;
-  search: string;
+  readonly paginationInput: UserPaginationInput;
+  readonly search: string;
 }

@@ -11,20 +11,21 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Provider } from '../../shared';
 
 export class RegisterRequest {
-  @ApiProperty()
+  @ApiProperty({ example: 'lighty@gmail.com' })
   @IsEmail({}, { message: '이메일 형식이 아닙니다.' })
   readonly email: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '재은최' })
   // 최대 길이 미정
   @Length(1, 20)
   readonly name: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'good_orange' })
   @Length(5, 15, { message: '계정 아이디는 최소 5자 최대 15자만 가능합니다.' })
   readonly accountId: string;
 
   @ApiProperty({
+    example: 'https://cdn.lighty.today/image.com',
     type: 'string',
     nullable: true,
   })

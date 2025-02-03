@@ -33,6 +33,7 @@ export class AuthService {
     }
 
     return {
+      id: user.id,
       accessToken: await this.generateToken(user.id),
       accountId: user.accountId,
       profileImageUrl: user.profileImageUrl,
@@ -52,6 +53,7 @@ export class AuthService {
     await this.usersRepository.save(user);
 
     return {
+      id: user.id,
       accessToken: await this.generateToken(user.id),
       accountId: user.accountId,
     };

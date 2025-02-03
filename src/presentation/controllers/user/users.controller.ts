@@ -21,7 +21,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { ApiUserPaginationQuery } from 'src/common/decorators/swagger';
+import {
+  ApiFileOperation,
+  ApiUserPaginationQuery,
+} from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateProfileImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { UsersService } from 'src/domain/services/user/users.service';
@@ -33,6 +36,7 @@ import { IMAGE_BASE_URL } from 'src/common/constant';
 import { ChangeProfileImageRequest } from 'src/presentation/dto/user/request/change-profile-image.request';
 import { ChangeAccountIdRequest } from 'src/presentation/dto';
 import { UserDetailResponse } from 'src/presentation/dto/user/response/user-detail.response';
+import { UserProfileResponse } from 'src/presentation/dto/user/response/user-profile.response';
 
 @ApiTags('/users')
 @ApiBearerAuth()
@@ -41,7 +45,7 @@ import { UserDetailResponse } from 'src/presentation/dto/user/response/user-deta
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiOperation({ summary: '프로필 사진 업로드' })
+  @ApiFileOperation()
   @ApiBody({ type: FileRequest })
   @ApiResponse({
     status: 200,
@@ -98,9 +102,49 @@ export class UsersController {
     description: '회원 상세 정보 조회 완료',
     type: UserDetailResponse,
   })
+  @ApiResponse({
+    status: 404,
+    description: '존재하지 않는 회원 번호',
+  })
   @Get('my')
   async getDetail(@CurrentUser() userId: string): Promise<UserDetailResponse> {
     return await this.usersService.getDetail(userId);
+  }
+
+  @ApiOperation({
+    summary: '회원 프로필 조회 (로그인 시 응답하는 회원 정보와 동일)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '회원 프로필 조회 완료',
+    type: UserProfileResponse,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '존재하지 않는 회원 번호',
+  })
+  @Get('profile')
+  async getProfile(
+    @CurrentUser() userId: string,
+  ): Promise<UserProfileResponse> {
+    return await this.usersService.getProfile(userId);
+  }
+
+  @ApiOperation({
+    summary: '닉네임 중복 체크',
+    description: '상태 코드로만 판단하시면 됩니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용 가능한 닉네임',
+  })
+  @ApiResponse({
+    status: 409,
+    description: '이미 존재하는 닉네임',
+  })
+  @Get('availability')
+  async existAccountId(@Query('accountId') accountId: string) {
+    await this.usersService.checkDuplicateAccountId(accountId);
   }
 
   @ApiOperation({ summary: '프로필 사진 변경' })

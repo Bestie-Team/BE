@@ -25,7 +25,10 @@ import {
 } from '@nestjs/swagger';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { ApiGroupPaginationQuery } from 'src/common/decorators/swagger';
+import {
+  ApiFileOperation,
+  ApiGroupPaginationQuery,
+} from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GroupCreateService } from 'src/domain/services/group/group-create.service';
@@ -48,7 +51,7 @@ export class GroupsController {
     private readonly groupsService: GroupsService,
   ) {}
 
-  @ApiOperation({ summary: '그룹 커버 이미지 업로드' })
+  @ApiFileOperation()
   @ApiBody({ type: FileRequest })
   @ApiResponse({
     status: 200,

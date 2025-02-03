@@ -39,8 +39,6 @@ import { UserDetailResponse } from 'src/presentation/dto/user/response/user-deta
 import { UserProfileResponse } from 'src/presentation/dto/user/response/user-profile.response';
 
 @ApiTags('/users')
-@ApiBearerAuth()
-@UseGuards(AuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -60,6 +58,8 @@ export class UsersController {
     status: 413,
     description: '파일 사이즈 초과',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file', CreateProfileImageMulterOptions()))
   @Post('profile/image')
@@ -88,6 +88,8 @@ export class UsersController {
     status: 400,
     description: '입력값 검증 실패',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async search(
     @Query() dto: SearchUserRequest,
     @CurrentUser() userId: string,
@@ -106,6 +108,8 @@ export class UsersController {
     status: 404,
     description: '존재하지 않는 회원 번호',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Get('my')
   async getDetail(@CurrentUser() userId: string): Promise<UserDetailResponse> {
     return await this.usersService.getDetail(userId);
@@ -123,6 +127,8 @@ export class UsersController {
     status: 404,
     description: '존재하지 않는 회원 번호',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Get('profile')
   async getProfile(
     @CurrentUser() userId: string,
@@ -156,6 +162,8 @@ export class UsersController {
     status: 400,
     description: '입력값 검증 실패',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('profile/image')
   async changeProfileImage(
@@ -186,6 +194,8 @@ export class UsersController {
     status: 400,
     description: '입력값 검증 실패',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('account-id')
   async changeAccountId(

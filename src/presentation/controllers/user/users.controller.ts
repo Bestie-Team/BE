@@ -33,6 +33,7 @@ import { IMAGE_BASE_URL } from 'src/common/constant';
 import { ChangeProfileImageRequest } from 'src/presentation/dto/user/request/change-profile-image.request';
 import { ChangeAccountIdRequest } from 'src/presentation/dto';
 import { UserDetailResponse } from 'src/presentation/dto/user/response/user-detail.response';
+import { UserProfileResponse } from 'src/presentation/dto/user/response/user-profile.response';
 
 @ApiTags('/users')
 @ApiBearerAuth()
@@ -98,9 +99,32 @@ export class UsersController {
     description: '회원 상세 정보 조회 완료',
     type: UserDetailResponse,
   })
+  @ApiResponse({
+    status: 404,
+    description: '존재하지 않는 회원 번호',
+  })
   @Get('my')
   async getDetail(@CurrentUser() userId: string): Promise<UserDetailResponse> {
     return await this.usersService.getDetail(userId);
+  }
+
+  @ApiOperation({
+    summary: '회원 프로필 조회 (로그인 시 응답하는 회원 정보와 동일)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '회원 프로필 조회 완료',
+    type: UserProfileResponse,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '존재하지 않는 회원 번호',
+  })
+  @Get('profile')
+  async getProfile(
+    @CurrentUser() userId: string,
+  ): Promise<UserProfileResponse> {
+    return await this.usersService.getProfile(userId);
   }
 
   @ApiOperation({ summary: '프로필 사진 변경' })

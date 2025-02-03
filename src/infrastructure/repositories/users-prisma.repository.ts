@@ -3,6 +3,7 @@ import { UserEntity } from 'src/domain/entities/user/user.entity';
 import { UsersRepository } from 'src/domain/interface/users.repository';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import type {
+  Profile,
   User,
   UserBasicInfo,
   UserDetail,
@@ -162,6 +163,20 @@ export class UsersPrismaRepository implements UsersRepository {
           profileImageUrl: row.profile_image_url,
         }
       : null;
+  }
+
+  async findProfileById(id: string): Promise<Profile | null> {
+    return await this.prisma.user.findUnique({
+      select: {
+        id: true,
+        name: true,
+        accountId: true,
+        profileImageUrl: true,
+      },
+      where: {
+        id,
+      },
+    });
   }
 
   async update(data: Partial<UserEntity>): Promise<void> {

@@ -1,5 +1,10 @@
 import { UserEntity } from 'src/domain/entities/user/user.entity';
-import { User, UserBasicInfo, UserDetail } from 'src/domain/types/user.types';
+import {
+  Profile,
+  User,
+  UserBasicInfo,
+  UserDetail,
+} from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
 
 export interface UsersRepository {
@@ -15,6 +20,7 @@ export interface UsersRepository {
     searchInput: SearchInput,
   ): Promise<User[]>;
   findDetailById(id: string): Promise<UserDetail | null>;
+  findProfileById(id: string): Promise<Profile | null>;
   update(data: Partial<UserEntity>): Promise<void>;
 }
 

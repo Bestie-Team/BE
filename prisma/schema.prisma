@@ -120,8 +120,8 @@ model GatheringParticipation {
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
 
-  gathering Gathering @relation(fields: [gatheringId], references: [id])
-  participant User @relation(fields: [participantId], references: [id])
+  gathering Gathering @relation(fields: [gatheringId], references: [id], onDelete: Cascade)
+  participant User @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
   @@map("gathering_participation")
 }

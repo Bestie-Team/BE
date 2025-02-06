@@ -990,4 +990,88 @@ describe('GatheringsController (e2e)', () => {
       expect(members.length).toEqual(3);
     });
   });
+
+  describe('(DELETE) /gatherings/{gatheringId} - 모임 삭제', () => {
+    it('모임 삭제 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+
+      const gathering = await prisma.gathering.create({
+        data: generateGatheringEntity(loginedUser!.id, new Date()),
+      });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/gatherings/${gathering.id}`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+      const participations = await prisma.gatheringParticipation.findMany();
+
+      expect(status).toEqual(200);
+      expect(participations.length).toEqual(0);
+    });
+
+    it('모임장이 아닌 회원이 삭제하려는 경우 예외', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const owner = await prisma.user.create({
+        data: generateUserEntity('membet@test.com', 'member_id'),
+      });
+
+      const gathering = await prisma.gathering.create({
+        data: generateGatheringEntity(owner.id, new Date()),
+      });
+      const gatheringParticipation = await prisma.gatheringParticipation.create(
+        {
+          data: generateGatheringParticipationEntity(
+            gathering.id,
+            loginedUser!.id,
+          ),
+        },
+      );
+
+      const response = await request(app.getHttpServer())
+        .delete(`/gatherings/${gathering.id}`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(403);
+    });
+
+    it('완료된 모임을 삭제하려는 경우 실패', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+
+      const gathering = await prisma.gathering.create({
+        data: generateGatheringEntity(loginedUser!.id, new Date()),
+      });
+      await prisma.gathering.update({
+        data: { endedAt: new Date() },
+        where: {
+          id: gathering.id,
+        },
+      });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/gatherings/${gathering.id}`)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(422);
+    });
+  });
 });

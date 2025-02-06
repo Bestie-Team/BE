@@ -86,11 +86,21 @@ export class UsersPrismaRepository implements UsersRepository {
           .selectFrom('friend as f')
           .select('f.sender_id as friend_id')
           .where('f.receiver_id', '=', userId)
+          .where(
+            'f.status',
+            '=',
+            sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
+          )
           .union((qb) =>
             qb
               .selectFrom('friend as f')
               .select('f.receiver_id as friend_id')
-              .where('f.sender_id', '=', userId),
+              .where('f.sender_id', '=', userId)
+              .where(
+                'f.status',
+                '=',
+                sql<FriendStatus>`${FriendStatus.ACCEPTED}::"FriendStatus"`,
+              ),
           ),
       )
       .orderBy('u.name')

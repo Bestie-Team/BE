@@ -41,6 +41,7 @@ describe('UsersController (e2e)', () => {
     await prisma.user.deleteMany();
   });
 
+  // TODO 친구, 친구 요청 상태 회원도 추가해서 테스트.
   describe('(GET) /users/search?search={} - 회원 검색', () => {
     it('회원 검색 정상 동작', async () => {
       const { accessToken } = await login(app);
@@ -210,6 +211,8 @@ describe('UsersController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<UserDetailResponse> = response;
 
+      console.log(body);
+
       expect(status).toEqual(200);
       expect(body.id).toEqual(loginedUser!.id);
       expect(body.accountId).toEqual(loginedUser!.accountId);
@@ -219,5 +222,7 @@ describe('UsersController (e2e)', () => {
       expect(body.friendCount).toEqual(acceptedFriend.length);
       expect(body.groupCount).toEqual([...ownGroups, ...groupJoin].length);
     });
+
+    // TODO 모든 카운트 정보가 0명일 떄 조회.
   });
 });

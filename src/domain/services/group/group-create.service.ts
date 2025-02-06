@@ -101,7 +101,18 @@ export class GroupCreateService {
 
   async updateDescription(id: string, ownerId: string, description: string) {
     await this.checkIsOwner(id, ownerId);
-    await this.groupsRepository.update(id, { description });
+    await this.groupsRepository.update(id, {
+      description,
+      updatedAt: new Date(),
+    });
+  }
+
+  async updateCoverImage(id: string, ownerId: string, groupImageUrl: string) {
+    await this.checkIsOwner(id, ownerId);
+    await this.groupsRepository.update(id, {
+      groupImageUrl,
+      updatedAt: new Date(),
+    });
   }
 
   @Transactional()

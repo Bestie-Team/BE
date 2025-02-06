@@ -293,6 +293,15 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     });
   }
 
+  async update(id: string, data: Partial<GatheringEntity>): Promise<void> {
+    await this.txHost.tx.gathering.update({
+      data,
+      where: {
+        id,
+      },
+    });
+  }
+
   async delete(id: string): Promise<void> {
     await this.txHost.tx.gathering.update({
       data: {

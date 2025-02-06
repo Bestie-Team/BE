@@ -72,7 +72,7 @@ export class CreateGatheringRequest {
     example: '두리 집이 있는 집',
     description: '1 ~ 25자',
   })
-  @Length(1, 25, { message: '모임 장소는 최소 1자 최대 25자만 가능합니다.' })
+  @Length(1, 100, { message: '모임 장소는 최소 1자 최대 100자만 가능합니다.' })
   readonly address: string;
 
   @ApiProperty({ example: 'https://image.com', description: 'url' })

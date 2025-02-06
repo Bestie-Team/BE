@@ -15,7 +15,10 @@ import {
   MINIMUM_FRIENDS_REQUIRED_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
-import { GatheringPrototype } from 'src/domain/types/gathering.types';
+import {
+  GatheringPrototype,
+  UpdateInput,
+} from 'src/domain/types/gathering.types';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
@@ -131,6 +134,25 @@ export class GatheringsWriteService {
     if (!participation) {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
+  }
+
+  async update(id: string, input: UpdateInput, ownerId: string) {
+    const gathering = await this.gatheringsRepository.findOneByIdAndHostId(
+      id,
+      ownerId,
+    );
+
+    if (!gathering) {
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    }
+
+    const stdDate = new Date();
+    const gatheringDate = new Date(input.gatheringDate);
+    await this.gatheringsRepository.update(id, {
+      ...input,
+      gatheringDate,
+      updatedAt: stdDate,
+    });
   }
 
   async delete(id: string, userId: string) {

@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -39,6 +41,7 @@ import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/c
 import { GatheringInvitationListRequest } from 'src/presentation/dto/gathering/request/gathering-invitation-list.request';
 import { GatheringListRequest } from 'src/presentation/dto/gathering/request/gathering-list.request';
 import { NoFeedGatheringListRequest } from 'src/presentation/dto/gathering/request/no-feed-gathering-list.request';
+import { UpdateGatheringRequest } from 'src/presentation/dto/gathering/request/update-gathering.request';
 import { GatheringDetailResponse } from 'src/presentation/dto/gathering/response/gathering-detail.response';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
@@ -278,9 +281,28 @@ export class GatheringsController {
     return gatheringInvitationConverter.toListDto(domain);
   }
 
+  @ApiOperation({ summary: '모임 수정' })
+  @ApiResponse({
+    status: 204,
+    description: '모임 수정 완료',
+  })
+  @ApiResponse({
+    status: 403,
+    description: '모임장이 아닌 경우 실패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch(':gatheringId')
+  async update(
+    @Param('gatheringId') gatheringId: string,
+    @Body() dto: UpdateGatheringRequest,
+    @CurrentUser() userId: string,
+  ) {
+    await this.gatheringsWriteService.update(gatheringId, dto, userId);
+  }
+
   @ApiOperation({ summary: '모임 삭제' })
   @ApiResponse({
-    status: 200,
+    status: 204,
     description: '모임 삭제 완료',
   })
   @ApiResponse({
@@ -291,6 +313,7 @@ export class GatheringsController {
     status: 422,
     description: '완료된 모임을 삭제하려는 경우 실패',
   })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':gatheringId')
   async delete(
     @Param('gatheringId', ParseUUIDPipe) gatheringId: string,

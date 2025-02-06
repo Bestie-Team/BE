@@ -39,3 +39,10 @@ export interface GatheringInvitation {
   readonly groupName: string | null;
   readonly members: User[];
 }
+
+export interface UpdateInput {
+  readonly name: string;
+  readonly description: string;
+  readonly gatheringDate: string;
+  readonly address: string;
+}

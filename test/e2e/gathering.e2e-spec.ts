@@ -23,6 +23,7 @@ import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
 import { GatheringDetail } from 'src/domain/types/gathering.types';
 import { User } from '@prisma/client';
+import { UpdateGatheringRequest } from 'src/presentation/dto/gathering/request/update-gathering.request';
 
 describe('GatheringsController (e2e)', () => {
   let app: INestApplication;
@@ -1011,7 +1012,7 @@ describe('GatheringsController (e2e)', () => {
       const { status } = response;
       const participations = await prisma.gatheringParticipation.findMany();
 
-      expect(status).toEqual(200);
+      expect(status).toEqual(204);
       expect(participations.length).toEqual(0);
     });
 
@@ -1072,6 +1073,36 @@ describe('GatheringsController (e2e)', () => {
       const { status } = response;
 
       expect(status).toEqual(422);
+    });
+  });
+
+  describe('(PATCH) /gatherings/{gatheringId} - 모임 수정', () => {
+    it('모임 수정 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const gathering = await prisma.gathering.create({
+        data: generateGatheringEntity(loginedUser!.id, new Date()),
+      });
+
+      const dto: UpdateGatheringRequest = {
+        name: '변경된 이름',
+        address: '변경된 주소',
+        description: '변경된 설명',
+        gatheringDate: new Date('2025-02-02T00:00:00.000Z').toISOString(),
+      };
+
+      const response = await request(app.getHttpServer())
+        .patch(`/gatherings/${gathering.id}`)
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(204);
     });
   });
 });

@@ -3,11 +3,13 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { v4 } from 'uuid';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import {
+  CANT_DELETE_END_GATHERING,
   FORBIDDEN_MESSAGE,
   GROUP_GATHERING_REQUIRED_GROUPID_MESSAGE,
   MINIMUM_FRIENDS_REQUIRED_MESSAGE,
@@ -129,5 +131,29 @@ export class GatheringsWriteService {
     if (!participation) {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
+  }
+
+  async delete(id: string, userId: string) {
+    const gathering = await this.gatheringsRepository.findOneByIdAndHostId(
+      id,
+      userId,
+    );
+
+    if (!gathering) {
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    }
+    if (gathering.endedAt) {
+      throw new UnprocessableEntityException(CANT_DELETE_END_GATHERING);
+    }
+
+    await this.deleteTransaction(id);
+  }
+
+  @Transactional()
+  async deleteTransaction(gatheringId: string) {
+    await this.gatheringsRepository.delete(gatheringId);
+    await this.gatheringParticipationsRepository.deleteAllByGatheringId(
+      gatheringId,
+    );
   }
 }

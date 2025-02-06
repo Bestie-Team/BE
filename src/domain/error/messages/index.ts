@@ -27,3 +27,4 @@ export const CANT_INVITE_REPORTED_USER =
   '그룹을 신고한 회원은 초대할 수 없습니다.';
 export const GROUP_MEMBER_ALREADY_EXIST_MESSAGE =
   '이미 존재하는 그룹 멤버입니다.';
+export const CANT_DELETE_END_GATHERING = '완료된 모임은 삭제할 수 없습니다.';

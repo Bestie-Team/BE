@@ -267,4 +267,12 @@ export class GatheringParticipationsPrismaRepository
       },
     });
   }
+
+  async deleteAllByGatheringId(gatheringId: string): Promise<void> {
+    await this.txHost.tx.gatheringParticipation.deleteMany({
+      where: {
+        gatheringId,
+      },
+    });
+  }
 }

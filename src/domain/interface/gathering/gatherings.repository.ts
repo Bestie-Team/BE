@@ -20,7 +20,12 @@ export interface GatheringsRepository {
     paginationInput: DateIdPaginationInput,
   ): Promise<Gathering[]>;
   findDetailById(id: string): Promise<GatheringDetail | null>;
+  findOneByIdAndHostId(
+    id: string,
+    hostId: string,
+  ): Promise<{ id: string; endedAt: Date | null } | null>;
   findOneById(id: string): Promise<{ id: string; endedAt: Date | null } | null>;
+  delete(id: string): Promise<void>;
 }
 
 export const GatheringsRepository = Symbol('GatheringRepository');

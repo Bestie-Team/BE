@@ -33,6 +33,7 @@ export interface GatheringParticipationsRepository {
     firstUserId: string,
     secondUserId: string,
   ): Promise<void>;
+  deleteAllByGatheringId(gatheringId: string): Promise<void>;
 }
 
 export const GatheringParticipationsRepository = Symbol(

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -275,5 +276,26 @@ export class GatheringsController {
         dto,
       );
     return gatheringInvitationConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '모임 삭제' })
+  @ApiResponse({
+    status: 200,
+    description: '모임 삭제 완료',
+  })
+  @ApiResponse({
+    status: 403,
+    description: '모임장이 아닌 경우 실패',
+  })
+  @ApiResponse({
+    status: 422,
+    description: '완료된 모임을 삭제하려는 경우 실패',
+  })
+  @Delete(':gatheringId')
+  async delete(
+    @Param('gatheringId', ParseUUIDPipe) gatheringId: string,
+    @CurrentUser() userId: string,
+  ) {
+    await this.gatheringsWriteService.delete(gatheringId, userId);
   }
 }

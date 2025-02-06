@@ -250,6 +250,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       },
       where: {
         id,
+        deletedAt: null,
       },
     });
 
@@ -269,12 +270,37 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       : null;
   }
 
+  async findOneByIdAndHostId(
+    id: string,
+    hostId: string,
+  ): Promise<{ id: string; endedAt: Date | null } | null> {
+    return await this.txHost.tx.gathering.findFirst({
+      select: { id: true, endedAt: true },
+      where: {
+        id,
+        hostUserId: hostId,
+        deletedAt: null,
+      },
+    });
+  }
+
   async findOneById(
     id: string,
   ): Promise<{ id: string; endedAt: Date | null } | null> {
     return await this.txHost.tx.gathering.findUnique({
       select: { id: true, endedAt: true },
-      where: { id },
+      where: { id, deletedAt: null },
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.txHost.tx.gathering.update({
+      data: {
+        deletedAt: new Date(),
+      },
+      where: {
+        id,
+      },
     });
   }
 }

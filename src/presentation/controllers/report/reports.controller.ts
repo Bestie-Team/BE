@@ -43,6 +43,6 @@ export class ReportsController {
       ? await this.friendReportWriteService.report(input)
       : type === 'GROUP'
       ? await this.groupReportWriteService.report(input)
-      : await this.friendReportWriteService.report(input);
+      : await this.feedReportsWriteService.report(input);
   }
 }

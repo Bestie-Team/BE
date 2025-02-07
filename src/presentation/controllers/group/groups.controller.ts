@@ -185,7 +185,10 @@ export class GroupsController {
     await this.groupsCreateService.leaveGroup(groupId, userId);
   }
 
-  @ApiOperation({ summary: '그룹 정보 수정' })
+  @ApiOperation({
+    summary: '그룹 정보 수정',
+    description: '변경되지 않는 속성은 기존 값을 넣어서 주세요.',
+  })
   @ApiResponse({
     status: 204,
     description: '수정 완료',

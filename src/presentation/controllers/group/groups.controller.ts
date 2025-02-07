@@ -34,15 +34,10 @@ import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer
 import { GroupCreateService } from 'src/domain/services/group/group-create.service';
 import { GroupsService } from 'src/domain/services/group/groups.service';
 import { toListDto } from 'src/presentation/converters/group/group.converters';
-import {
-  AddGroupMemberRequest,
-  PaginationRequest,
-  UpdateCoverImageRequest,
-} from 'src/presentation/dto';
+import { AddGroupMemberRequest, PaginationRequest } from 'src/presentation/dto';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
-import { UpdateDescriptionRequest } from 'src/presentation/dto/group/request/update-description.request';
 import { UpdateGroupRequest } from 'src/presentation/dto/group/request/update-group.request';
 import { GroupListResponse } from 'src/presentation/dto/group/response/group-list.response';
 
@@ -188,52 +183,6 @@ export class GroupsController {
     @CurrentUser() userId: string,
   ) {
     await this.groupsCreateService.leaveGroup(groupId, userId);
-  }
-
-  @ApiOperation({ summary: '그룹 설명 변경' })
-  @ApiResponse({
-    status: 204,
-    description: '그룹 설명 변경 완료',
-  })
-  @ApiResponse({
-    status: 403,
-    description: '그룹장이 아닌 경우 변경 실패',
-  })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Patch(':groupId/description')
-  async updateDescription(
-    @Param('groupId') groupId: string,
-    @Body() dto: UpdateDescriptionRequest,
-    @CurrentUser() userId: string,
-  ) {
-    await this.groupsCreateService.updateDescription(
-      groupId,
-      userId,
-      dto.description,
-    );
-  }
-
-  @ApiOperation({ summary: '그룹 커버 이미지 변경' })
-  @ApiResponse({
-    status: 204,
-    description: '이미지 변경 완료',
-  })
-  @ApiResponse({
-    status: 403,
-    description: '그룹장이 아닌 경우 변경 실패',
-  })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Patch(':groupId/image')
-  async updateCoverImage(
-    @Param('groupId') groupId: string,
-    @Body() dto: UpdateCoverImageRequest,
-    @CurrentUser() userId: string,
-  ) {
-    await this.groupsCreateService.updateCoverImage(
-      groupId,
-      userId,
-      dto.groupImageUrl,
-    );
   }
 
   @ApiOperation({ summary: '그룹 정보 수정' })

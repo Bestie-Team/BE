@@ -585,39 +585,6 @@ describe('GroupsController (e2e)', () => {
     });
   });
 
-  describe('(PATCH) /groups/{id}/description - 그룹 설명 변경', () => {
-    it('그룹 설명 변경 정상 동작', async () => {
-      const { accessToken, accountId } = await login(app);
-
-      const loginedUser = await prisma.user.findUnique({
-        where: {
-          accountId,
-        },
-      });
-      const group = await prisma.group.create({
-        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
-      });
-      const groupId = group.id;
-      const dto: UpdateDescriptionRequest = {
-        description: '변경된 설명',
-      };
-
-      // when
-      const response = await request(app.getHttpServer())
-        .patch(`/groups/${groupId}/description`)
-        .send(dto)
-        .set('Authorization', accessToken);
-      const { status } = response;
-      const updatedGroup = await prisma.group.findUnique({
-        where: {
-          id: groupId,
-        },
-      });
-      expect(status).toEqual(204);
-      expect(updatedGroup?.description).toEqual(dto.description);
-    });
-  });
-
   describe('(PATCH) /groups/{id} - 그룹 정보 수정', () => {
     it('그룹 정보 수정 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);

@@ -41,57 +41,77 @@ describe('UsersController (e2e)', () => {
     await prisma.user.deleteMany();
   });
 
-  // TODO 친구, 친구 요청 상태 회원도 추가해서 테스트.
   describe('(GET) /users/search?search={} - 회원 검색', () => {
     it('회원 검색 정상 동작', async () => {
-      const { accessToken } = await login(app);
+      const { accessToken, accountId } = await login(app);
 
-      const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 4
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
       });
-      const user2 = await prisma.user.create({
-        data: generateUserEntity('test2@test.com', 'lighty_2', '김기수'), // 3
-      });
-      const user3 = await prisma.user.create({
-        data: generateUserEntity('test3@test.com', 'lighty_3', '박민수'), //5
-      });
-      const user4 = await prisma.user.create({
-        data: generateUserEntity('test4@test.com', 'lighty_4', '강민수'), // 1
-      });
-      const user5 = await prisma.user.create({
-        data: generateUserEntity('test5@test.com', 'lighty_5', '조민수'), //6
-      });
-      const user6 = await prisma.user.create({
-        data: generateUserEntity('test6@test.com', 'lighty_6', '강민수'), // 2
-      });
-      const nonSearchedUser = await prisma.user.create({
-        data: generateUserEntity('test7@test.com', 'righty', '이민수'),
+      const users = Array.from({ length: 50 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `account${i}_id`, `김민수${i}`),
+      );
+      await prisma.user.createMany({
+        data: users,
       });
 
-      const searchKeyword = 'lig';
+      const sentFriendRequests = Array.from({ length: 10 }, (_, i) =>
+        generateFriendEntity(loginedUser!.id, users[i].id, 'PENDING'),
+      );
+      const receivedFriendRequests = Array.from({ length: 10 }, (_, i) =>
+        generateFriendEntity(
+          users[i + sentFriendRequests.length].id,
+          loginedUser!.id,
+          'PENDING',
+        ),
+      );
+      const friend = Array.from({ length: 10 }, (_, i) =>
+        generateFriendEntity(loginedUser!.id, users[i + 40].id, 'ACCEPTED'),
+      );
+      await prisma.friend.createMany({
+        data: [...sentFriendRequests, ...receivedFriendRequests, ...friend],
+      });
+
+      const searchKeyword = 'acc';
       const cursor = {
-        name: user4.name, // 강민수
-        accountId: user4.accountId,
+        name: '가',
+        accountId: 'a',
       };
-      const limit = 4;
-      const expectedUsers = [user6, user2, user1, user3];
+      const limit = 40;
+
+      // 이름으로 오름차순 정렬.
+      const expectedUsers = users
+        .filter((_, i) => i < 40)
+        .sort((a, b) => {
+          if (a.name < b.name) {
+            return -1;
+          }
+          if (a.name > b.name) {
+            return 1;
+          }
+          return 0;
+        });
+
+      // when
       const url = encodeURI(
         `/users/search?search=${searchKeyword}&cursor=${JSON.stringify(
           cursor,
         )}&limit=${limit}`,
       );
-      // when
       const response = await request(app.getHttpServer())
         .get(url)
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<SearchUserResponse> = response;
+      const { users: resUsers, nextCursor } = body;
 
       expect(status).toEqual(200);
-      expect(body.nextCursor).toEqual({
+      expect(nextCursor).toEqual({
         name: expectedUsers.at(-1)?.name,
         accountId: expectedUsers.at(-1)?.accountId,
       });
-      body.users.forEach((user, i) => {
+      resUsers.forEach((user, i) => {
         expect(user.id).toEqual(expectedUsers[i].id);
         expect(user.accountId).toEqual(expectedUsers[i].accountId);
         expect(user.name).toEqual(expectedUsers[i].name);

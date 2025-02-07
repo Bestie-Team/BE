@@ -43,6 +43,7 @@ import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
 import { UpdateDescriptionRequest } from 'src/presentation/dto/group/request/update-description.request';
+import { UpdateGroupRequest } from 'src/presentation/dto/group/request/update-group.request';
 import { GroupListResponse } from 'src/presentation/dto/group/response/group-list.response';
 
 @ApiTags('/groups')
@@ -233,6 +234,25 @@ export class GroupsController {
       userId,
       dto.groupImageUrl,
     );
+  }
+
+  @ApiOperation({ summary: '그룹 정보 수정' })
+  @ApiResponse({
+    status: 204,
+    description: '수정 완료',
+  })
+  @ApiResponse({
+    status: 403,
+    description: '그룹장이 아닌 경우 수정 실패',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch(':groupId')
+  async update(
+    @Param('groupId') groupId: string,
+    @Body() dto: UpdateGroupRequest,
+    @CurrentUser() userId: string,
+  ) {
+    await this.groupsCreateService.update(groupId, userId, dto);
   }
 
   @ApiOperation({ summary: '그룹 삭제 (그룹장)' })

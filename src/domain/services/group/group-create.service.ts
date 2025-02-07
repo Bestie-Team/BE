@@ -115,6 +115,18 @@ export class GroupCreateService {
     });
   }
 
+  async update(
+    id: string,
+    ownerId: string,
+    input: Pick<GroupEntity, 'name' | 'description' | 'groupImageUrl'>,
+  ) {
+    await this.checkIsOwner(id, ownerId);
+    await this.groupsRepository.update(id, {
+      ...input,
+      updatedAt: new Date(),
+    });
+  }
+
   @Transactional()
   private async createTransaction(
     group: GroupEntity,

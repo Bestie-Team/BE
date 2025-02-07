@@ -82,7 +82,11 @@ export class FriendsController {
     await this.friendsService.accept(friendId, userId);
   }
 
-  @ApiOperation({ summary: '친구 요청 거절' })
+  @ApiOperation({
+    summary: '친구 요청 거절',
+    description:
+      '보낸 요청 취소에도 동일하게 사용하시면 돼요. 요청 목록 조회 응답의 id가 friendId입니다.',
+  })
   @ApiParam({
     name: 'friendId',
     description: '친구 요청 번호',

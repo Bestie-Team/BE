@@ -4,13 +4,14 @@ import { UsersRepository } from 'src/domain/interface/users.repository';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import type {
   Profile,
-  User,
+  SearchedUser,
   UserBasicInfo,
   UserDetail,
 } from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
 import { sql } from 'kysely';
 import { FriendStatus } from '@prisma/client';
+import { FriendRequestStatus } from 'src/shared/types';
 
 @Injectable()
 export class UsersPrismaRepository implements UsersRepository {
@@ -64,12 +65,42 @@ export class UsersPrismaRepository implements UsersRepository {
   async findByAccountIdContaining(
     userId: string,
     searchInput: SearchInput,
-  ): Promise<User[]> {
+  ): Promise<SearchedUser[]> {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
       .selectFrom('user as u')
-      .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
+      .leftJoin('friend as f', (join) =>
+        join
+          .on((eb) =>
+            eb.or([
+              eb.and([
+                eb('f.sender_id', '=', userId),
+                eb('f.receiver_id', '=', eb.ref('u.id')),
+              ]),
+              eb.and([
+                eb('f.receiver_id', '=', userId),
+                eb('f.sender_id', '=', eb.ref('u.id')),
+              ]),
+            ]),
+          )
+          .on(
+            'f.status',
+            '=',
+            sql<FriendStatus>`${FriendStatus.PENDING}::"FriendStatus"`,
+          ),
+      )
+      .select([
+        'u.id',
+        'u.account_id',
+        'u.name',
+        'u.profile_image_url',
+        sql<string>`CASE
+        WHEN f.sender_id = ${userId} THEN 'SENT'
+        WHEN f.receiver_id = ${userId} THEN 'RECEIVED'
+        ELSE 'NONE'
+      END`.as('status'), // 요청 상태 추가
+      ])
       .where('u.account_id', 'like', `%${search}%`)
       .where('u.id', '!=', userId)
       .where(({ eb, or, and }) =>
@@ -113,6 +144,7 @@ export class UsersPrismaRepository implements UsersRepository {
       accountId: row.account_id,
       name: row.name,
       profileImageUrl: row.profile_image_url,
+      status: row.status as FriendRequestStatus, // sql case when 사용함.
     }));
   }
 

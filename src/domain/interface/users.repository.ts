@@ -1,7 +1,7 @@
 import { UserEntity } from 'src/domain/entities/user/user.entity';
 import {
   Profile,
-  User,
+  SearchedUser,
   UserBasicInfo,
   UserDetail,
 } from 'src/domain/types/user.types';
@@ -18,7 +18,7 @@ export interface UsersRepository {
   findByAccountIdContaining(
     userId: string,
     searchInput: SearchInput,
-  ): Promise<User[]>;
+  ): Promise<SearchedUser[]>;
   findDetailById(id: string): Promise<UserDetail | null>;
   findProfileById(id: string): Promise<Profile | null>;
   update(data: Partial<UserEntity>): Promise<void>;

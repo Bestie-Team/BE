@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -203,5 +204,22 @@ export class UsersController {
     @CurrentUser() userId: string,
   ) {
     await this.usersService.updateAccountId(userId, dto.accountId);
+  }
+
+  @ApiOperation({ summary: '탈퇴' })
+  @ApiResponse({
+    status: 204,
+    description: '탈퇴 성공',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '입력값 검증 실패',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete()
+  async delete(@CurrentUser() userId: string) {
+    await this.usersService.delete(userId);
   }
 }

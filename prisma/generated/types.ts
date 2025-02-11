@@ -50,6 +50,49 @@ export const ReportTypes = {
   GROUP: 'GROUP',
 } as const;
 export type ReportTypes = (typeof ReportTypes)[keyof typeof ReportTypes];
+export type ActiveFeed = {
+  id: string;
+  writer_id: string;
+  gathering_id: string | null;
+  content: string;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+  deleted_at: Timestamp | null;
+};
+export type ActiveFeedComment = {
+  id: string;
+  feed_id: string;
+  writer_id: string;
+  content: string;
+  created_at: Timestamp;
+  deleted_at: Timestamp | null;
+};
+export type ActiveGathering = {
+  id: string;
+  type: GatheringType;
+  group_id: string | null;
+  host_user_id: string;
+  name: string;
+  description: string;
+  gathering_date: Timestamp;
+  address: string;
+  invitation_image_url: string;
+  ended_at: Timestamp | null;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+  deleted_at: Timestamp | null;
+};
+export type ActiveUser = {
+  id: string;
+  email: string;
+  provider: OAuthProvider;
+  name: string;
+  account_id: string;
+  profile_image_url: string | null;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+  deleted_at: Timestamp | null;
+};
 export type BlockedFeed = {
   user_id: string;
   feed_id: string;
@@ -163,6 +206,10 @@ export type User = {
   deleted_at: Timestamp | null;
 };
 export type DB = {
+  active_feed: ActiveFeed;
+  active_feed_comment: ActiveFeedComment;
+  active_gathering: ActiveGathering;
+  active_user: ActiveUser;
   blocked_feed: BlockedFeed;
   feed: Feed;
   feed_comment: FeedComment;

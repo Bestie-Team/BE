@@ -24,7 +24,7 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findOneByEmail(email: string): Promise<UserBasicInfo | null> {
-    return await this.prisma.user.findUnique({
+    return await this.prisma.activeUser.findUnique({
       select: {
         id: true,
         email: true,
@@ -39,7 +39,7 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findOneByAccountId(accountId: string): Promise<{ id: string } | null> {
-    return await this.prisma.user.findUnique({
+    return await this.prisma.activeUser.findUnique({
       select: {
         id: true,
       },
@@ -50,7 +50,7 @@ export class UsersPrismaRepository implements UsersRepository {
   async findOneById(
     id: string,
   ): Promise<{ id: string; createdAt: Date; updatedAt: Date } | null> {
-    return await this.prisma.user.findUnique({
+    return await this.prisma.activeUser.findUnique({
       select: {
         id: true,
         createdAt: true,
@@ -69,7 +69,7 @@ export class UsersPrismaRepository implements UsersRepository {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
-      .selectFrom('user as u')
+      .selectFrom('active_user as u')
       .leftJoin('friend as f', (join) =>
         join
           .on((eb) =>
@@ -225,6 +225,17 @@ export class UsersPrismaRepository implements UsersRepository {
     const { id, ...updateDate } = data;
     await this.prisma.user.update({
       data: updateDate,
+      where: {
+        id,
+      },
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.user.update({
+      data: {
+        deletedAt: new Date(),
+      },
       where: {
         id,
       },

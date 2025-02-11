@@ -22,6 +22,7 @@ export interface UsersRepository {
   findDetailById(id: string): Promise<UserDetail | null>;
   findProfileById(id: string): Promise<Profile | null>;
   update(data: Partial<UserEntity>): Promise<void>;
+  delete(id: string): Promise<void>;
 }
 
 export const UsersRepository = Symbol('UsersRepository');

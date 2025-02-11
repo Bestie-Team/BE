@@ -21,11 +21,12 @@ export class FriendsPrismaRepository implements FriendsRepository {
 
   async findOneById(
     id: string,
-  ): Promise<{ id: string; receiverId: string } | null> {
+  ): Promise<{ id: string; receiverId: string; senderId: string } | null> {
     return await this.prisma.friend.findUnique({
       select: {
         id: true,
         receiverId: true,
+        senderId: true,
       },
       where: {
         id,

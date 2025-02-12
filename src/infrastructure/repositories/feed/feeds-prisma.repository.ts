@@ -186,7 +186,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
       .leftJoin('blocked_feed as bf', 'f.id', 'bf.feed_id')
       .where('f.deleted_at', 'is', null)
-      .where('bf.user_id', 'is', null)
+      .where('bf.user_id', '!=', userId)
       .where((eb) =>
         eb.or([
           eb.and([

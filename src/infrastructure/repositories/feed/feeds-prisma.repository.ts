@@ -52,6 +52,9 @@ export class FeedsPrismaRepository implements FeedsRepository {
       where: {
         id: feedId,
         writerId,
+        writer: {
+          deletedAt: null,
+        },
       },
     });
   }
@@ -65,6 +68,9 @@ export class FeedsPrismaRepository implements FeedsRepository {
       where: {
         gatheringId,
         writerId,
+        writer: {
+          deletedAt: null,
+        },
       },
     });
   }
@@ -73,11 +79,12 @@ export class FeedsPrismaRepository implements FeedsRepository {
     order: Order,
     subquery: SelectQueryBuilder<any, any, any>,
   ): Promise<Feed[]> {
+    // NOTE active user feed 수정
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const rows = await this.txHost.tx.$kysely
       .selectFrom('feed as f')
       .innerJoin('user as u', 'f.writer_id', 'u.id')
-      .innerJoin('feed_image as fi', 'f.id', 'fi.feed_id')
+      .leftJoin('feed_image as fi', 'f.id', 'fi.feed_id')
       .leftJoin('gathering as g', 'f.gathering_id', 'g.id')
       .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
       .leftJoin('user as gm', 'gp.participant_id', 'gm.id')
@@ -102,6 +109,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
         qb
           .selectFrom('feed_comment as fc')
           .whereRef('fc.feed_id', '=', 'f.id')
+          .where('fc.deleted_at', 'is', null)
           .select(({ fn }) => [fn.count<number>('fc.id').as('comment_count')])
           .as('comment_count'),
       ])

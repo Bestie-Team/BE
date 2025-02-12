@@ -383,6 +383,62 @@ describe('FeedsController (e2e)', () => {
         expect(feed.id).toEqual(expectedFeeds[i].id);
       });
     });
+
+    it('삭제된 댓글은 카운트에서 제외된다', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const user = await prisma.user.create({
+        data: generateUserEntity('user@test.com', 'accoundtest'),
+      });
+
+      const feed = await prisma.feed.create({
+        data: generateFeedEntity(
+          user.id,
+          null,
+          new Date('2024-11-01T00:00:00.000Z'),
+        ),
+      });
+      const feedVisibility = await prisma.friendFeedVisibility.create({
+        data: generateFriendFeedVisibilityEntity(feed.id, loginedUser!.id),
+      });
+      const comments = Array.from({ length: 5 }, (_, i) =>
+        generateFeedCommentEntity(feed.id, loginedUser!.id),
+      );
+      await prisma.feedComment.createMany({ data: comments });
+      await prisma.feedComment.update({
+        data: { deletedAt: new Date() },
+        where: {
+          id: comments[0].id,
+        },
+      });
+
+      const order: Order = 'DESC';
+      const minDate = new Date('2024-01-01T00:00:00.000Z').toISOString();
+      const maxDate = new Date('2024-12-31T23:59:59.000Z').toISOString();
+      const cursor = {
+        createdAt: maxDate,
+        id: 'f72cf60c-1988-4906-88a1-5e4ac04c34a4',
+      };
+      const limit = 1;
+
+      const response = await request(app.getHttpServer())
+        .get(
+          `/feeds?order=${order}&minDate=${minDate}&maxDate=${maxDate}&cursor=${JSON.stringify(
+            cursor,
+          )}&limit=${limit}`,
+        )
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<FeedListResponse> = response;
+      const { feeds } = body;
+
+      expect(status).toEqual(200);
+      expect(feeds[0].commentCount).toEqual(comments.length - 1);
+    });
   });
 
   describe('(DELETE) /feeds/{id} - 피드 삭제', () => {

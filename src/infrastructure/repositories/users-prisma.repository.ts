@@ -180,14 +180,8 @@ export class UsersPrismaRepository implements UsersRepository {
       )
       .select((qb) =>
         qb
-          .selectFrom('group as g')
-          .leftJoin('group_participation as gp', 'gp.group_id', 'g.id')
-          .where((eb) =>
-            eb.or([
-              eb('g.owner_id', '=', id),
-              eb('gp.participant_id', '=', id),
-            ]),
-          )
+          .selectFrom('group_participation as gp')
+          .where('gp.participant_id', '=', id)
           .select(({ fn }) => fn.countAll().as('group_count'))
           .as('group_count'),
       )

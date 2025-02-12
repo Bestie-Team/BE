@@ -205,6 +205,10 @@ describe('UsersController (e2e)', () => {
       const groups = [...ownGroups, ...notOwnGroups];
       await prisma.group.createMany({ data: groups });
 
+      // 자신의 오너 그룹 참여 생성
+      const ownGroupParticipations = ownGroups.map((group) =>
+        generateGroupParticipationEntity(group.id, loginedUser!.id, new Date()),
+      );
       // 오너가 아닌 그룹 일부에 참여
       const groupJoin = Array.from({ length: 3 }, (_, i) =>
         generateGroupParticipationEntity(
@@ -214,7 +218,7 @@ describe('UsersController (e2e)', () => {
         ),
       );
       await prisma.groupParticipation.createMany({
-        data: groupJoin,
+        data: [...groupJoin, ...ownGroupParticipations],
       });
 
       // 피드 생성

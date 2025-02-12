@@ -41,12 +41,13 @@ export class GroupCreateService {
     );
     const stdDate = new Date();
     const group = GroupEntity.create(prototype, v4, new Date());
-    const groupParticipations = friendIds.map((participantId) =>
-      GroupParticipationEntity.create(
-        { groupId: group.id, participantId },
-        v4,
-        stdDate,
-      ),
+    const groupParticipations = [prototype.ownerId, ...friendIds].map(
+      (participantId) =>
+        GroupParticipationEntity.create(
+          { groupId: group.id, participantId },
+          v4,
+          stdDate,
+        ),
     );
 
     await this.createTransaction(group, groupParticipations);

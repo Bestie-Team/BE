@@ -45,10 +45,10 @@ export const generateFriendEntity = (
 export const generateGroupEntity = (
   ownerId: string,
   name = '멋쟁이들의 그룹',
-  description = '멋쟁이만 참여 가능',
-  groupImageUrl = 'https://image.com',
+  stdDate = new Date(),
 ): GroupEntity => {
-  const stdDate = new Date();
+  const groupImageUrl = 'https://image.com';
+  const description = '멋쟁이만 참여 가능';
   return GroupEntity.create(
     { name, description, groupImageUrl, ownerId },
     v4,

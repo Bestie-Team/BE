@@ -160,7 +160,7 @@ describe('GroupsController (e2e)', () => {
       await prisma.group.createMany({
         data: [...ownGroups, ...otherGroups],
       });
-      // 내 참여 데이터 생성
+      // 내가 그룹장인 그룹에 자신의 참여 데이터 생성
       const myOwnGroupParticipations = ownGroups.map((group, i) =>
         generateGroupParticipationEntity(
           group.id,
@@ -240,7 +240,12 @@ describe('GroupsController (e2e)', () => {
       expect(nextCursor).toBeNull();
       expect(groups.length).toEqual(9);
       groups.forEach((group) => {
-        expect(group.members.length).toEqual(2);
+        if (group.name.includes('내그룹')) {
+          expect(group.members.length).toEqual(2);
+        }
+        if (group.name.includes('남그룹')) {
+          expect(group.members.length).toEqual(3);
+        }
       });
     });
   });

@@ -184,9 +184,13 @@ export class FeedsPrismaRepository implements FeedsRepository {
       .leftJoin('friend_feed_visibility as fv', 'f.id', 'fv.feed_id')
       .leftJoin('gathering as g', 'f.gathering_id', 'g.id')
       .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
-      .leftJoin('blocked_feed as bf', 'f.id', 'bf.feed_id')
       .where('f.deleted_at', 'is', null)
-      .where('bf.user_id', 'is', null)
+      .where('f.id', 'not in', (qb) =>
+        qb
+          .selectFrom('blocked_feed as bf')
+          .select('bf.feed_id as id')
+          .where('bf.user_id', '=', userId),
+      )
       .where((eb) =>
         eb.or([
           eb.and([
@@ -229,26 +233,30 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const cursorComparison = order === 'ASC' ? '>' : '<';
 
     const query = this.txHost.tx.$kysely
-      .selectFrom('feed as fs')
-      .select('fs.id')
-      .leftJoin('blocked_feed as bf', 'fs.id', 'bf.feed_id')
-      .where('bf.user_id', 'is', null)
-      .where('fs.deleted_at', 'is', null)
-      .where('fs.writer_id', '=', userId)
-      .where('fs.created_at', '>=', new Date(minDate))
-      .where('fs.created_at', '<=', new Date(maxDate))
+      .selectFrom('feed as f')
+      .select('f.id')
+      .where('f.id', 'not in', (qb) =>
+        qb
+          .selectFrom('blocked_feed as bf')
+          .select('bf.feed_id as id')
+          .where('bf.user_id', '=', userId),
+      )
+      .where('f.deleted_at', 'is', null)
+      .where('f.writer_id', '=', userId)
+      .where('f.created_at', '>=', new Date(minDate))
+      .where('f.created_at', '<=', new Date(maxDate))
       .where((eb) =>
         eb.or([
-          eb('fs.created_at', cursorComparison, new Date(cursor.createdAt)),
+          eb('f.created_at', cursorComparison, new Date(cursor.createdAt)),
           eb.and([
-            eb('fs.created_at', '=', new Date(cursor.createdAt)),
-            eb('fs.id', '>', cursor.id),
+            eb('f.created_at', '=', new Date(cursor.createdAt)),
+            eb('f.id', '>', cursor.id),
           ]),
         ]),
       )
-      .groupBy('fs.id')
-      .orderBy('fs.created_at', feedCreatedAtOrder)
-      .orderBy('fs.id', 'asc')
+      .groupBy('f.id')
+      .orderBy('f.created_at', feedCreatedAtOrder)
+      .orderBy('f.id', 'asc')
       .limit(limit);
     return await this.findFeeds(order, query);
   }

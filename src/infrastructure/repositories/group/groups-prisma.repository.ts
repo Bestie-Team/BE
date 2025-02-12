@@ -82,8 +82,8 @@ export class GroupsPrismaRepository implements GroupsRepository {
         };
       }
 
-      // 자신의 참여 데이터는 멤버로 집계 X
-      if (row.member_id !== userId) {
+      // 그룹장은 멤버로 집계 X
+      if (row.member_id !== row.owner_id) {
         const member = {
           id: row.member_id,
           accountId: row.member_account_id,

@@ -235,6 +235,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const query = this.txHost.tx.$kysely
       .selectFrom('feed as f')
       .select('f.id')
+      // NOTE 자신의 게시글을 숨기는 기능이 필요할까...
       .where('f.id', 'not in', (qb) =>
         qb
           .selectFrom('blocked_feed as bf')

@@ -45,8 +45,8 @@ export class GatheringParticipationsPrismaRepository
     const participationRows = await this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('gathering as g', 'gp.gathering_id', 'g.id')
-      .leftJoin('group as gr', 'g.group_id', 'gr.id')
       .innerJoin('user as hu', 'g.host_user_id', 'hu.id')
+      .leftJoin('group as gr', 'g.group_id', 'gr.id')
       .select([
         'gp.id',
         'g.id as gathering_id',
@@ -65,12 +65,12 @@ export class GatheringParticipationsPrismaRepository
       .where((eb) =>
         eb.or([
           eb(
-            'g.gathering_date',
-            minDate === cursor.createdAt ? '<=' : '<',
+            'gp.created_at',
+            maxDate === cursor.createdAt ? '<=' : '<',
             new Date(cursor.createdAt),
           ),
           eb.and([
-            eb('g.gathering_date', '=', new Date(cursor.createdAt)),
+            eb('gp.created_at', '=', new Date(cursor.createdAt)),
             eb('g.id', '>', cursor.id),
           ]),
         ]),
@@ -85,22 +85,6 @@ export class GatheringParticipationsPrismaRepository
       .limit(limit)
       .execute();
 
-    const gatheringIds = participationRows.map((row) => row.gathering_id);
-    if (gatheringIds.length === 0) return [];
-
-    const memberRows = await this.txHost.tx.$kysely
-      .selectFrom('gathering_participation as gp')
-      .innerJoin('user as mu', 'gp.participant_id', 'mu.id')
-      .select([
-        'gp.gathering_id',
-        'mu.id',
-        'mu.account_id',
-        'mu.name',
-        'mu.profile_image_url',
-      ])
-      .where('gp.gathering_id', 'in', gatheringIds)
-      .where('mu.id', '!=', participantId)
-      .execute();
     const result: { [key: string]: GatheringInvitation } = {};
 
     participationRows.forEach((row) => {
@@ -114,16 +98,7 @@ export class GatheringParticipationsPrismaRepository
         groupName: row.group_name,
         name: row.name,
         sender: row.sender,
-        members: [],
       };
-    });
-    memberRows.forEach((member) => {
-      result[member.gathering_id].members.push({
-        id: member.id,
-        accountId: member.account_id,
-        name: member.name,
-        profileImageUrl: member.profile_image_url,
-      });
     });
 
     return Object.values(result);
@@ -138,7 +113,6 @@ export class GatheringParticipationsPrismaRepository
       .selectFrom('gathering as g')
       .innerJoin('user as hu', 'g.host_user_id', 'hu.id')
       .innerJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
-      .innerJoin('user as mu', 'gp.participant_id', 'mu.id')
       .leftJoin('group as gr', 'g.group_id', 'gr.id')
       .select([
         'g.id',
@@ -150,10 +124,6 @@ export class GatheringParticipationsPrismaRepository
         'g.invitation_image_url',
         'gr.name as group_name',
         'hu.account_id as sender',
-        'mu.id as member_id',
-        'mu.account_id as member_account_id',
-        'mu.name as member_name',
-        'mu.profile_image_url as member_profile_image_url',
       ])
       .where('g.id', 'in', (qb) =>
         qb
@@ -180,6 +150,7 @@ export class GatheringParticipationsPrismaRepository
               ]),
             ]),
           )
+          .where('gs.deleted_at', 'is', null)
           .where(
             'gp.status',
             '=',
@@ -206,16 +177,8 @@ export class GatheringParticipationsPrismaRepository
           gatheringDate: row.gathering_date,
           invitation_image_url: row.invitation_image_url,
           sender: row.sender,
-          members: [],
         };
       }
-
-      result[row.id].members.push({
-        id: row.member_id,
-        accountId: row.member_account_id,
-        name: row.member_name,
-        profileImageUrl: row.member_profile_image_url,
-      });
     });
 
     return Object.values(result);

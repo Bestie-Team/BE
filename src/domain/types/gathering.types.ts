@@ -37,7 +37,6 @@ export interface GatheringInvitation {
   readonly address: string;
   readonly invitation_image_url: string;
   readonly groupName: string | null;
-  readonly members: User[];
 }
 
 export interface UpdateInput {

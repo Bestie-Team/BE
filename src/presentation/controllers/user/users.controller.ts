@@ -206,7 +206,11 @@ export class UsersController {
     await this.usersService.updateAccountId(userId, dto.accountId);
   }
 
-  @ApiOperation({ summary: '탈퇴' })
+  @ApiOperation({
+    summary: '탈퇴',
+    description:
+      '아직 실행은 하면 안 돼여, 삭제 정책 다른 곳에 반영 안 했어요~~',
+  })
   @ApiResponse({
     status: 204,
     description: '탈퇴 성공',

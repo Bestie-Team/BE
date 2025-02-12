@@ -137,18 +137,21 @@ export class FriendsService {
     });
   }
 
-  async reject(friendId: string, receiverId: string) {
-    await this.checkReceiver(friendId, receiverId);
+  async reject(friendId: string, userId: string) {
+    await this.checkReceiver(friendId, userId);
     await this.friendsRepository.delete(friendId);
   }
 
-  async checkReceiver(friendId: string, receiverId: string) {
+  async checkReceiver(friendId: string, userId: string) {
     const friendRequest = await this.friendsRepository.findOneById(friendId);
     if (!friendRequest) {
       throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
     }
 
-    if (friendRequest.receiverId !== receiverId) {
+    if (
+      friendRequest.receiverId !== userId &&
+      friendRequest.senderId !== userId
+    ) {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
   }

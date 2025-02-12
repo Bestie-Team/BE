@@ -47,26 +47,18 @@ export class GroupsPrismaRepository implements GroupsRepository {
       .where((eb) =>
         eb('g.id', 'in', (qb) =>
           qb
-            .selectFrom('group as g')
-            .select('g.id')
-            .where('g.id', 'in', (qb) =>
-              qb
-                .selectFrom('group as g')
-                .select('g.id as group_id')
-                .where('g.owner_id', '=', userId)
-                .union((qb) =>
-                  qb
-                    .selectFrom('group_participation as gp')
-                    .select('gp.group_id')
-                    .where('gp.participant_id', '=', userId),
-                ),
-            )
+            .selectFrom('group_participation as gp')
+            .innerJoin('group as g', 'g.id', 'gp.group_id')
+            .select('gp.group_id as id')
+            .where('gp.participant_id', '=', userId)
             .where('gp.created_at', '<', new Date(cursor))
             .orderBy('gp.created_at', 'desc')
             .orderBy('g.name', 'asc')
             .limit(limit),
         ),
       )
+      .orderBy('gp.created_at', 'desc')
+      .orderBy('g.name', 'asc')
       .execute();
 
     const result: { [key: string]: Group } = {};
@@ -90,14 +82,16 @@ export class GroupsPrismaRepository implements GroupsRepository {
         };
       }
 
-      const member = {
-        id: row.member_id,
-        accountId: row.member_account_id,
-        name: row.member_name,
-        profileImageUrl: row.member_profile_image_url,
-      };
-
-      result[row.group_id].members.push(member);
+      // 그룹장은 멤버로 집계 X
+      if (row.member_id !== row.owner_id) {
+        const member = {
+          id: row.member_id,
+          accountId: row.member_account_id,
+          name: row.member_name,
+          profileImageUrl: row.member_profile_image_url,
+        };
+        result[row.group_id].members.push(member);
+      }
     });
 
     return Object.values(result);
@@ -113,25 +107,6 @@ export class GroupsPrismaRepository implements GroupsRepository {
         ownerId,
       },
     });
-  }
-
-  async findGroupMembersById(id: string): Promise<{ participantId: string }[]> {
-    const result = await this.txHost.tx.group.findUnique({
-      select: {
-        groupParticipation: {
-          select: {
-            participantId: true,
-          },
-        },
-        ownerId: true,
-      },
-      where: {
-        id,
-      },
-    });
-    return result
-      ? [...result.groupParticipation, { participantId: result.ownerId }]
-      : [];
   }
 
   async update(id: string, data: Partial<GroupEntity>): Promise<void> {

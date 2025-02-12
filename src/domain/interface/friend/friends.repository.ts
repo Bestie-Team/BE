@@ -6,7 +6,9 @@ import { FriendStatus, UserPaginationInput } from 'src/shared/types';
 
 export interface FriendsRepository {
   save(data: FriendEntity): Promise<void>;
-  findOneById(id: string): Promise<{ id: string; receiverId: string } | null>;
+  findOneById(
+    id: string,
+  ): Promise<{ id: string; receiverId: string; senderId: string } | null>;
   findFriendsByUserId(
     userId: string,
     paginationInput: UserPaginationInput,

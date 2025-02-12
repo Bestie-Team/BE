@@ -22,8 +22,8 @@ import {
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
-import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
+import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 
 @Injectable()
 export class GatheringsWriteService {
@@ -34,8 +34,8 @@ export class GatheringsWriteService {
     private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,
-    @Inject(GroupsRepository)
-    private readonly groupsRepository: GroupsRepository,
+    @Inject(GroupParticipationsRepository)
+    private readonly groupParticipationsRepository: GroupParticipationsRepository,
   ) {}
 
   async create(prototype: GatheringPrototype, friendIds: string[] | null) {
@@ -108,7 +108,8 @@ export class GatheringsWriteService {
   }
 
   private async getGroupMemberIds(groupId: string) {
-    const members = await this.groupsRepository.findGroupMembersById(groupId);
+    const members =
+      await this.groupParticipationsRepository.findMembersByGroupId(groupId);
     return members.map((member) => member.participantId);
   }
 

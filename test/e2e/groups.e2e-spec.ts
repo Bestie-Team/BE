@@ -14,11 +14,7 @@ import {
 } from 'test/helpers/generators';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
 import { ResponseResult } from 'test/helpers/types';
-import {
-  AddGroupMemberRequest,
-  GroupListResponse,
-  UpdateDescriptionRequest,
-} from 'src/presentation/dto';
+import { AddGroupMemberRequest, GroupListResponse } from 'src/presentation/dto';
 import { Friend, User } from '@prisma/client';
 import { UpdateGroupRequest } from 'src/presentation/dto/group/request/update-group.request';
 
@@ -139,75 +135,99 @@ describe('GroupsController (e2e)', () => {
           accountId,
         },
       });
-      const groupParticipationStdDate1 = new Date('2025-01-01T00:00:00.000Z');
-      const groupParticipationStdDate2 = new Date('2025-01-01T12:00:00.000Z');
-      const groupParticipationStdDate3 = new Date('2024-12-21T12:00:00.000Z');
-      const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'), // 4
+      const users = Array.from({ length: 15 }, (_, i) =>
+        generateUserEntity(`other${i}@test.com`, `other_${i}`, `김철수${i}`),
+      );
+      await prisma.user.createMany({
+        data: users,
       });
-      const user2 = await prisma.user.create({
-        data: generateUserEntity('test2@test.com', 'lighty_2', '김진수'), // 1
+
+      const stdDates = [
+        new Date('2025-01-01T00:00:00.000Z'),
+        new Date('2025-01-01T12:00:00.000Z'),
+        new Date('2024-12-21T12:00:00.000Z'),
+        new Date('2024-12-21T11:59:00.000Z'),
+        new Date('2024-04-31T12:00:00.000Z'),
+      ];
+      // 내가 참여 중인 그룹
+      // 내가 생성한 그룹
+      const ownGroups = Array.from({ length: 5 }, (_, i) =>
+        generateGroupEntity(loginedUser!.id, `내그룹${i}`),
+      );
+      const otherGroups = Array.from({ length: 5 }, (_, i) =>
+        generateGroupEntity(users[i].id, `남그룹${i}`),
+      );
+      await prisma.group.createMany({
+        data: [...ownGroups, ...otherGroups],
       });
-      const user3 = await prisma.user.create({
-        data: generateUserEntity('test3@test.com', 'lighty_3', '이진수'), // 2
-      });
-      const friendRealtion1 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user1.id, 'ACCEPTED'),
-      });
-      const friendRealtion2 = await prisma.friend.create({
-        data: generateFriendEntity(user2.id, loginedUser!.id, 'ACCEPTED'),
-      });
-      const friendRealtion3 = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user3.id, 'ACCEPTED'),
-      });
-      const group1 = await prisma.group.create({
-        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
-      });
-      const group1Participation1 = await prisma.groupParticipation.create({
-        data: generateGroupParticipationEntity(
-          group1.id,
-          user1.id,
-          groupParticipationStdDate2,
-        ),
-      });
-      const group1Participation2 = await prisma.groupParticipation.create({
-        data: generateGroupParticipationEntity(
-          group1.id,
-          user2.id,
-          groupParticipationStdDate2,
-        ),
-      });
-      const group1Participation3 = await prisma.groupParticipation.create({
-        data: generateGroupParticipationEntity(
-          group1.id,
-          user3.id,
-          groupParticipationStdDate2,
-        ),
-      });
-      const group2 = await prisma.group.create({
-        data: generateGroupEntity(user1.id, '안멋쟁이 그룹'),
-      });
-      const group2Participation1 = await prisma.groupParticipation.create({
-        data: generateGroupParticipationEntity(
-          group2.id,
+      // 내가 그룹장인 그룹에 자신의 참여 데이터 생성
+      const myOwnGroupParticipations = ownGroups.map((group, i) =>
+        generateGroupParticipationEntity(
+          group.id,
           loginedUser!.id,
-          groupParticipationStdDate1,
+          stdDates[i],
         ),
-      });
-      const group3 = await prisma.group.create({
-        data: generateGroupEntity(user2.id, '테스트 그룹'),
-      });
-      const group3Participation1 = await prisma.groupParticipation.create({
-        data: generateGroupParticipationEntity(
-          group3.id,
-          loginedUser!.id,
-          groupParticipationStdDate3,
+      );
+      const myOtherGroupParticipations = otherGroups
+        .map((group, i) =>
+          generateGroupParticipationEntity(
+            group.id,
+            loginedUser!.id,
+            stdDates[i],
+          ),
+        )
+        .filter((_, i) => i < 4);
+      // 내가 만든 그룹에 타회원 참여
+      const otherUserOwnGroupParticipations1 = ownGroups.map((group, i) =>
+        generateGroupParticipationEntity(
+          group.id,
+          users[i + 4].id,
+          stdDates[i],
         ),
+      );
+      // 내가 만든 그룹에 타회원 참여
+      const otherUserOwnGroupParticipations2 = ownGroups.map((group, i) =>
+        generateGroupParticipationEntity(
+          group.id,
+          users[i + 9].id,
+          stdDates[i],
+        ),
+      );
+      // 타회원 자신이 만든 그룹에 자신 참여
+      const otherGroupOwnerParticipations = otherGroups.map((group, i) =>
+        generateGroupParticipationEntity(group.id, users[i].id, stdDates[i]),
+      );
+      // 타회원이 만든 그룹에 타회원이 참여
+      const otherUserOtherGroupParticipations1 = otherGroups.map((group, i) =>
+        generateGroupParticipationEntity(
+          group.id,
+          users[i + 4].id,
+          stdDates[i],
+        ),
+      );
+      // 타회원이 만든 그룹에 타회원이 참여
+      const otherUserOtherGroupParticipations2 = otherGroups.map((group, i) =>
+        generateGroupParticipationEntity(
+          group.id,
+          users[i + 9].id,
+          stdDates[i],
+        ),
+      );
+      const participations = [
+        ...myOwnGroupParticipations,
+        ...myOtherGroupParticipations,
+        ...otherUserOwnGroupParticipations1,
+        ...otherUserOwnGroupParticipations2,
+        ...otherUserOtherGroupParticipations1,
+        ...otherUserOtherGroupParticipations2,
+      ];
+
+      await prisma.groupParticipation.createMany({
+        data: participations,
       });
-      const expectedGroups = [group1, group2, group3];
 
       const cursor = new Date('2025-01-01T12:00:00.001Z').toISOString();
-      const limit = 3;
+      const limit = 10;
 
       // when
       const response = await request(app.getHttpServer())
@@ -217,14 +237,16 @@ describe('GroupsController (e2e)', () => {
       const { groups, nextCursor } = body;
 
       expect(status).toEqual(200);
-      expect(nextCursor).toEqual(groupParticipationStdDate3.toISOString());
-      groups.forEach((group, i) => {
-        expect(group.id).toEqual(expectedGroups[i].id);
-        expect(group.name).toEqual(expectedGroups[i].name);
-        expect(group.description).toEqual(expectedGroups[i].description);
-        expect(group.gatheringCount).toEqual(expectedGroups[i].gatheringCount);
+      expect(nextCursor).toBeNull();
+      expect(groups.length).toEqual(9);
+      groups.forEach((group) => {
+        if (group.name.includes('내그룹')) {
+          expect(group.members.length).toEqual(2);
+        }
+        if (group.name.includes('남그룹')) {
+          expect(group.members.length).toEqual(3);
+        }
       });
-      // 멤버도 검증해야하는데 귀찮다...
     });
   });
 

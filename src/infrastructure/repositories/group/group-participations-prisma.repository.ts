@@ -43,6 +43,19 @@ export class GroupParticipationsPrismaRepository
     });
   }
 
+  async findMembersByGroupId(
+    groupId: string,
+  ): Promise<{ participantId: string }[]> {
+    return await this.txHost.tx.groupParticipation.findMany({
+      select: {
+        participantId: true,
+      },
+      where: {
+        groupId,
+      },
+    });
+  }
+
   async delete(groupId: string, participantId: string): Promise<void> {
     await this.txHost.tx.groupParticipation.delete({
       where: {

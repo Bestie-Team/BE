@@ -20,6 +20,10 @@ export interface Gathering {
   readonly invitationImageUrl: string;
 }
 
+export interface EndedGathering extends Gathering {
+  isFeedPosted: boolean;
+}
+
 export interface GatheringDetail extends Gathering {
   readonly description: string;
   readonly address: string;

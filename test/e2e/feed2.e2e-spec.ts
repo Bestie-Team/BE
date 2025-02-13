@@ -179,20 +179,33 @@ describe('FeedsController (e2e)', () => {
       await prisma.user.createMany({ data: users });
 
       // 내가 만든 그룹, 아닌 그룹 하나씩 생성
-      const ownGathering = generateGatheringEntity(loginedUser!.id);
-      const gathering = generateGatheringEntity(users[0].id);
-      await prisma.gathering.createMany({ data: [ownGathering, gathering] });
+      const ownGathering = generateGatheringEntity(
+        loginedUser!.id,
+        new Date(),
+        '내가 만든 모임',
+      );
+      const notOwngathering = generateGatheringEntity(
+        users[0].id,
+        new Date(),
+        '누군가가 만든 모임',
+      );
+      await prisma.gathering.createMany({
+        data: [ownGathering, notOwngathering],
+      });
 
       // 내가 만든 그룹, 아닌 그룹에 멤버 4명씩 추가
       const ownGatheringParticipations = Array.from({ length: 4 }, (_, i) =>
         generateGatheringParticipationEntity(ownGathering.id, users[i].id),
       );
       const gatheringParticipations = Array.from({ length: 4 }, (_, i) =>
-        generateGatheringParticipationEntity(ownGathering.id, users[i + 4].id),
+        generateGatheringParticipationEntity(
+          notOwngathering.id,
+          users[i + 4].id,
+        ),
       );
       // 내가 만든 그룹이 아닌 그룹에 나도 참가
       const loginedUserParticipation = generateGatheringParticipationEntity(
-        gathering.id,
+        notOwngathering.id,
         loginedUser!.id,
         'ACCEPTED',
       );
@@ -234,9 +247,32 @@ describe('FeedsController (e2e)', () => {
           users[i].id,
           ownGathering.id,
           new Date(`2024-0${8}-0${9 - i}T12:00:00.000Z`),
-          `내가 만든 그룹 피드${i}`,
+          `내가 만든 모임에 친구가 쓴 피드${i}`,
         );
         const feedImages = Array.from({ length: 2 }, (_, i) =>
+          generateFeedImageEntity(i, `https://cdn.lighty.today/image${i}.jpg`),
+        );
+        const feed = await prisma.feed.create({
+          data: {
+            ...feedEntity,
+            images: {
+              createMany: {
+                data: feedImages,
+              },
+            },
+          },
+        });
+        feeds.push(feed);
+      }
+      // 참가 중인 모임에 다른 회원이 작성한 피드 생성.
+      for (let i = 0; i < 5; i++) {
+        const feedEntity = generateFeedEntity(
+          users[i].id,
+          notOwngathering.id,
+          new Date(`2024-0${1}-0${9 - i}T12:00:00.000Z`),
+          `내가 참여 중인 모임에 다른 회원이 쓴 피드${i}`,
+        );
+        const feedImages = Array.from({ length: 5 }, (_, i) =>
           generateFeedImageEntity(i, `https://cdn.lighty.today/image${i}.jpg`),
         );
         const feed = await prisma.feed.create({
@@ -255,9 +291,9 @@ describe('FeedsController (e2e)', () => {
       for (let i = 0; i < 5; i++) {
         const feedEntity = generateFeedEntity(
           loginedUser!.id,
-          gathering.id,
+          notOwngathering.id,
           new Date(`2024-0${1}-0${9 - i}T12:00:00.000Z`),
-          `참여 중인 그룹 피드${i}`,
+          `내가 참여 중인 모임에 내가 쓴 피드${i}`,
         );
         const feedImages = Array.from({ length: 5 }, (_, i) =>
           generateFeedImageEntity(i, `https://cdn.lighty.today/image${i}.jpg`),
@@ -275,11 +311,17 @@ describe('FeedsController (e2e)', () => {
         feeds.push(feed);
       }
 
-      // 일반 피드에 조회 가능 목록에 나를 추가.
+      // 일반 피드 공개 범위 목록에 나를 추가.
       const feedVisibilities = Array.from({ length: 5 }, (_, i) =>
         generateFriendFeedVisibilityEntity(feeds[i].id, loginedUser!.id),
       );
-      await prisma.friendFeedVisibility.createMany({ data: feedVisibilities });
+      // 일반 피드에 함께하는 다른 회원 추가
+      const otherUserFeedVisibilities = Array.from({ length: 10 }, (_, i) =>
+        generateFriendFeedVisibilityEntity(feeds[i % 5].id, users[i].id),
+      );
+      await prisma.friendFeedVisibility.createMany({
+        data: [...feedVisibilities, ...otherUserFeedVisibilities],
+      });
 
       // 댓글 추가.
       for (let i = 0; i < 7; i++) {
@@ -325,7 +367,15 @@ describe('FeedsController (e2e)', () => {
           createdAt: new Date(),
         },
       });
-      const expectedFeeds = feeds.filter((_, i) => i !== 0 && i !== 10);
+      const expectedFeeds = feeds
+        .filter((_, i) => i < 15 && i !== 0 && i !== 10)
+        .sort((a, b) => {
+          if (a.createdAt > b.createdAt) return -1;
+          if (a.createdAt < b.createdAt) return 1;
+
+          return a.id.localeCompare(b.id);
+        });
+      console.log(expectedFeeds);
 
       const order: Order = 'DESC';
       const minDate = new Date('2024-01-01T00:00:00.000Z').toISOString();
@@ -376,11 +426,17 @@ describe('FeedsController (e2e)', () => {
       expect(allFeedStatus).toEqual(200);
       expect(myFeedStaus).toEqual(200);
       expect(blockedFeedStatus).toEqual(200);
-      expect(allFeeds.length).toEqual(9);
-      expect(myFeeds.length).toEqual(4);
+      expect(allFeeds.length).toEqual(13);
+      expect(myFeeds.length).toEqual(5);
       expect(blockedFeeds.length).toEqual(2);
       allFeeds.forEach((feed, i) => {
         expect(feed.id).toEqual(expectedFeeds[i].id);
+        if (feed.gathering) {
+          expect(feed.withMembers.length).toEqual(4);
+        }
+        if (!feed.gathering) {
+          expect(feed.withMembers.length).toEqual(2);
+        }
       });
     });
 

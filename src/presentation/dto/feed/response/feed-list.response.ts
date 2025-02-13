@@ -11,9 +11,6 @@ class Gathering {
 
   @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
   readonly gatheringDate: string;
-
-  @ApiProperty({ type: () => User, isArray: true })
-  readonly members: User[];
 }
 
 export class Feed {
@@ -43,6 +40,12 @@ export class Feed {
 
   @ApiProperty({ type: () => Gathering, nullable: true })
   readonly gathering: Gathering | null;
+
+  @ApiProperty({
+    type: () => [User],
+    description: '모임 피드에서는 모임원, 일반 피드에서는 공개한 친구.',
+  })
+  readonly withMembers: User[];
 }
 
 export class FeedListResponse {

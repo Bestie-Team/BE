@@ -1,13 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { getFeedCursor } from 'src/domain/helpers/get-cursor';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
-import { FeedPaginationInput } from 'src/domain/types/feed.types';
+import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
+import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
+import { User } from 'src/domain/types/user.types';
 
 @Injectable()
 export class FeedsReadService {
   constructor(
     @Inject(FeedsRepository)
     private readonly feedsRepository: FeedsRepository,
+    @Inject(FriendFeedVisibilitiesRepository)
+    private readonly friendFeedVisibilitiesRepository: FriendFeedVisibilitiesRepository,
   ) {}
 
   async getAllFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
@@ -16,6 +20,19 @@ export class FeedsReadService {
 
   async getMyFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
     return await this.getFeeds(userId, feedPaginationInput, 'MY');
+  }
+
+  async getCommonFeedWithMember(
+    feeds: Feed[],
+    userId: string,
+  ): Promise<{ [feedId: string]: User[] }> {
+    const commonFeeds = feeds.filter((feed) => !feed.gathering);
+    return commonFeeds.length > 0
+      ? await this.friendFeedVisibilitiesRepository.findVisibleUsersByFeedIds(
+          commonFeeds.map((feed) => feed.id),
+          userId,
+        )
+      : {};
   }
 
   private async getFeeds(
@@ -32,9 +49,19 @@ export class FeedsReadService {
           )
         : await this.feedsRepository.findByUserId(userId, feedPaginationInput);
     const nextCursor = getFeedCursor(feeds, limit);
+    const withMembers = await this.getCommonFeedWithMember(feeds, userId);
+    const feedsWithMembers = feeds.map((feed) => {
+      const members = feed.gathering
+        ? feed.withMembers
+        : withMembers[feed.id] || [];
+      return {
+        ...feed,
+        withMembers: members,
+      };
+    });
 
     return {
-      feeds,
+      feeds: feedsWithMembers,
       nextCursor,
     };
   }

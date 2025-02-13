@@ -76,6 +76,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
   }
 
   async findFeeds(
+    userId: string,
     order: Order,
     subquery: SelectQueryBuilder<any, any, any>,
   ): Promise<Feed[]> {
@@ -114,6 +115,9 @@ export class FeedsPrismaRepository implements FeedsRepository {
           .as('comment_count'),
       ])
       .where('f.id', 'in', () => subquery)
+      .where((eb) =>
+        eb.or([eb('gm.id', '!=', userId), eb('gm.id', 'is', null)]),
+      )
       .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id', 'asc')
       .orderBy('fi.index')
@@ -136,6 +140,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
           },
           gathering: null,
           images: [],
+          withMembers: [],
         };
       }
 
@@ -149,15 +154,14 @@ export class FeedsPrismaRepository implements FeedsRepository {
           id: row.gathering_id,
           gatheringDate: row.gathering_date!,
           name: row.gathering_name!,
-          members: [],
         };
       }
 
       if (
         row.member_id &&
-        !result[row.id].gathering?.members.some((m) => m.id === row.member_id)
+        !result[row.id].withMembers.some((m) => m.id === row.member_id)
       ) {
-        result[row.id].gathering?.members.push({
+        result[row.id].withMembers.push({
           // user의 컬럼들은 모두 not null이므로 id가 있다면 다른 속성은 항상 존재함.
           id: row.member_id,
           accountId: row.member_account_id!,
@@ -221,7 +225,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id', 'asc')
       .limit(limit);
-    return await this.findFeeds(order, query);
+    return await this.findFeeds(userId, order, query);
   }
 
   async findByUserId(
@@ -259,7 +263,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id', 'asc')
       .limit(limit);
-    return await this.findFeeds(order, query);
+    return await this.findFeeds(userId, order, query);
   }
 
   async findBlockedFeedsByUserId(
@@ -286,7 +290,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       .orderBy('f.id', 'asc')
       .limit(limit);
 
-    return this.findFeeds('DESC', query);
+    return this.findFeeds(userId, 'DESC', query);
   }
 
   async delete(id: string): Promise<void> {

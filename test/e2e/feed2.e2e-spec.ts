@@ -375,7 +375,6 @@ describe('FeedsController (e2e)', () => {
 
           return a.id.localeCompare(b.id);
         });
-      console.log(expectedFeeds);
 
       const order: Order = 'DESC';
       const minDate = new Date('2024-01-01T00:00:00.000Z').toISOString();

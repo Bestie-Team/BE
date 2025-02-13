@@ -7,3 +7,4 @@ export * from './request/update-gathering.request';
 export * from './response/gathering-detail.response';
 export * from './response/gathering-invitation-list.response';
 export * from './response/gathering-list.response';
+export * from './response/ended-gatherings-list.response';

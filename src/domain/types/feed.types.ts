@@ -23,8 +23,8 @@ export interface Feed {
     readonly id: string;
     readonly name: string;
     readonly gatheringDate: Date;
-    readonly members: User[];
   } | null;
+  readonly withMembers: User[];
 }
 
 export interface FeedPaginationInput {

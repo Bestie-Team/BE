@@ -53,7 +53,7 @@ export class FeedsReadService {
     const feedsWithMembers = feeds.map((feed) => {
       const members = feed.gathering
         ? feed.withMembers
-        : [feed.writer, ...(withMembers[feed.id] || [])];
+        : withMembers[feed.id] || [];
       return {
         ...feed,
         withMembers: members,

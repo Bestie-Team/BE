@@ -5,7 +5,11 @@ import { GatheringParticipationStatus } from '@prisma/client';
 import { SelectQueryBuilder, sql } from 'kysely';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
-import { Gathering, GatheringDetail } from 'src/domain/types/gathering.types';
+import {
+  EndedGathering,
+  Gathering,
+  GatheringDetail,
+} from 'src/domain/types/gathering.types';
 import {
   DateIdPaginationInput,
   PaginatedDateRangeInput,
@@ -72,7 +76,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
   async findEndedGatheringsByUserId(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
-  ): Promise<Gathering[]> {
+  ): Promise<EndedGathering[]> {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering as g')
@@ -112,7 +116,43 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       .orderBy('g.id', 'asc')
       .groupBy('g.id')
       .limit(limit);
-    return await this.findGatherings(subquery);
+
+    const rows = await this.txHost.tx.$kysely
+      .selectFrom('gathering as g')
+      .leftJoin('feed as f', 'f.gathering_id', 'g.id')
+      .select([
+        'g.id',
+        'g.name',
+        'g.gathering_date',
+        'g.invitation_image_url',
+        'g.description',
+        sql<string>`CASE
+        WHEN f.writer_id = ${userId} THEN TRUE
+        ELSE FALSE
+      END`.as('is_feed_posted'),
+      ])
+      .where('g.id', 'in', () => subquery)
+      .orderBy('g.gathering_date', 'asc')
+      .orderBy('g.id', 'asc')
+      .execute();
+
+    const result: { [key: string]: EndedGathering } = {};
+    rows.forEach((row) => {
+      if (!result[row.id]) {
+        result[row.id] = {
+          id: row.id,
+          name: row.name,
+          description: row.description,
+          gatheringDate: row.gathering_date,
+          invitationImageUrl: row.invitation_image_url,
+          isFeedPosted: Boolean(row.is_feed_posted),
+        };
+      } else if (row.is_feed_posted) {
+        result[row.id].isFeedPosted = true;
+      }
+    });
+
+    return Object.values(result);
   }
 
   async findGatheringsWithoutFeedByUserId(

@@ -3,9 +3,11 @@ import { NOT_FOUND_GATHERING_MESSAGE } from 'src/domain/error/messages';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { getGatheringCursor } from 'src/domain/helpers/get-cursor';
 import {
+  DateIdCursor,
   DateIdPaginationInput,
   PaginatedDateRangeInput,
 } from 'src/shared/types';
+import { EndedGathering, Gathering } from 'src/domain/types/gathering.types';
 
 @Injectable()
 export class GatheringsReadService {
@@ -34,15 +36,46 @@ export class GatheringsReadService {
   async getWaitingGatherings(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
-  ) {
-    return await this.getGatherings(userId, paginatedDateRangeInput, 'WAITING');
+  ): Promise<{
+    gatherings: Gathering[];
+    nextCursor: DateIdCursor | null;
+  }> {
+    const gatherings = await this.gatheringsRepository.findByUserId(
+      userId,
+      paginatedDateRangeInput,
+    );
+    const nextCursor = getGatheringCursor(
+      gatherings,
+      paginatedDateRangeInput.limit,
+    );
+
+    return {
+      gatherings,
+      nextCursor,
+    };
   }
 
   async getEndedGatherings(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
-  ) {
-    return await this.getGatherings(userId, paginatedDateRangeInput, 'ENDED');
+  ): Promise<{
+    gatherings: EndedGathering[];
+    nextCursor: DateIdCursor | null;
+  }> {
+    const gatherings =
+      await this.gatheringsRepository.findEndedGatheringsByUserId(
+        userId,
+        paginatedDateRangeInput,
+      );
+    const nextCursor = getGatheringCursor(
+      gatherings,
+      paginatedDateRangeInput.limit,
+    );
+
+    return {
+      gatherings,
+      nextCursor,
+    };
   }
 
   async getGatherings(

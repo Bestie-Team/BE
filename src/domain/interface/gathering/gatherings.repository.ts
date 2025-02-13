@@ -1,5 +1,9 @@
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
-import { Gathering, GatheringDetail } from 'src/domain/types/gathering.types';
+import {
+  EndedGathering,
+  Gathering,
+  GatheringDetail,
+} from 'src/domain/types/gathering.types';
 import {
   DateIdPaginationInput,
   PaginatedDateRangeInput,
@@ -14,7 +18,7 @@ export interface GatheringsRepository {
   findEndedGatheringsByUserId(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
-  ): Promise<Gathering[]>;
+  ): Promise<EndedGathering[]>;
   findGatheringsWithoutFeedByUserId(
     userId: string,
     paginationInput: DateIdPaginationInput,

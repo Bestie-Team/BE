@@ -42,6 +42,7 @@ import { GatheringInvitationListRequest } from 'src/presentation/dto/gathering/r
 import { GatheringListRequest } from 'src/presentation/dto/gathering/request/gathering-list.request';
 import { NoFeedGatheringListRequest } from 'src/presentation/dto/gathering/request/no-feed-gathering-list.request';
 import { UpdateGatheringRequest } from 'src/presentation/dto/gathering/request/update-gathering.request';
+import { EndedGatheringsListResponse } from 'src/presentation/dto/gathering/response/ended-gatherings-list.response';
 import { GatheringDetailResponse } from 'src/presentation/dto/gathering/response/gathering-detail.response';
 import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
@@ -136,7 +137,7 @@ export class GatheringsController {
   @ApiResponse({
     status: 200,
     description: '완료된 모임 목록 조회 완료',
-    type: GatheringListResponse,
+    type: EndedGatheringsListResponse,
   })
   @ApiResponse({
     status: 400,
@@ -146,12 +147,12 @@ export class GatheringsController {
   async getEndedGatherings(
     @Query() dto: GatheringListRequest,
     @CurrentUser() userId: string,
-  ): Promise<GatheringListResponse> {
+  ): Promise<EndedGatheringsListResponse> {
     const domain = await this.gatheringsReadService.getEndedGatherings(
       userId,
       dto,
     );
-    return gatheringConverter.toListDto(domain);
+    return gatheringConverter.toEndedListDto(domain);
   }
 
   @ApiOperation({ summary: '참여 중인 모임 목록 조회' })

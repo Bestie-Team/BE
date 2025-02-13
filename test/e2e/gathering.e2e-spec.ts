@@ -24,6 +24,7 @@ import { GatheringListResponse } from 'src/presentation/dto/gathering/response/g
 import { GatheringDetail } from 'src/domain/types/gathering.types';
 import { User } from '@prisma/client';
 import { UpdateGatheringRequest } from 'src/presentation/dto/gathering/request/update-gathering.request';
+import { EndedGatheringsListResponse } from 'src/presentation/dto/gathering/response/ended-gatherings-list.response';
 
 describe('GatheringsController (e2e)', () => {
   let app: INestApplication;
@@ -831,6 +832,16 @@ describe('GatheringsController (e2e)', () => {
         });
       }
 
+      // 완료된 모임에 피드 작성
+      const myFeeds = Array.from({ length: 3 }, (_, i) =>
+        generateFeedEntity(loginedUser!.id, gatherings[i].id),
+      );
+      // 타회원이 피드 작성
+      const otherUserFeeds = Array.from({ length: 2 }, (_, i) =>
+        generateFeedEntity(users[i].id, gatherings[3 + i].id),
+      );
+      await prisma.feed.createMany({ data: [...myFeeds, ...otherUserFeeds] });
+
       const expectedGatherings = gatherings
         .filter((_, i) => i < 5)
         .sort(
@@ -855,7 +866,8 @@ describe('GatheringsController (e2e)', () => {
           )}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
         )
         .set('Authorization', accessToken);
-      const { status, body }: ResponseResult<GatheringListResponse> = response;
+      const { status, body }: ResponseResult<EndedGatheringsListResponse> =
+        response;
       const { gatherings: resGatherings, nextCursor } = body;
 
       expect(status).toEqual(200);
@@ -873,6 +885,15 @@ describe('GatheringsController (e2e)', () => {
         expect(gathering.invitationImageUrl).toEqual(
           expectedGatherings[i].invitationImageUrl,
         );
+        if (
+          gathering.name.includes('0') ||
+          gathering.name.includes('1') ||
+          gathering.name.includes('2')
+        ) {
+          expect(gathering.isFeedPosted).toBeTruthy();
+        } else {
+          expect(gathering.isFeedPosted).toBeFalsy();
+        }
       });
     });
   });

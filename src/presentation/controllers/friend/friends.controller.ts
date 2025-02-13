@@ -28,7 +28,6 @@ import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 import { SearchFriendRequest } from 'src/presentation/dto/friend/request/search-friend.request';
 import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
-import { ApiUserPaginationQuery } from 'src/common/decorators/swagger';
 
 @ApiTags('/friends')
 @ApiBearerAuth()
@@ -108,7 +107,6 @@ export class FriendsController {
   }
 
   @ApiOperation({ summary: '친구 목록 조회' })
-  @ApiUserPaginationQuery()
   @ApiResponse({
     status: 200,
     description: '친구 목록 조회 성공',
@@ -127,7 +125,6 @@ export class FriendsController {
   }
 
   @ApiOperation({ summary: '받은 친구 요청 목록 조회' })
-  @ApiUserPaginationQuery()
   @ApiResponse({
     status: 200,
     description: '받은 친구 요청 목록 조회 성공',
@@ -149,7 +146,6 @@ export class FriendsController {
   }
 
   @ApiOperation({ summary: '보낸 친구 요청 목록 조회' })
-  @ApiUserPaginationQuery()
   @ApiResponse({
     status: 200,
     description: '보낸 친구 요청 목록 조회 성공',
@@ -177,7 +173,6 @@ export class FriendsController {
     type: 'string',
     example: 'lighty_id',
   })
-  @ApiUserPaginationQuery()
   @ApiResponse({
     status: 200,
     description: '검색 성공',

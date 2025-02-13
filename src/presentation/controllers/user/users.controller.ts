@@ -22,10 +22,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import {
-  ApiFileOperation,
-  ApiUserPaginationQuery,
-} from 'src/common/decorators/swagger';
+import { ApiFileOperation } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateProfileImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { UsersService } from 'src/domain/services/user/users.service';
@@ -74,7 +71,6 @@ export class UsersController {
 
   @Get('search')
   @ApiOperation({ summary: '회원 검색' })
-  @ApiUserPaginationQuery()
   @ApiQuery({
     name: 'search',
     description: '검색어 (회원 계정 아이디)',

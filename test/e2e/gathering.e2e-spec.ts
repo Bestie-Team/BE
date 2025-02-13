@@ -593,14 +593,14 @@ describe('GatheringsController (e2e)', () => {
         .filter((_, i) => i < 8)
         .sort(
           (a, b) =>
-            a.gatheringDate.getTime() - b.gatheringDate.getTime() ||
+            b.gatheringDate.getTime() - a.gatheringDate.getTime() ||
             a.id.localeCompare(b.id),
         );
 
       const minDate = new Date('2025-01-01T00:00:00.000Z').toISOString();
       const maxDate = new Date('2025-12-31T23:59:59.000Z').toISOString();
       const cursor = {
-        createdAt: minDate,
+        createdAt: maxDate,
         id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
       };
       const limit = 8;
@@ -846,14 +846,14 @@ describe('GatheringsController (e2e)', () => {
         .filter((_, i) => i < 5)
         .sort(
           (a, b) =>
-            a.gatheringDate.getTime() - b.gatheringDate.getTime() ||
+            b.gatheringDate.getTime() - a.gatheringDate.getTime() ||
             a.id.localeCompare(b.id),
         );
 
       const minDate = new Date('2025-01-01T00:00:00.000Z').toISOString();
       const maxDate = new Date('2025-12-31T23:59:59.000Z').toISOString();
       const cursor = {
-        createdAt: minDate,
+        createdAt: maxDate,
         id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
       };
       const limit = 8;
@@ -869,6 +869,7 @@ describe('GatheringsController (e2e)', () => {
       const { status, body }: ResponseResult<EndedGatheringsListResponse> =
         response;
       const { gatherings: resGatherings, nextCursor } = body;
+      console.log(resGatherings);
 
       expect(status).toEqual(200);
       expect(nextCursor).toEqual(null);

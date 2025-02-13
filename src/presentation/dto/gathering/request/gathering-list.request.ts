@@ -23,7 +23,7 @@ export class GatheringListRequest {
 
   @ApiProperty({
     type: Cursor,
-    description: '첫 번째 커서: { createdAt: minDate, id: uuid 아무 값이나 }',
+    description: '첫 번째 커서: { createdAt: maxDate, id: uuid 아무 값이나 }',
   })
   @Transform(({ value }) => {
     try {

@@ -55,7 +55,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
         eb.or([
           eb(
             'g.gathering_date',
-            minDate === cursor.createdAt ? '>=' : '>',
+            maxDate === cursor.createdAt ? '<=' : '<',
             new Date(cursor.createdAt),
           ),
           eb.and([
@@ -66,7 +66,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       )
       .where('g.deleted_at', 'is', null)
       .where('g.ended_at', 'is', null)
-      .orderBy('g.gathering_date', 'asc')
+      .orderBy('g.gathering_date', 'desc')
       .orderBy('g.id', 'asc')
       .groupBy('g.id')
       .limit(limit);
@@ -101,7 +101,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
         eb.or([
           eb(
             'g.gathering_date',
-            minDate === cursor.createdAt ? '>=' : '>',
+            maxDate === cursor.createdAt ? '<=' : '<',
             new Date(cursor.createdAt),
           ),
           eb.and([
@@ -112,7 +112,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       )
       .where('g.deleted_at', 'is', null)
       .where('g.ended_at', 'is not', null)
-      .orderBy('g.gathering_date', 'asc')
+      .orderBy('g.gathering_date', 'desc')
       .orderBy('g.id', 'asc')
       .groupBy('g.id')
       .limit(limit);
@@ -132,7 +132,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       END`.as('is_feed_posted'),
       ])
       .where('g.id', 'in', () => subquery)
-      .orderBy('g.gathering_date', 'asc')
+      .orderBy('g.gathering_date', 'desc')
       .orderBy('g.id', 'asc')
       .execute();
 
@@ -238,7 +238,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
         'g.description',
       ])
       .where('g.id', 'in', () => subquery)
-      .orderBy('g.gathering_date', 'asc')
+      .orderBy('g.gathering_date', 'desc')
       .orderBy('g.id', 'asc')
       .execute();
 

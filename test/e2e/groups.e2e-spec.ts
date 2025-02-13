@@ -32,6 +32,10 @@ describe('GroupsController (e2e)', () => {
     await app.init();
   });
 
+  afterAll(() => {
+    app.close();
+  });
+
   afterEach(async () => {
     await prisma.groupParticipation.deleteMany();
     await prisma.group.deleteMany();

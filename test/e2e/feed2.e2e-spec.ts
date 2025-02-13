@@ -38,6 +38,10 @@ describe('FeedsController (e2e)', () => {
     await app.init();
   });
 
+  afterAll(() => {
+    app.close();
+  });
+
   afterEach(async () => {
     await prisma.blockedFeed.deleteMany();
     await prisma.feedComment.deleteMany();

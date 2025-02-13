@@ -16,6 +16,10 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
+  afterAll(() => {
+    app.close();
+  });
+
   it('헬스 체크', async () => {
     const response = await request(app.getHttpServer()).get('/health');
     const { status, text } = response;

@@ -40,6 +40,10 @@ describe('GatheringsController (e2e)', () => {
     await app.init();
   });
 
+  afterAll(() => {
+    app.close();
+  });
+
   afterEach(async () => {
     await prisma.feed.deleteMany();
     await prisma.gatheringParticipation.deleteMany();

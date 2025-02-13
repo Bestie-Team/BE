@@ -35,6 +35,10 @@ describe('FriendsController (e2e)', () => {
     await app.init();
   });
 
+  afterAll(() => {
+    app.close();
+  });
+
   afterEach(async () => {
     await prisma.gatheringParticipation.deleteMany();
     await prisma.gathering.deleteMany();

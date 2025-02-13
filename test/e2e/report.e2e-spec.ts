@@ -40,6 +40,10 @@ describe('ReportsController (e2e)', () => {
     await prisma.user.deleteMany();
   });
 
+  afterAll(() => {
+    app.close();
+  });
+
   describe('(POST) /reports/friends - 친구 신고', () => {
     it('친구 신고 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);

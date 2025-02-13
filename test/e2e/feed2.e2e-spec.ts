@@ -434,7 +434,7 @@ describe('FeedsController (e2e)', () => {
           expect(feed.withMembers.length).toEqual(4);
         }
         if (!feed.gathering) {
-          expect(feed.withMembers.length).toEqual(2);
+          expect(feed.withMembers.length).toEqual(3);
         }
       });
     });

@@ -28,13 +28,17 @@ import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 import { SearchFriendRequest } from 'src/presentation/dto/friend/request/search-friend.request';
 import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
+import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
 
 @ApiTags('/friends')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('friends')
 export class FriendsController {
-  constructor(private readonly friendsService: FriendsService) {}
+  constructor(
+    private readonly friendsService: FriendsService,
+    private readonly friendWriteService: FriendWriteService,
+  ) {}
 
   @ApiOperation({ summary: '친구 요청' })
   @ApiBody({ type: CreateFriendRequest })
@@ -57,7 +61,7 @@ export class FriendsController {
     @CurrentUser() userId: string,
   ) {
     const { userId: receiverId } = dto;
-    await this.friendsService.request({ senderId: userId, receiverId });
+    await this.friendWriteService.request({ senderId: userId, receiverId });
   }
 
   @ApiOperation({ summary: '친구 요청 수락' })
@@ -78,7 +82,7 @@ export class FriendsController {
     @Param('friendId') friendId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.friendsService.accept(friendId, userId);
+    await this.friendWriteService.accept(friendId, userId);
   }
 
   @ApiOperation({
@@ -103,7 +107,7 @@ export class FriendsController {
     @Param('friendId') friendId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.friendsService.reject(friendId, userId);
+    await this.friendWriteService.reject(friendId, userId);
   }
 
   @ApiOperation({ summary: '친구 목록 조회' })
@@ -214,6 +218,6 @@ export class FriendsController {
     @Query('userId', ParseUUIDPipe) friendUserId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.friendsService.delete(friendUserId, userId);
+    await this.friendWriteService.delete(friendUserId, userId);
   }
 }

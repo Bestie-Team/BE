@@ -34,7 +34,7 @@ export class FriendRequestUseCase {
     });
 
     if (receiver.notificationToken && receiver.serviceNotificationConsent) {
-      this.publicNotification({
+      this.publishNotification({
         token: receiver.notificationToken,
         title: APP_NAME,
         body: message,
@@ -55,7 +55,7 @@ export class FriendRequestUseCase {
     return `${receiverName}님이 친구 요청을 보냈어요.`;
   }
 
-  private async publicNotification(payload: NotificationPayload) {
+  private async publishNotification(payload: NotificationPayload) {
     this.eventEmitter.emit('notify', payload);
   }
 }

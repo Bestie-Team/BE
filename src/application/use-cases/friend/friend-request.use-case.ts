@@ -24,6 +24,7 @@ export class FriendRequestUseCase {
     const sender = await this.usersService.getUserByIdOrThrow(senderId);
     const message = this.generateNotificationMessage(sender.name);
 
+    await this.friendWriteService.checkExistFriend(senderId, receiverId);
     await this.transaction(input, {
       message,
       title: APP_NAME,

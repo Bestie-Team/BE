@@ -31,16 +31,13 @@ export class FriendWriteService {
   ) {}
 
   async request(prototype: FriendPrototype) {
-    const { senderId, receiverId } = prototype;
-    await this.checkExistFriend(senderId, receiverId);
-
     const stdDate = new Date();
     const friend = FriendEntity.create(prototype, v4, stdDate);
 
     await this.friendsRepository.save(friend);
   }
 
-  private async checkExistFriend(senderId: string, receiverId: string) {
+  async checkExistFriend(senderId: string, receiverId: string) {
     const existFriend =
       await this.friendsRepository.findOneBySenderAndReceiverId(
         senderId,

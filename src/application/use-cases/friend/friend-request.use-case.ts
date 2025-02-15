@@ -43,7 +43,7 @@ export class FriendRequestUseCase {
   }
 
   @Transactional()
-  async transaction(
+  private async transaction(
     friendInput: FriendPrototype,
     notificationInput: NotificationPrototype,
   ) {
@@ -55,7 +55,7 @@ export class FriendRequestUseCase {
     return `${receiverName}님이 친구 요청을 보냈어요.`;
   }
 
-  async publicNotification(payload: NotificationPayload) {
+  private async publicNotification(payload: NotificationPayload) {
     this.eventEmitter.emit('notify', payload);
   }
 }

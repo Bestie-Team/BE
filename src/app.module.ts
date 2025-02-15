@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ClsModule } from 'nestjs-cls';
 import { AppController } from 'src/app.controller';
 import { UsersModule } from 'src/modules/user/users.module';
@@ -17,7 +18,6 @@ import { FeedsModule } from 'src/modules/feed/feeds.module';
 import { FeedCommentsModule } from 'src/modules/feed-comment/feed-comments.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { ReportsModule } from 'src/modules/report/reports.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ListenersModule } from 'src/infrastructure/listeners/listeners.module';
 
 @Module({

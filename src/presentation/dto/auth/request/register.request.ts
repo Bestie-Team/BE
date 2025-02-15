@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsIn,
   IsNotEmpty,
@@ -45,4 +46,14 @@ export class RegisterRequest {
   })
   @Transform(({ value }) => value.toUpperCase(), { toClassOnly: true })
   readonly provider: Provider;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsIn([true], { message: '서비스 이용 약관에 동의는 필수입니다.' })
+  readonly termsOfServiceConsent: boolean;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsIn([true], { message: '개인정보 수집 및 이용 동의는 필수입니다.' })
+  readonly privacyPolicyConsent: boolean;
 }

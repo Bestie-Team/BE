@@ -7,6 +7,8 @@ export interface UserPrototype {
   readonly accountId: string;
   readonly profileImageUrl: string | null;
   readonly provider: Provider;
+  readonly termsOfServiceConsent: boolean;
+  readonly privacyPolicyConsent: boolean;
 }
 
 export interface UserBasicInfo {

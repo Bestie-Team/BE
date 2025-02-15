@@ -38,10 +38,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         `${reqMessage}\nerrorBody: ${JSON.stringify(responseBody, null, 2)}`,
       );
 
-    res.status(status).json({
-      ...responseBody,
-      timestamp: new Date().toISOString(),
-    });
+    const body =
+      typeof responseBody === 'object'
+        ? {
+            ...responseBody,
+            timestamp: new Date().toISOString(),
+          }
+        : {
+            message: responseBody,
+            timestamp: new Date().toISOString(),
+          };
+    res.status(status).json(body);
   }
 
   generateRequestMessage(req: Request) {

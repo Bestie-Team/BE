@@ -51,6 +51,10 @@ export class UsersService {
     await this.usersRepository.update({ id: userId, accountId });
   }
 
+  async updateNotificationToken(token: string, userId: string) {
+    await this.usersRepository.update({ id: userId, notificationToken: token });
+  }
+
   async getDetail(id: string) {
     const user = await this.usersRepository.findDetailById(id);
     if (!user) {

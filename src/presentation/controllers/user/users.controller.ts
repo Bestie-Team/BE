@@ -32,7 +32,10 @@ import { SearchUserResponse } from 'src/presentation/dto/user/response/search-us
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { ChangeProfileImageRequest } from 'src/presentation/dto/user/request/change-profile-image.request';
-import { ChangeAccountIdRequest } from 'src/presentation/dto';
+import {
+  ChangeAccountIdRequest,
+  UpdateNotificationTokenRequest,
+} from 'src/presentation/dto';
 import { UserDetailResponse } from 'src/presentation/dto/user/response/user-detail.response';
 import { UserProfileResponse } from 'src/presentation/dto/user/response/user-profile.response';
 
@@ -185,6 +188,18 @@ export class UsersController {
     @CurrentUser() userId: string,
   ) {
     await this.usersService.updateAccountId(userId, dto.accountId);
+  }
+
+  @ApiOperation({ summary: '알림 토큰 변경' })
+  @ApiResponse({ status: 204, description: '변경 완료' })
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('notification-token')
+  async updateNotificationToken(
+    @Body() dto: UpdateNotificationTokenRequest,
+    @CurrentUser() userId: string,
+  ) {
+    await this.usersService.updateNotificationToken(dto.token, userId);
   }
 
   @ApiOperation({

@@ -10,12 +10,14 @@ export class UserEntity {
   readonly profileImageUrl: string | null;
   readonly termsOfServiceConsent: boolean;
   readonly privacyPolicyConsent: boolean;
+  readonly notificationToken: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
   constructor(
     input: UserPrototype & {
       id: string;
+      notificationToken: string | null;
       createdAt: Date;
       updatedAt: Date;
     },
@@ -33,6 +35,7 @@ export class UserEntity {
       id: idGen(),
       createdAt: stdDate,
       updatedAt: updatedAt || stdDate,
+      notificationToken: null,
       ...input,
     });
   }

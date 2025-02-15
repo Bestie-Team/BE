@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import admin from 'firebase-admin';
@@ -6,6 +6,8 @@ import { NotificationPayload } from 'src/infrastructure/types/notification.types
 
 @Injectable()
 export class NotificationListener {
+  private readonly logger = new Logger('Notification Listener');
+
   constructor(private readonly config: ConfigService) {
     admin.initializeApp({
       credential: admin.credential.cert({
@@ -28,7 +30,8 @@ export class NotificationListener {
           body,
         },
       })
-      .then(() => console.log('전송 완료'))
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        this.logger.log('알림 전송 실패', e);
+      });
   }
 }

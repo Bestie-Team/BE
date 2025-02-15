@@ -1,6 +1,7 @@
 import { Transactional } from '@nestjs-cls/transactional';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { APP_NAME } from 'src/common/constant';
 import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
 import { UsersService } from 'src/domain/services/user/users.service';
@@ -21,17 +22,22 @@ export class FriendRequestUseCase {
     const { receiverId, senderId } = input;
     const receiver = await this.usersService.getUserByIdOrThrow(receiverId);
     const sender = await this.usersService.getUserByIdOrThrow(senderId);
+    const message = this.generateNotificationMessage(sender.name);
 
     await this.transaction(input, {
-      message: this.generateNotificationMessage(sender.name),
-      title: 'LIGHTY',
+      message,
+      title: APP_NAME,
       type: 'FRIEND_REQUEST',
       userId: receiverId,
       relatedId: null,
     });
 
     if (receiver.notificationToken && receiver.serviceNotificationConsent) {
-      this.publicNotification({ token: 'token', title: 'title', body: 'body' });
+      this.publicNotification({
+        token: receiver.notificationToken,
+        title: APP_NAME,
+        body: message,
+      });
     }
   }
 

@@ -46,6 +46,7 @@ import { GatheringListResponse } from 'src/presentation/dto/gathering/response/g
 
 @ApiTags('/gatherings')
 @ApiBearerAuth()
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @UseGuards(AuthGuard)
 @Controller('gatherings')
 export class GatheringsController {
@@ -61,10 +62,6 @@ export class GatheringsController {
     status: 200,
     description: '파일 업로드 성공',
     type: UploadImageResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '파일 형식 호환 x',
   })
   @ApiResponse({
     status: 413,
@@ -91,10 +88,6 @@ export class GatheringsController {
     status: 201,
     description: '모임 생성 완료',
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패, friendIds에 친구가 아닌 회원이 존재할 경우',
-  })
   @Post()
   async create(
     @Body() dto: CreateGatheringRequest,
@@ -112,10 +105,6 @@ export class GatheringsController {
     status: 200,
     description: '모임 목록 조회 완료',
     type: GatheringListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Get('no-feed')
   async getGatheringsWithoutFeed(
@@ -135,10 +124,6 @@ export class GatheringsController {
     description: '완료된 모임 목록 조회 완료',
     type: EndedGatheringsListResponse,
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
-  })
   @Get('ended')
   async getEndedGatherings(
     @Query() dto: GatheringListRequest,
@@ -156,10 +141,6 @@ export class GatheringsController {
     status: 200,
     description: '모임 목록 조회 완료',
     type: GatheringListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Get()
   async getGatherings(
@@ -197,10 +178,6 @@ export class GatheringsController {
     status: 200,
     description: '모임 초대 수락 완료',
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
-  })
   @Post(':invitationId/accept')
   async accept(
     @Param('invitationId', ParseUUIDPipe) invitationId: string,
@@ -219,10 +196,6 @@ export class GatheringsController {
     status: 200,
     description: '모임 초대 거절 완료',
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
-  })
   @Post(':invitationId/reject')
   async reject(
     @Param('invitationId', ParseUUIDPipe) invitationId: string,
@@ -236,10 +209,6 @@ export class GatheringsController {
     status: 200,
     description: '받은 모임 초대 목록 조회 완료',
     type: GatheringInvitationListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Get('invitations/received')
   async getReceivedInvitations(
@@ -259,10 +228,6 @@ export class GatheringsController {
     status: 200,
     description: '보낸 모임 초대 목록 조회 완료',
     type: GatheringInvitationListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Get('invitations/sent')
   async getSentInvitations(

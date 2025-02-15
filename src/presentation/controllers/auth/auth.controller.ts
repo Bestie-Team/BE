@@ -16,6 +16,7 @@ import { Provider } from 'src/shared/types';
 import { RegisterResponse } from 'src/presentation/dto/auth/response/register.response';
 
 @ApiTags('/auth')
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

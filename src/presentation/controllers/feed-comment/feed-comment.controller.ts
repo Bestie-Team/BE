@@ -11,7 +11,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { FeedCommentsService } from 'src/domain/services/feed-comment/feed-comments.service';
@@ -21,6 +26,8 @@ import { FeedCommentResponse } from 'src/presentation/dto/comment/response/feed-
 
 @ApiTags('/feed-comments')
 @UseGuards(AuthGuard)
+@ApiBearerAuth()
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @Controller('feed-comments')
 export class FeedCommentController {
   constructor(private readonly feedCommentService: FeedCommentsService) {}

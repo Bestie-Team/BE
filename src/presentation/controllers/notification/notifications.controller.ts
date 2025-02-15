@@ -25,6 +25,7 @@ import { NotificationListResponse } from 'src/presentation/dto/notification/resp
 
 @ApiTags('/notifications')
 @ApiBearerAuth()
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @UseGuards(AuthGuard)
 @Controller('notifications')
 export class NotificationsController {

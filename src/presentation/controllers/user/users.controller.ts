@@ -37,6 +37,7 @@ import { UserDetailResponse } from 'src/presentation/dto/user/response/user-deta
 import { UserProfileResponse } from 'src/presentation/dto/user/response/user-profile.response';
 
 @ApiTags('/users')
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -47,10 +48,6 @@ export class UsersController {
     status: 200,
     description: '파일 업로드 성공',
     type: UploadImageResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '파일 형식 호환 x',
   })
   @ApiResponse({
     status: 413,
@@ -80,10 +77,6 @@ export class UsersController {
     status: 200,
     description: '검색 성공',
     type: SearchUserResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
@@ -155,10 +148,6 @@ export class UsersController {
     status: 204,
     description: '변경 성공',
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
-  })
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -187,10 +176,6 @@ export class UsersController {
     status: 422,
     description: '마지막 변경일로부터 30일 미경과',
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
-  })
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -210,10 +195,6 @@ export class UsersController {
   @ApiResponse({
     status: 204,
     description: '탈퇴 성공',
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @ApiBearerAuth()
   @UseGuards(AuthGuard)

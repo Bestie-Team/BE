@@ -41,6 +41,7 @@ import { UploadImageListResponse } from 'src/presentation/dto/file/response/uplo
 
 @ApiTags('/feeds')
 @ApiBearerAuth()
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @UseGuards(AuthGuard)
 @Controller('feeds')
 export class FeedsController {
@@ -59,10 +60,6 @@ export class FeedsController {
     status: 200,
     description: '파일 업로드 성공',
     type: UploadImageListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '파일 형식 호환 x, 업로드 이미지 5장 초과',
   })
   @ApiResponse({
     status: 413,
@@ -122,11 +119,6 @@ export class FeedsController {
   @ApiResponse({
     status: 201,
     description: '피드 작성 완료',
-  })
-  @ApiResponse({
-    status: 400,
-    description:
-      '입력값 검증 실패, friendIds에 친구가 아닌 회원 번호가 있는 경우',
   })
   @Post('friends')
   async createFriendFeed(

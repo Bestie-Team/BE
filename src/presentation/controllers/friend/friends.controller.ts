@@ -32,6 +32,7 @@ import { FriendWriteService } from 'src/domain/services/friend/friend-write.serv
 
 @ApiTags('/friends')
 @ApiBearerAuth()
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @UseGuards(AuthGuard)
 @Controller('friends')
 export class FriendsController {
@@ -51,10 +52,6 @@ export class FriendsController {
     description:
       '이미 친구인 회원에게 요청을 보낸 경우, 이미 요청을 보냈거나 받은 회원에게 요청을 보낸 경우',
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패, 신고한 회원에게 요청을 보낸 경우',
-  })
   @Post()
   async request(
     @Body() dto: CreateFriendRequest,
@@ -72,10 +69,6 @@ export class FriendsController {
   @ApiResponse({
     status: 201,
     description: '친구 요청 수락 완료',
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Post(':friendId/accept')
   async accept(
@@ -98,10 +91,6 @@ export class FriendsController {
     status: 201,
     description: '친구 요청 거절 완료',
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
-  })
   @Post(':friendId/reject')
   async reject(
     @Param('friendId') friendId: string,
@@ -116,10 +105,6 @@ export class FriendsController {
     description: '친구 목록 조회 성공',
     type: FriendListResponse,
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
-  })
   @Get()
   async getFriends(
     @Query() paginationDto: UserPaginationRequest,
@@ -133,10 +118,6 @@ export class FriendsController {
     status: 200,
     description: '받은 친구 요청 목록 조회 성공',
     type: FriendRequestListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Get('requests/received')
   async getReceivedRequests(
@@ -154,10 +135,6 @@ export class FriendsController {
     status: 200,
     description: '보낸 친구 요청 목록 조회 성공',
     type: FriendRequestListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Get('requests/sent')
   async getSentRequests(
@@ -181,10 +158,6 @@ export class FriendsController {
     status: 200,
     description: '검색 성공',
     type: FriendListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Get('search')
   async search(

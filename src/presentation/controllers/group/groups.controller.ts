@@ -43,6 +43,7 @@ import { GroupListResponse } from 'src/presentation/dto/group/response/group-lis
 
 @ApiTags('/groups')
 @ApiBearerAuth()
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @UseGuards(AuthGuard)
 @Controller('groups')
 export class GroupsController {
@@ -57,10 +58,6 @@ export class GroupsController {
     status: 200,
     description: '파일 업로드 성공',
     type: UploadImageResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '파일 형식 호환 x',
   })
   @ApiResponse({
     status: 413,
@@ -87,10 +84,6 @@ export class GroupsController {
     status: 201,
     description: '그룹 생성 완료',
   })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패, friendIds에 친구가 아닌 회원이 존재할 경우',
-  })
   @Post()
   async create(@Body() dto: CreateGroupRequest, @CurrentUser() userId: string) {
     const { friendIds, ...rest } = dto;
@@ -106,10 +99,6 @@ export class GroupsController {
     status: 200,
     description: '그룹 목록 조회 완료',
     type: GroupListResponse,
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @Get()
   async getGroups(
@@ -135,10 +124,6 @@ export class GroupsController {
   @ApiResponse({
     status: 201,
     description: '그룹원 추가 완료',
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @ApiResponse({
     status: 409,
@@ -171,10 +156,6 @@ export class GroupsController {
   @ApiResponse({
     status: 204,
     description: '그룹 나가기 완료',
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':groupId/members')
@@ -220,10 +201,6 @@ export class GroupsController {
   @ApiResponse({
     status: 403,
     description: '그룹장이 아닌 경우 삭제 실패',
-  })
-  @ApiResponse({
-    status: 400,
-    description: '입력값 검증 실패',
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':groupId')

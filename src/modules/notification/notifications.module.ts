@@ -13,5 +13,6 @@ import { NotificationsController } from 'src/presentation/controllers/notificati
       useClass: NotificationsPrismaRepository,
     },
   ],
+  exports: [NotificationsService],
 })
 export class NotificationsModule {}

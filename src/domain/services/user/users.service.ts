@@ -69,7 +69,7 @@ export class UsersService {
     return user;
   }
 
-  private async getUserByIdOrThrow(userId: string) {
+  async getUserByIdOrThrow(userId: string) {
     const user = await this.usersRepository.findOneById(userId);
     if (!user) {
       throw new NotFoundException(NOT_FOUND_USER_MESSAGE);

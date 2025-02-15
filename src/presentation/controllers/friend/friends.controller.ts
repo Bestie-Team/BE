@@ -29,6 +29,7 @@ import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/
 import { SearchFriendRequest } from 'src/presentation/dto/friend/request/search-friend.request';
 import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
 import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
+import { FriendRequestUseCase } from 'src/application/use-cases/friend/friend-request.use-case';
 
 @ApiTags('/friends')
 @ApiBearerAuth()
@@ -39,6 +40,7 @@ export class FriendsController {
   constructor(
     private readonly friendsService: FriendsService,
     private readonly friendWriteService: FriendWriteService,
+    private readonly friendRequestUseCase: FriendRequestUseCase,
   ) {}
 
   @ApiOperation({ summary: '친구 요청' })
@@ -58,7 +60,7 @@ export class FriendsController {
     @CurrentUser() userId: string,
   ) {
     const { userId: receiverId } = dto;
-    await this.friendWriteService.request({ senderId: userId, receiverId });
+    await this.friendRequestUseCase.execute({ senderId: userId, receiverId });
   }
 
   @ApiOperation({ summary: '친구 요청 수락' })

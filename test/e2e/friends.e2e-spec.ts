@@ -40,6 +40,7 @@ describe('FriendsController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.notification.deleteMany();
     await prisma.gatheringParticipation.deleteMany();
     await prisma.gathering.deleteMany();
     await prisma.friend.deleteMany();

@@ -10,4 +10,8 @@ export const validationSchema = Joi.object({
   AWS_BUCKEY_NAME: Joi.string().required(),
   // JWT
   JWT_SECRET_KEY: Joi.string().required(),
+  // FCM
+  FCM_PROJECT_ID: Joi.string().required(),
+  FCM_PRIVATE_KEY: Joi.string().required(),
+  FCM_CLIENT_EMAIL: Joi.string().required(),
 });

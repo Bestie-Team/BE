@@ -17,6 +17,8 @@ import { FeedsModule } from 'src/modules/feed/feeds.module';
 import { FeedCommentsModule } from 'src/modules/feed-comment/feed-comments.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { ReportsModule } from 'src/modules/report/reports.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ListenersModule } from 'src/infrastructure/listeners/listeners.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { ReportsModule } from 'src/modules/report/reports.module';
     }),
     ClsModule.forRoot(clsOptions),
     PrismaModule,
+    EventEmitterModule.forRoot(),
+    ListenersModule,
     FiltersModule,
     InterceptorsModule,
     PipesModule,

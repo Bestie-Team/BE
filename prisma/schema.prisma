@@ -68,6 +68,11 @@ model User {
   name String @db.VarChar(20)
   accountId String @db.VarChar(15) @map("account_id") @unique
   profileImageUrl String? @map("profile_image_url")
+  termsOfServiceConsent Boolean @map("terms_of_service_consent")
+  privacyPolicyConsent Boolean @map("privacy_policy_consent")
+  marketingNotificationConsent Boolean @map("marketing_notification_consent") @default(false)
+  serviceNotificationConsent Boolean @map("service_notification_consent") @default(false)
+  notificationToken String? @map("notification_token")
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
@@ -218,7 +223,7 @@ model FeedComment {
   @@map("feed_comment")
 }
 
-model ActiveFeedComment {
+view ActiveFeedComment {
   id String @id
   feedId String @map("feed_id")
   writerId String @map("writer_id")

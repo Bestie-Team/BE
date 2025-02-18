@@ -31,7 +31,10 @@ export class NotificationListener {
         },
       })
       .catch((e) => {
-        this.logger.log('알림 전송 실패', e);
+        this.logger.log({
+          message: `알림 전송 실패: ${e.message}`,
+          timestamp: new Date().toISOString(),
+        });
       });
   }
 }

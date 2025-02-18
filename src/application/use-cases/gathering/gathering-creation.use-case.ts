@@ -46,10 +46,14 @@ export class GatheringCreationUseCase {
 
   private validate(groupId: string | null, friendUserIds: string[] | null) {
     if (!groupId && !friendUserIds) {
-      throw new BadRequestException();
+      throw new BadRequestException(
+        '그룹 번호 또는 친구 번호는 필수로 제공되어야 합니다.',
+      );
     }
     if (groupId && friendUserIds) {
-      throw new BadRequestException();
+      throw new BadRequestException(
+        '그룹 번호와 친구 번호는 동시에 제공될 수 없습니다. 둘 중 하나만 선택해주세요.',
+      );
     }
   }
 

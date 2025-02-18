@@ -24,20 +24,23 @@ export class GatheringCreationUseCase {
   async execute(input: GatheringPrototype, friendUserIds: string[] | null) {
     const { groupId, hostUserId } = input;
 
+    let receiverIds: string[] = [];
+
     if (groupId) {
-      const participants = (
+      receiverIds = (
         await this.groupsService.getParticipantsById(groupId)
       ).filter((userId) => userId !== hostUserId);
-      await this.createGroupGathering(input, participants);
-      await this.createNotifications(hostUserId, participants);
+      await this.createGroupGathering(input, receiverIds);
     }
     if (groupId === null && friendUserIds !== null) {
+      receiverIds = friendUserIds;
       await this.createFriendGathering(input, friendUserIds);
-      await this.createNotifications(hostUserId, friendUserIds);
     }
+
+    this.notify(hostUserId, receiverIds);
   }
 
-  async createNotifications(senderId: string, receiverIds: string[]) {
+  async notify(senderId: string, receiverIds: string[]) {
     const sender = await this.usersService.getUserByIdOrThrow(senderId);
     const receivers = await this.usersService.getUsersByIds(receiverIds);
 

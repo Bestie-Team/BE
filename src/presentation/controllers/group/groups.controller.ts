@@ -31,7 +31,7 @@ import {
 } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { GroupCreateService } from 'src/domain/services/group/group-create.service';
+import { GroupsWriteService } from 'src/domain/services/group/groups-write.service';
 import { GroupsService } from 'src/domain/services/group/groups.service';
 import { toListDto } from 'src/presentation/converters/group/group.converters';
 import { AddGroupMemberRequest, PaginationRequest } from 'src/presentation/dto';
@@ -48,7 +48,7 @@ import { GroupListResponse } from 'src/presentation/dto/group/response/group-lis
 @Controller('groups')
 export class GroupsController {
   constructor(
-    private readonly groupsCreateService: GroupCreateService,
+    private readonly groupsWriteService: GroupsWriteService,
     private readonly groupsService: GroupsService,
   ) {}
 
@@ -87,7 +87,7 @@ export class GroupsController {
   @Post()
   async create(@Body() dto: CreateGroupRequest, @CurrentUser() userId: string) {
     const { friendIds, ...rest } = dto;
-    await this.groupsCreateService.create(
+    await this.groupsWriteService.create(
       { ownerId: userId, ...rest },
       friendIds,
     );
@@ -140,7 +140,7 @@ export class GroupsController {
     @CurrentUser() userId: string,
   ) {
     const { userIds: participantIds } = dto;
-    await this.groupsCreateService.addNewMembers(
+    await this.groupsWriteService.addNewMembers(
       groupId,
       userId,
       participantIds,
@@ -163,7 +163,7 @@ export class GroupsController {
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.groupsCreateService.leaveGroup(groupId, userId);
+    await this.groupsWriteService.leaveGroup(groupId, userId);
   }
 
   @ApiOperation({
@@ -185,7 +185,7 @@ export class GroupsController {
     @Body() dto: UpdateGroupRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.groupsCreateService.update(groupId, userId, dto);
+    await this.groupsWriteService.update(groupId, userId, dto);
   }
 
   @ApiOperation({ summary: '그룹 삭제 (그룹장)' })
@@ -208,6 +208,6 @@ export class GroupsController {
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.groupsCreateService.deleteGroup(groupId, userId);
+    await this.groupsWriteService.deleteGroup(groupId, userId);
   }
 }

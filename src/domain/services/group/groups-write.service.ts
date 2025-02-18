@@ -23,7 +23,7 @@ import { GroupParticipationEntity } from 'src/domain/entities/group/group-partic
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 
 @Injectable()
-export class GroupCreateService {
+export class GroupsWriteService {
   constructor(
     @Inject(GroupsRepository)
     private readonly groupsRepository: GroupsRepository,

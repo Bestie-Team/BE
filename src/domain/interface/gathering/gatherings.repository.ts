@@ -28,7 +28,9 @@ export interface GatheringsRepository {
     id: string,
     hostId: string,
   ): Promise<{ id: string; endedAt: Date | null } | null>;
-  findOneById(id: string): Promise<{ id: string; endedAt: Date | null } | null>;
+  findOneById(
+    id: string,
+  ): Promise<{ id: string; hostUserId: string; endedAt: Date | null } | null>;
   update(id: string, data: Partial<GatheringEntity>): Promise<void>;
   delete(id: string): Promise<void>;
 }

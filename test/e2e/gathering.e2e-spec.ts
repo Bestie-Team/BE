@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
-import { Body, INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
 import { AppModule } from 'src/app.module';
@@ -19,12 +19,18 @@ import {
 } from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
-import { GatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/gathering-invitation-list.response';
+import { ReceivedGatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/received-gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
 import { GatheringDetail } from 'src/domain/types/gathering.types';
 import { User } from '@prisma/client';
 import { UpdateGatheringRequest } from 'src/presentation/dto/gathering/request/update-gathering.request';
 import { EndedGatheringsListResponse } from 'src/presentation/dto/gathering/response/ended-gatherings-list.response';
+import { SentGatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/sent-gathering-invitation-list.response';
+import {
+  AcceptGatheringInvitationRequest,
+  RejectGatheringInvitationRequest,
+} from 'src/presentation/dto';
+import { send } from 'process';
 
 describe('GatheringsController (e2e)', () => {
   let app: INestApplication;
@@ -270,8 +276,14 @@ describe('GatheringsController (e2e)', () => {
         ),
       });
 
+      const dto: AcceptGatheringInvitationRequest = {
+        gatheringId: gathering.id,
+        invitationId: gatheringInvitation.id,
+      };
+
       const response = await request(app.getHttpServer())
-        .post(`/gatherings/${gatheringInvitation.id}/accept`)
+        .post(`/gatherings/accept`)
+        .send(dto)
         .set('Authorization', accessToken);
       const { status } = response;
       const acceptedInvitation = await prisma.gatheringParticipation.findUnique(
@@ -312,8 +324,13 @@ describe('GatheringsController (e2e)', () => {
         ),
       });
 
+      const dto: RejectGatheringInvitationRequest = {
+        invitationId: gatheringInvitation.id,
+      };
+
       const response = await request(app.getHttpServer())
-        .post(`/gatherings/${gatheringInvitation.id}/reject`)
+        .post(`/gatherings/reject`)
+        .send(dto)
         .set('Authorization', accessToken);
       const { status } = response;
       const acceptedInvitation = await prisma.gatheringParticipation.findUnique(
@@ -405,8 +422,10 @@ describe('GatheringsController (e2e)', () => {
           )}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
         )
         .set('Authorization', accessToken);
-      const { status, body }: ResponseResult<GatheringInvitationListResponse> =
-        response;
+      const {
+        status,
+        body,
+      }: ResponseResult<ReceivedGatheringInvitationListResponse> = response;
       const { invitations, nextCursor } = body;
 
       expect(status).toEqual(200);
@@ -509,8 +528,10 @@ describe('GatheringsController (e2e)', () => {
           )}&limit=${limit}&minDate=${minDate}&maxDate=${maxDate}`,
         )
         .set('Authorization', accessToken);
-      const { status, body }: ResponseResult<GatheringInvitationListResponse> =
-        response;
+      const {
+        status,
+        body,
+      }: ResponseResult<SentGatheringInvitationListResponse> = response;
       const { invitations, nextCursor } = body;
 
       expect(status).toEqual(200);

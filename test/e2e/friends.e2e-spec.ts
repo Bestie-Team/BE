@@ -20,6 +20,7 @@ import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-
 import { UserCursor } from 'src/presentation/dto/shared';
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 import { generate } from 'rxjs';
+import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';
 
 describe('FriendsController (e2e)', () => {
   let app: INestApplication;
@@ -184,9 +185,15 @@ describe('FriendsController (e2e)', () => {
         data: generateFriendEntity(sender.id, receiver!.id),
       });
 
+      const dto: AccepFriendRequest = {
+        friendId: friendRequest.id,
+        senderId: sender.id,
+      };
+
       // when
       const response = await request(app.getHttpServer())
-        .post(`/friends/${friendRequest.id}/accept`)
+        .post(`/friends/accept`)
+        .send(dto)
         .set('Authorization', receiverToken);
       const { status } = response;
 

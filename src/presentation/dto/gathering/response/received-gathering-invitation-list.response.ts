@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DateIdCursor, User } from '../../shared';
+import { DateIdCursor } from '../../shared';
 
-export class GatheringInvitation {
+class ReceivedGatheringInvitation {
   @ApiProperty()
   readonly id: string;
+
+  @ApiProperty({ example: 'uuid' })
+  readonly gatheringId: string;
 
   @ApiProperty({
     example: '두리 집 청소 모임',
@@ -50,9 +53,9 @@ export class GatheringInvitation {
   readonly groupName: string | null;
 }
 
-export class GatheringInvitationListResponse {
-  @ApiProperty({ type: GatheringInvitation })
-  readonly invitations: GatheringInvitation[];
+export class ReceivedGatheringInvitationListResponse {
+  @ApiProperty({ type: ReceivedGatheringInvitation })
+  readonly invitations: ReceivedGatheringInvitation[];
 
   @ApiProperty({ type: 'string', nullable: true })
   readonly nextCursor: DateIdCursor | null;

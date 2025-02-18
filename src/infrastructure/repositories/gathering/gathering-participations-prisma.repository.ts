@@ -5,7 +5,10 @@ import { GatheringParticipationStatus } from '@prisma/client';
 import { sql } from 'kysely';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
-import { GatheringInvitation } from 'src/domain/types/gathering.types';
+import {
+  ReceivedGatheringInvitation,
+  SentGatheringInvitation,
+} from 'src/domain/types/gathering.types';
 import {
   GatheringParticipationStatus as SharedGatheringParticipationStatus,
   PaginatedDateRangeInput,
@@ -44,7 +47,7 @@ export class GatheringParticipationsPrismaRepository
   async findReceivedByParticipantId(
     participantId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
-  ): Promise<GatheringInvitation[]> {
+  ): Promise<ReceivedGatheringInvitation[]> {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const participationRows = await this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
@@ -89,11 +92,12 @@ export class GatheringParticipationsPrismaRepository
       .limit(limit)
       .execute();
 
-    const result: { [key: string]: GatheringInvitation } = {};
+    const result: { [key: string]: ReceivedGatheringInvitation } = {};
 
     participationRows.forEach((row) => {
       result[row.gathering_id] = {
         id: row.id,
+        gatheringId: row.gathering_id,
         address: row.address,
         createdAt: row.created_at,
         description: row.description,
@@ -111,7 +115,7 @@ export class GatheringParticipationsPrismaRepository
   async findSentBySenderId(
     senderId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
-  ): Promise<GatheringInvitation[]> {
+  ): Promise<SentGatheringInvitation[]> {
     const { cursor, limit, maxDate, minDate } = paginatedDateRangeInput;
     const rows = await this.txHost.tx.$kysely
       .selectFrom('gathering as g')
@@ -168,11 +172,11 @@ export class GatheringParticipationsPrismaRepository
       .orderBy('g.created_at', 'desc')
       .execute();
 
-    const result: { [key: string]: GatheringInvitation } = {};
+    const result: { [key: string]: SentGatheringInvitation } = {};
     rows.forEach((row) => {
       if (!result[row.id]) {
         result[row.id] = {
-          id: row.id,
+          gatheringId: row.id,
           name: row.name,
           description: row.description,
           address: row.address,

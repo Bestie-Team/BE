@@ -1,5 +1,8 @@
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
-import { GatheringInvitation } from 'src/domain/types/gathering.types';
+import {
+  ReceivedGatheringInvitation,
+  SentGatheringInvitation,
+} from 'src/domain/types/gathering.types';
 import {
   GatheringParticipationStatus,
   PaginatedDateRangeInput,
@@ -15,11 +18,11 @@ export interface GatheringParticipationsRepository {
   findReceivedByParticipantId(
     participantId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
-  ): Promise<GatheringInvitation[]>;
+  ): Promise<ReceivedGatheringInvitation[]>;
   findSentBySenderId(
     senderId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
-  ): Promise<GatheringInvitation[]>;
+  ): Promise<SentGatheringInvitation[]>;
   updateStatus(
     invitationId: string,
     status: GatheringParticipationStatus,

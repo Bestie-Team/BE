@@ -67,10 +67,6 @@ export class FriendsController {
   }
 
   @ApiOperation({ summary: '친구 요청 수락' })
-  @ApiParam({
-    name: 'friendId',
-    description: '친구 요청 번호',
-  })
   @ApiResponse({
     status: 201,
     description: '친구 요청 수락 완료',

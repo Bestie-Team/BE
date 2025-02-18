@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { APP_NAME } from 'src/common/constant';
 import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
@@ -7,8 +6,6 @@ import { GroupsService } from 'src/domain/services/group/groups.service';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
 import { UsersService } from 'src/domain/services/user/users.service';
 import { GatheringPrototype } from 'src/domain/types/gathering.types';
-import { NotificationPrototype } from 'src/domain/types/notification.types';
-import { NotificationPayload } from 'src/infrastructure/types/notification.types';
 
 @Injectable()
 export class GatheringCreationUseCase {
@@ -18,7 +15,6 @@ export class GatheringCreationUseCase {
     private readonly groupsService: GroupsService,
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(input: GatheringPrototype, friendUserIds: string[] | null) {
@@ -52,20 +48,20 @@ export class GatheringCreationUseCase {
     }
     if (groupId && friendUserIds) {
       throw new BadRequestException(
-        '그룹 번호와 친구 번호는 동시에 제공될 수 없습니다. 둘 중 하나만 선택해주세요.',
+        '그룹 번호와 친구 번호는 동시에 제공될 수 없습니다.',
       );
     }
   }
 
   private async createGathering(
     prototype: GatheringPrototype,
-    friendUserIds: string[],
+    inviteeIds: string[],
   ) {
     const gathering = this.gatheringsWriteService.createGathering(prototype);
     const invitations =
       this.gatheringParticipationsWriteService.createGatheringInvitations(
         gathering.id,
-        friendUserIds,
+        inviteeIds,
       );
 
     return await this.gatheringsWriteService.createTransaction(
@@ -78,32 +74,19 @@ export class GatheringCreationUseCase {
     const sender = await this.usersService.getUserByIdOrThrow(senderId);
     const receivers = await this.usersService.getUsersByIds(receiverIds);
 
-    const validReceivers = receivers.filter(
-      (receiver) =>
-        receiver.notificationToken && receiver.serviceNotificationConsent,
-    );
-
-    const prototypes: NotificationPrototype[] = validReceivers.map(() => ({
-      type: 'GATHERING_INVITATION_RECEIVED',
-      userId: senderId,
-      title: APP_NAME,
-      message: `${sender.name}님이 약속 초대장을 보냈어요!`,
-      relatedId: null,
-    }));
-
-    if (validReceivers.length > 0) {
-      this.notificationsService.createNotifications(prototypes);
-      validReceivers.forEach((receiver) =>
-        this.publishNotification({
+    const notificationPromises = receivers.map(async (receiver) => {
+      if (receiver.notificationToken && receiver.serviceNotificationConsent) {
+        return this.notificationsService.createV2({
+          message: `${sender.name}님이 약속 초대장을 보냈어요!`,
+          type: 'GATHERING_INVITATION_RECEIVED',
           title: APP_NAME,
-          body: `${sender.name}님이 약속 초대장을 보냈어요!`,
-          token: receiver.notificationToken as string,
-        }),
-      );
-    }
-  }
+          userId: receiver.id,
+          token: receiver.notificationToken,
+          relatedId: null,
+        });
+      }
+    });
 
-  private async publishNotification(payload: NotificationPayload) {
-    this.eventEmitter.emit('notify', payload);
+    Promise.all(notificationPromises);
   }
 }

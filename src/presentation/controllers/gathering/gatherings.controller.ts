@@ -30,6 +30,7 @@ import { ApiFileOperation } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
+import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
 import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
 import { gatheringInvitationConverter } from 'src/presentation/converters/gathering/gathering-invitation.converters';
@@ -54,6 +55,7 @@ export class GatheringsController {
   constructor(
     private readonly gatheringsWriteService: GatheringsWriteService,
     private readonly gatheringsReadService: GatheringsReadService,
+    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriteService,
     private readonly gatheringInvitationsReadService: GatheringInvitationsReadService,
     private readonly gatheringCreationUseCase: GatheringCreationUseCase,
   ) {}
@@ -185,7 +187,7 @@ export class GatheringsController {
     @Param('invitationId', ParseUUIDPipe) invitationId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.gatheringsWriteService.accept(invitationId, userId);
+    await this.gatheringInvitationsWriteService.accept(invitationId, userId);
   }
 
   @ApiOperation({ summary: '모임 초대 거절' })
@@ -203,7 +205,7 @@ export class GatheringsController {
     @Param('invitationId', ParseUUIDPipe) invitationId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.gatheringsWriteService.reject(invitationId, userId);
+    await this.gatheringInvitationsWriteService.reject(invitationId, userId);
   }
 
   @ApiOperation({ summary: '받은 모임 초대 목록 조회' })

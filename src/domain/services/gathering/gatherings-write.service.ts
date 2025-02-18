@@ -50,30 +50,6 @@ export class GatheringsWriteService {
     return GatheringEntity.create(prototype, v4, stdDate);
   }
 
-  async accept(invitationId: string, userId: string) {
-    await this.checkIsParticipant(invitationId, userId);
-    await this.gatheringParticipationsRepository.updateStatus(
-      invitationId,
-      'ACCEPTED',
-    );
-  }
-
-  async reject(invitationId: string, userId: string) {
-    await this.checkIsParticipant(invitationId, userId);
-    await this.gatheringParticipationsRepository.delete(invitationId);
-  }
-
-  private async checkIsParticipant(invitationId: string, userId: string) {
-    const participation =
-      await this.gatheringParticipationsRepository.findOneByIdAndParticipantId(
-        invitationId,
-        userId,
-      );
-    if (!participation) {
-      throw new ForbiddenException(FORBIDDEN_MESSAGE);
-    }
-  }
-
   async update(id: string, input: UpdateInput, ownerId: string) {
     const gathering = await this.gatheringsRepository.findOneByIdAndHostId(
       id,

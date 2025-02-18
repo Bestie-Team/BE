@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { FriendAcceptanceUseCase } from 'src/application/use-cases/friend/friend-acceptance.use-case';
 import { FriendRequestUseCase } from 'src/application/use-cases/friend/friend-request.use-case';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
@@ -14,6 +15,7 @@ import { FriendsController } from 'src/presentation/controllers/friend/friends.c
   controllers: [FriendsController],
   providers: [
     FriendRequestUseCase,
+    FriendAcceptanceUseCase,
     FriendWriteService,
     FriendsService,
     { provide: FriendsRepository, useClass: FriendsPrismaRepository },

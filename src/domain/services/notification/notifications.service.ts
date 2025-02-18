@@ -1,17 +1,33 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { NotificationEntity } from 'src/domain/entities/notification/notification.entity';
 import { getNotificationCursor } from 'src/domain/helpers/get-cursor';
 import { NotificationsRepository } from 'src/domain/interface/notification/notifications.repository';
 import { NotificationPrototype } from 'src/domain/types/notification.types';
 import { DateIdPaginationInput } from 'src/shared/types';
+import { EventPublisher } from 'src/infrastructure/event/publishers/interface/event-publisher';
 
 @Injectable()
 export class NotificationsService {
+  private readonly logger = new Logger('NotificationsService');
+
   constructor(
     @Inject(NotificationsRepository)
     private readonly notificationRepository: NotificationsRepository,
+    @Inject(EventPublisher)
+    private readonly eventPublisher: EventPublisher,
   ) {}
+
+  async createV2(input: NotificationPrototype & { token: string }) {
+    const stdDate = new Date();
+    const notification = NotificationEntity.create(input, v4, stdDate);
+    this.notificationRepository.save(notification);
+    this.eventPublisher.publish('notify', {
+      body: input.message,
+      title: input.title,
+      token: input.token,
+    });
+  }
 
   async create(prototype: NotificationPrototype) {
     const stdDate = new Date();

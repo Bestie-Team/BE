@@ -30,6 +30,8 @@ import { SearchFriendRequest } from 'src/presentation/dto/friend/request/search-
 import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
 import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
 import { FriendRequestUseCase } from 'src/application/use-cases/friend/friend-request.use-case';
+import { FriendAcceptanceUseCase } from 'src/application/use-cases/friend/friend-acceptance.use-case';
+import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';
 
 @ApiTags('/friends')
 @ApiBearerAuth()
@@ -41,6 +43,7 @@ export class FriendsController {
     private readonly friendsService: FriendsService,
     private readonly friendWriteService: FriendWriteService,
     private readonly friendRequestUseCase: FriendRequestUseCase,
+    private readonly friendAcceptanceUseCase: FriendAcceptanceUseCase,
   ) {}
 
   @ApiOperation({ summary: '친구 요청' })
@@ -72,12 +75,9 @@ export class FriendsController {
     status: 201,
     description: '친구 요청 수락 완료',
   })
-  @Post(':friendId/accept')
-  async accept(
-    @Param('friendId') friendId: string,
-    @CurrentUser() userId: string,
-  ) {
-    await this.friendWriteService.accept(friendId, userId);
+  @Post('accept')
+  async accept(@Body() dto: AccepFriendRequest, @CurrentUser() userId: string) {
+    await this.friendAcceptanceUseCase.execute({ ...dto, receiverId: userId });
   }
 
   @ApiOperation({

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GatheringCreationUseCase } from 'src/application/use-cases/gathering/gathering-creation.use-case';
-import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance-use-case';
+import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance.use-case';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
 import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';

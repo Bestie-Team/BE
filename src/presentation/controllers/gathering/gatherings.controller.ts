@@ -23,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { GatheringCreationUseCase } from 'src/application/use-cases/gathering/gathering-creation.use-case';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { ApiFileOperation } from 'src/common/decorators/swagger';
@@ -54,6 +55,7 @@ export class GatheringsController {
     private readonly gatheringsWriteService: GatheringsWriteService,
     private readonly gatheringsReadService: GatheringsReadService,
     private readonly gatheringInvitationsReadService: GatheringInvitationsReadService,
+    private readonly gatheringCreationUseCase: GatheringCreationUseCase,
   ) {}
 
   @ApiFileOperation()
@@ -94,7 +96,7 @@ export class GatheringsController {
     @CurrentUser() userId: string,
   ) {
     const { friendIds, ...rest } = dto;
-    await this.gatheringsWriteService.create(
+    await this.gatheringCreationUseCase.execute(
       { ...rest, hostUserId: userId },
       friendIds,
     );

@@ -21,6 +21,7 @@ import { GroupsController } from 'src/presentation/controllers/group/groups.cont
     },
   ],
   exports: [
+    GroupsService,
     { provide: GroupsRepository, useClass: GroupsPrismaRepository },
     {
       provide: GroupParticipationsRepository,

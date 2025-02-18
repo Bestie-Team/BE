@@ -78,6 +78,36 @@ export class UsersPrismaRepository implements UsersRepository {
     });
   }
 
+  async findUsersByIds(ids: string[]): Promise<
+    (User & {
+      serviceNotificationConsent: boolean;
+      marketingNotificationConsent: boolean;
+      notificationToken: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    })[]
+  > {
+    return await this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        accountId: true,
+        profileImageUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        serviceNotificationConsent: true,
+        marketingNotificationConsent: true,
+        notificationToken: true,
+      },
+      where: {
+        deletedAt: null,
+        id: {
+          in: ids,
+        },
+      },
+    });
+  }
+
   async findByAccountIdContaining(
     userId: string,
     searchInput: SearchInput,

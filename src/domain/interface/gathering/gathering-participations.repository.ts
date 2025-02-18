@@ -7,6 +7,7 @@ import {
 
 export interface GatheringParticipationsRepository {
   save(data: GatheringParticipationEntity): Promise<void>;
+  saveMany(data: GatheringParticipationEntity[]): Promise<void>;
   findOneByIdAndParticipantId(
     id: string,
     participantId: string,

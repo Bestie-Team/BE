@@ -19,6 +19,24 @@ export class NotificationsService {
     await this.notificationRepository.save(notification);
   }
 
+  async createNotifications(prototypes: NotificationPrototype[]) {
+    const stdDate = new Date();
+    const notifications = prototypes.map((proto) =>
+      NotificationEntity.create(
+        {
+          message: proto.message,
+          relatedId: proto.relatedId,
+          title: proto.title,
+          type: proto.type,
+          userId: proto.userId,
+        },
+        v4,
+        stdDate,
+      ),
+    );
+    await this.notificationRepository.saveMany(notifications);
+  }
+
   async getAll(userId: string, paginationInput: DateIdPaginationInput) {
     const notifications = await this.notificationRepository.findAllByUserId(
       userId,

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -11,8 +10,6 @@ import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity'
 import {
   CANT_DELETE_END_GATHERING,
   FORBIDDEN_MESSAGE,
-  GROUP_GATHERING_REQUIRED_GROUPID_MESSAGE,
-  MINIMUM_FRIENDS_REQUIRED_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import {
@@ -23,7 +20,6 @@ import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
-import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 
 @Injectable()
 export class GatheringsWriteService {
@@ -34,83 +30,24 @@ export class GatheringsWriteService {
     private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,
-    @Inject(GroupParticipationsRepository)
-    private readonly groupParticipationsRepository: GroupParticipationsRepository,
   ) {}
 
-  async create(prototype: GatheringPrototype, friendIds: string[] | null) {
-    const { type, groupId } = prototype;
-    type === 'FRIEND'
-      ? await this.createFriendGathering(prototype, friendIds)
-      : await this.createGroupGathering(prototype, groupId);
-  }
-
-  async createFriendGathering(
-    prototype: GatheringPrototype,
-    friendIds: string[] | null,
-  ) {
-    if (friendIds === null || friendIds.length === 0) {
-      throw new BadRequestException(MINIMUM_FRIENDS_REQUIRED_MESSAGE);
-    }
-    await checkIsFriendAll(
-      this.friendsRepository,
-      prototype.hostUserId,
-      friendIds,
-    );
-    await this.createTransaction(prototype, friendIds);
-  }
-
-  async createGroupGathering(
-    prototype: GatheringPrototype,
-    groupId: string | null,
-  ) {
-    const { hostUserId } = prototype;
-    if (!groupId) {
-      throw new BadRequestException(GROUP_GATHERING_REQUIRED_GROUPID_MESSAGE);
-    }
-    const friendIds = await this.getGroupMemberIds(groupId);
-    const filteredIds = friendIds.filter((userId) => userId !== hostUserId);
-    await this.createTransaction(prototype, filteredIds);
+  async checkIsFriend(userId: string, friendUserIds: string[]) {
+    await checkIsFriendAll(this.friendsRepository, userId, friendUserIds);
   }
 
   @Transactional()
-  private async createTransaction(
-    prototype: GatheringPrototype,
-    friendIds: string[],
+  async createTransaction(
+    gathering: GatheringEntity,
+    participations: GatheringParticipationEntity[],
   ) {
-    const gatheringId = await this.createGathering(prototype);
-    await this.createParticipations(gatheringId, friendIds);
-  }
-
-  private async createGathering(prototype: GatheringPrototype) {
-    const stdDate = new Date();
-    const gathering = GatheringEntity.create(prototype, v4, stdDate);
     await this.gatheringsRepository.save(gathering);
-
-    return gathering.id;
+    await this.gatheringParticipationsRepository.saveMany(participations);
   }
 
-  private async createParticipations(gatheringId: string, friendIds: string[]) {
+  createGathering(prototype: GatheringPrototype) {
     const stdDate = new Date();
-    const gatheringParticipations = friendIds.map(async (friendId) => {
-      const participation = GatheringParticipationEntity.create(
-        {
-          gatheringId,
-          participantId: friendId,
-        },
-        v4,
-        stdDate,
-      );
-      await this.gatheringParticipationsRepository.save(participation);
-    });
-
-    await Promise.all(gatheringParticipations);
-  }
-
-  private async getGroupMemberIds(groupId: string) {
-    const members =
-      await this.groupParticipationsRepository.findMembersByGroupId(groupId);
-    return members.map((member) => member.participantId);
+    return GatheringEntity.create(prototype, v4, stdDate);
   }
 
   async accept(invitationId: string, userId: string) {

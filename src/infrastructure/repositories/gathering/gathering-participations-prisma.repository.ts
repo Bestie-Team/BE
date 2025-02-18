@@ -25,6 +25,10 @@ export class GatheringParticipationsPrismaRepository
     });
   }
 
+  async saveMany(data: GatheringParticipationEntity[]): Promise<void> {
+    await this.txHost.tx.gatheringParticipation.createMany({ data });
+  }
+
   async findOneByIdAndParticipantId(
     id: string,
     participantId: string,

@@ -23,6 +23,15 @@ export interface UsersRepository {
       })
     | null
   >;
+  findUsersByIds(ids: string[]): Promise<
+    (User & {
+      serviceNotificationConsent: boolean;
+      marketingNotificationConsent: boolean;
+      notificationToken: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    })[]
+  >;
   findByAccountIdContaining(
     userId: string,
     searchInput: SearchInput,

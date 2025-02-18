@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { APP_NAME } from 'src/common/constant';
 import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
@@ -23,24 +23,54 @@ export class GatheringCreationUseCase {
 
   async execute(input: GatheringPrototype, friendUserIds: string[] | null) {
     const { groupId, hostUserId } = input;
+    this.validate(groupId, friendUserIds);
 
-    let receiverIds: string[] = [];
+    let inviteeIds: string[] = [];
 
     if (groupId) {
-      receiverIds = (
+      inviteeIds = (
         await this.groupsService.getParticipantsById(groupId)
       ).filter((userId) => userId !== hostUserId);
-      await this.createGroupGathering(input, receiverIds);
     }
-    if (groupId === null && friendUserIds !== null) {
-      receiverIds = friendUserIds;
-      await this.createFriendGathering(input, friendUserIds);
+    if (friendUserIds) {
+      inviteeIds = friendUserIds;
+      await this.gatheringsWriteService.checkIsFriend(
+        hostUserId,
+        friendUserIds,
+      );
     }
 
-    this.notify(hostUserId, receiverIds);
+    await this.createGathering(input, inviteeIds);
+    this.notify(hostUserId, inviteeIds);
   }
 
-  async notify(senderId: string, receiverIds: string[]) {
+  private validate(groupId: string | null, friendUserIds: string[] | null) {
+    if (!groupId && !friendUserIds) {
+      throw new BadRequestException();
+    }
+    if (groupId && friendUserIds) {
+      throw new BadRequestException();
+    }
+  }
+
+  private async createGathering(
+    prototype: GatheringPrototype,
+    friendUserIds: string[],
+  ) {
+    const gathering = this.gatheringsWriteService.createGathering(prototype);
+    const invitations =
+      this.gatheringParticipationsWriteService.createGatheringInvitations(
+        gathering.id,
+        friendUserIds,
+      );
+
+    return await this.gatheringsWriteService.createTransaction(
+      gathering,
+      invitations,
+    );
+  }
+
+  private async notify(senderId: string, receiverIds: string[]) {
     const sender = await this.usersService.getUserByIdOrThrow(senderId);
     const receivers = await this.usersService.getUsersByIds(receiverIds);
 
@@ -69,44 +99,7 @@ export class GatheringCreationUseCase {
     }
   }
 
-  async publishNotification(payload: NotificationPayload) {
+  private async publishNotification(payload: NotificationPayload) {
     this.eventEmitter.emit('notify', payload);
-  }
-
-  async createGroupGathering(
-    prototype: GatheringPrototype,
-    friendUserIds: string[],
-  ) {
-    const gathering = this.gatheringsWriteService.createGathering(prototype);
-    const invitations =
-      this.gatheringParticipationsWriteService.createGatheringInvitations(
-        gathering.id,
-        friendUserIds,
-      );
-
-    return await this.gatheringsWriteService.createTransaction(
-      gathering,
-      invitations,
-    );
-  }
-
-  private async createFriendGathering(
-    prototype: GatheringPrototype,
-    friendUserIds: string[],
-  ) {
-    const { hostUserId } = prototype;
-    await this.gatheringsWriteService.checkIsFriend(hostUserId, friendUserIds);
-
-    const gathering = this.gatheringsWriteService.createGathering(prototype);
-    const invitations =
-      this.gatheringParticipationsWriteService.createGatheringInvitations(
-        gathering.id,
-        friendUserIds,
-      );
-
-    return await this.gatheringsWriteService.createTransaction(
-      gathering,
-      invitations,
-    );
   }
 }

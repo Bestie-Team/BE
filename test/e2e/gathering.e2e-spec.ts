@@ -45,6 +45,7 @@ describe('GatheringsController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.notification.deleteMany();
     await prisma.feed.deleteMany();
     await prisma.gatheringParticipation.deleteMany();
     await prisma.gathering.deleteMany();
@@ -99,8 +100,10 @@ describe('GatheringsController (e2e)', () => {
         .send(dto)
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<SearchUserResponse> = response;
+      const invitations = await prisma.gatheringParticipation.findMany();
 
       expect(status).toEqual(201);
+      expect(invitations.length).toEqual(3);
     });
 
     it('그룹 모임 생성 정상 동작', async () => {
@@ -159,8 +162,10 @@ describe('GatheringsController (e2e)', () => {
         .send(dto)
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<SearchUserResponse> = response;
+      const invitations = await prisma.gatheringParticipation.findMany();
 
       expect(status).toEqual(201);
+      expect(invitations.length).toEqual(3);
     });
 
     // 그룹 멤버를 조회하여 초대를 생성할 때, 자신도 그룹의 멤버이기 떄문에 포함되는 경우가 있었음.
@@ -873,7 +878,6 @@ describe('GatheringsController (e2e)', () => {
       const { status, body }: ResponseResult<EndedGatheringsListResponse> =
         response;
       const { gatherings: resGatherings, nextCursor } = body;
-      console.log(resGatherings);
 
       expect(status).toEqual(200);
       expect(nextCursor).toEqual(null);

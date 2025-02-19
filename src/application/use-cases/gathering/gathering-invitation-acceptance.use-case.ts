@@ -36,14 +36,22 @@ export class GatheringInvitationAcceptanceUseCase {
       const invitee = await this.usersService.getUserByIdOrThrow(inviteeId);
       const message = `${invitee.name}님이 약속 초대를 수락했어요!`;
 
-      this.notificationsService.createV2({
-        message,
-        type: 'GATHERING_INVITATION_ACCEPTED',
-        title: APP_NAME,
-        userId: hostUser.id,
-        token: hostUser.notificationToken,
-        relatedId: gathering.id,
-      });
+      this.notificationsService
+        .createV2({
+          message,
+          type: 'GATHERING_INVITATION_ACCEPTED',
+          title: APP_NAME,
+          userId: hostUser.id,
+          token: hostUser.notificationToken,
+          relatedId: gathering.id,
+        })
+        .catch((e: Error) =>
+          this.logger.log({
+            message: `알림 에러: ${e.message}`,
+            stack: e.stack,
+            timestamp: new Date().toISOString(),
+          }),
+        );
     }
   }
 }

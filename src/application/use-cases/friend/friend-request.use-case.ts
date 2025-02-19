@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
 import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
@@ -7,6 +7,8 @@ import { FriendPrototype } from 'src/domain/types/friend.types';
 
 @Injectable()
 export class FriendRequestUseCase {
+  private readonly logger = new Logger('FriendRequestUseCase');
+
   constructor(
     private readonly friendWriteService: FriendWriteService,
     private readonly notificationService: NotificationsService,
@@ -29,14 +31,22 @@ export class FriendRequestUseCase {
       const sender = await this.usersService.getUserByIdOrThrow(senderId);
       const message = `${sender.name}님이 친구 요청을 보냈어요!`;
 
-      this.notificationService.createV2({
-        message,
-        type: 'FRIEND_REQUEST',
-        title: APP_NAME,
-        userId: receiver.id,
-        token: receiver.notificationToken,
-        relatedId: null,
-      });
+      this.notificationService
+        .createV2({
+          message,
+          type: 'FRIEND_REQUEST',
+          title: APP_NAME,
+          userId: receiver.id,
+          token: receiver.notificationToken,
+          relatedId: null,
+        })
+        .catch((e: Error) =>
+          this.logger.log({
+            message: `알림 에러: ${e.message}`,
+            stack: e.stack,
+            timestamp: new Date().toISOString(),
+          }),
+        );
     }
   }
 }

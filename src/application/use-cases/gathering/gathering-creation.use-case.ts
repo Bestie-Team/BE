@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
 import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
@@ -9,6 +9,8 @@ import { GatheringPrototype } from 'src/domain/types/gathering.types';
 
 @Injectable()
 export class GatheringCreationUseCase {
+  private readonly logger = new Logger('GatheringCreationUseCase');
+
   constructor(
     private readonly gatheringsWriteService: GatheringsWriteService,
     private readonly gatheringParticipationsWriteService: GatheringInvitationsWriteService,
@@ -76,14 +78,22 @@ export class GatheringCreationUseCase {
 
     const notificationPromises = receivers.map(async (receiver) => {
       if (receiver.notificationToken && receiver.serviceNotificationConsent) {
-        return this.notificationsService.createV2({
-          message: `${sender.name}님이 약속 초대장을 보냈어요!`,
-          type: 'GATHERING_INVITATION_RECEIVED',
-          title: APP_NAME,
-          userId: receiver.id,
-          token: receiver.notificationToken,
-          relatedId: null,
-        });
+        return this.notificationsService
+          .createV2({
+            message: `${sender.name}님이 약속 초대장을 보냈어요!`,
+            type: 'GATHERING_INVITATION_RECEIVED',
+            title: APP_NAME,
+            userId: receiver.id,
+            token: receiver.notificationToken,
+            relatedId: null,
+          })
+          .catch((e: Error) =>
+            this.logger.log({
+              message: `알림 에러: ${e.message}`,
+              stack: e.stack,
+              timestamp: new Date().toISOString(),
+            }),
+          );
       }
     });
 

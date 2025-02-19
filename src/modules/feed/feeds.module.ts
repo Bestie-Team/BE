@@ -30,6 +30,7 @@ import { FeedsController } from 'src/presentation/controllers/feed/feeds.control
     },
   ],
   exports: [
+    FeedsReadService,
     { provide: FeedsRepository, useClass: FeedsPrismaRepository },
     {
       provide: FriendFeedVisibilitiesRepository,

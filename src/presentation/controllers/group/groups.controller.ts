@@ -23,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { GroupCreationUseCase } from 'src/application/use-cases/group/group-creation.use-case';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import {
@@ -50,6 +51,7 @@ export class GroupsController {
   constructor(
     private readonly groupsWriteService: GroupsWriteService,
     private readonly groupsService: GroupsService,
+    private readonly groupCreationUseCase: GroupCreationUseCase,
   ) {}
 
   @ApiFileOperation()
@@ -87,7 +89,7 @@ export class GroupsController {
   @Post()
   async create(@Body() dto: CreateGroupRequest, @CurrentUser() userId: string) {
     const { friendIds, ...rest } = dto;
-    await this.groupsWriteService.create(
+    await this.groupCreationUseCase.execute(
       { ownerId: userId, ...rest },
       friendIds,
     );

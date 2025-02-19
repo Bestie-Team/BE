@@ -20,7 +20,7 @@ export class FeedCommentsService {
     private readonly feedCommentRepository: FeedCommentRepository,
   ) {}
 
-  async save(prototype: FeedCommentPrototype) {
+  async create(prototype: FeedCommentPrototype) {
     const stdDate = new Date();
     const comment = FeedCommentEntity.create(prototype, v4, stdDate);
     await this.feedCommentRepository.save(comment);

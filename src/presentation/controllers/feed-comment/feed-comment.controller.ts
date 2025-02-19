@@ -17,6 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { FeedCommentCreationUseCase } from 'src/application/use-cases/feed-comment/feed-comment.use-case';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { FeedCommentsService } from 'src/domain/services/feed-comment/feed-comments.service';
@@ -30,7 +31,10 @@ import { FeedCommentResponse } from 'src/presentation/dto/comment/response/feed-
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @Controller('feed-comments')
 export class FeedCommentController {
-  constructor(private readonly feedCommentService: FeedCommentsService) {}
+  constructor(
+    private readonly feedCommentService: FeedCommentsService,
+    private readonly feedCommentCreationUseCase: FeedCommentCreationUseCase,
+  ) {}
 
   @ApiOperation({ summary: '피드 댓글 작성 ' })
   @ApiResponse({ status: 201, description: '댓글 작성 완료' })
@@ -39,7 +43,7 @@ export class FeedCommentController {
     @Body() dto: CreateFeedCommentRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.feedCommentService.save({ ...dto, writerId: userId });
+    await this.feedCommentCreationUseCase.execute({ ...dto, writerId: userId });
   }
 
   @ApiOperation({ summary: '피드 댓글 조회' })

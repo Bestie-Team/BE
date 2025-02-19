@@ -18,7 +18,7 @@ import { FeedsModule } from 'src/modules/feed/feeds.module';
 import { FeedCommentsModule } from 'src/modules/feed-comment/feed-comments.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { ReportsModule } from 'src/modules/report/reports.module';
-import { ListenersModule } from 'src/infrastructure/listeners/listeners.module';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
 
 @Module({
   imports: [

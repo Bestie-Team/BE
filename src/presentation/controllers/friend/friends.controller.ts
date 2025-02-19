@@ -79,22 +79,15 @@ export class FriendsController {
   @ApiOperation({
     summary: '친구 요청 거절',
     description:
-      '보낸 요청 취소에도 동일하게 사용하시면 돼요. 요청 목록 조회 응답의 id가 friendId입니다.',
-  })
-  @ApiParam({
-    name: 'friendId',
-    description: '친구 요청 번호',
+      '보낸 요청 취소에도 동일하게 사용하시면 돼요. 기존에는 친구 요청 id 였는데 요청을 보낸 회원 id로 바꼈어요.',
   })
   @ApiResponse({
     status: 201,
     description: '친구 요청 거절 완료',
   })
-  @Post(':friendId/reject')
-  async reject(
-    @Param('friendId') friendId: string,
-    @CurrentUser() userId: string,
-  ) {
-    await this.friendWriteService.reject(friendId, userId);
+  @Post('reject')
+  async reject(@Body() dto: AccepFriendRequest, @CurrentUser() userId: string) {
+    await this.friendWriteService.reject(dto.senderId, userId);
   }
 
   @ApiOperation({ summary: '친구 목록 조회' })

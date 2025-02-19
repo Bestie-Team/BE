@@ -57,31 +57,34 @@ export class FriendWriteService {
     }
   }
 
-  async accept(friendId: string, receiverId: string) {
-    await this.checkReceiver(friendId, receiverId);
-    await this.friendsRepository.update(friendId, {
+  async accept(senderId: string, receiverId: string) {
+    const friendRequest = await this.checkExistRequest(senderId, receiverId);
+    if (friendRequest.receiverId !== receiverId) {
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    }
+
+    await this.friendsRepository.update(friendRequest.id, {
       status: 'ACCEPTED',
       updatedAt: new Date(),
     });
   }
 
-  async reject(friendId: string, userId: string) {
-    await this.checkReceiver(friendId, userId);
-    await this.friendsRepository.delete(friendId);
+  async reject(senderId: string, receiverId: string) {
+    const friendRequest = await this.checkExistRequest(senderId, receiverId);
+    await this.friendsRepository.delete(friendRequest.id);
   }
 
-  async checkReceiver(friendId: string, userId: string) {
-    const friendRequest = await this.friendsRepository.findOneById(friendId);
+  async checkExistRequest(senderId: string, receiverId: string) {
+    const friendRequest =
+      await this.friendsRepository.findOneBySenderAndReceiverId(
+        senderId,
+        receiverId,
+      );
     if (!friendRequest) {
       throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
     }
 
-    if (
-      friendRequest.receiverId !== userId &&
-      friendRequest.senderId !== userId
-    ) {
-      throw new ForbiddenException(FORBIDDEN_MESSAGE);
-    }
+    return friendRequest;
   }
 
   async delete(friendUserId: string, userId: string) {

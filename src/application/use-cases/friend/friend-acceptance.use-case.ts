@@ -16,9 +16,9 @@ export class FriendAcceptanceUseCase {
   ) {}
 
   async execute(input: FriendAcceptanceInput) {
-    const { senderId, receiverId, friendId } = input;
+    const { senderId, receiverId } = input;
 
-    await this.friendWriteService.accept(friendId, receiverId);
+    await this.friendWriteService.accept(senderId, receiverId);
     this.notify(senderId, receiverId);
   }
 

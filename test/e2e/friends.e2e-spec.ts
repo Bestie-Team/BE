@@ -186,7 +186,6 @@ describe('FriendsController (e2e)', () => {
       });
 
       const dto: AccepFriendRequest = {
-        friendId: friendRequest.id,
         senderId: sender.id,
       };
 
@@ -218,9 +217,14 @@ describe('FriendsController (e2e)', () => {
         data: generateFriendEntity(sender.id, receiver!.id),
       });
 
+      const dto: AccepFriendRequest = {
+        senderId: sender.id,
+      };
+
       // when
       const response = await request(app.getHttpServer())
-        .post(`/friends/${friendRequest.id}/reject`)
+        .post(`/friends/reject`)
+        .send(dto)
         .set('Authorization', receiverToken);
       const { status } = response;
 

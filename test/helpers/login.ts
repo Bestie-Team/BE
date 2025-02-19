@@ -16,6 +16,8 @@ export const login = async (app: INestApplication) => {
     name: '라이티',
     profileImageUrl: 'https://image.com',
     provider: 'GOOGLE',
+    termsOfServiceConsent: true,
+    privacyPolicyConsent: true,
   };
 
   const response = await request(app.getHttpServer())

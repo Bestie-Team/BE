@@ -201,6 +201,11 @@ export type User = {
   name: string;
   account_id: string;
   profile_image_url: string | null;
+  terms_of_service_consent: boolean;
+  privacy_policy_consent: boolean;
+  marketing_notification_consent: Generated<boolean>;
+  service_notification_consent: Generated<boolean>;
+  notification_token: string | null;
   created_at: Timestamp;
   updated_at: Timestamp;
   deleted_at: Timestamp | null;

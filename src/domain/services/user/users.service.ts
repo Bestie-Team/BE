@@ -51,6 +51,10 @@ export class UsersService {
     await this.usersRepository.update({ id: userId, accountId });
   }
 
+  async updateNotificationToken(token: string, userId: string) {
+    await this.usersRepository.update({ id: userId, notificationToken: token });
+  }
+
   async getDetail(id: string) {
     const user = await this.usersRepository.findDetailById(id);
     if (!user) {
@@ -69,13 +73,17 @@ export class UsersService {
     return user;
   }
 
-  private async getUserByIdOrThrow(userId: string) {
+  async getUserByIdOrThrow(userId: string) {
     const user = await this.usersRepository.findOneById(userId);
     if (!user) {
       throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
     }
 
     return user;
+  }
+
+  async getUsersByIds(userIds: string[]) {
+    return this.usersRepository.findUsersByIds(userIds);
   }
 
   async checkDuplicateAccountId(accountId: string) {

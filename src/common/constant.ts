@@ -14,3 +14,5 @@ export const notificationTypes = {
 };
 
 export type NotificationTypes = keyof typeof notificationTypes;
+
+export const APP_NAME = 'LIGHTY';

@@ -326,9 +326,9 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
 
   async findOneById(
     id: string,
-  ): Promise<{ id: string; endedAt: Date | null } | null> {
+  ): Promise<{ id: string; hostUserId: string; endedAt: Date | null } | null> {
     return await this.txHost.tx.gathering.findUnique({
-      select: { id: true, endedAt: true },
+      select: { id: true, hostUserId: true, endedAt: true },
       where: { id, deletedAt: null },
     });
   }

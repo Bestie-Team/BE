@@ -27,7 +27,15 @@ export const generateUserEntity = (
   updatedAt?: Date,
 ): UserEntity =>
   UserEntity.create(
-    { accountId, email, name, profileImageUrl, provider },
+    {
+      accountId,
+      email,
+      name,
+      profileImageUrl,
+      provider,
+      privacyPolicyConsent: true,
+      termsOfServiceConsent: true,
+    },
     v4,
     stdDate,
     updatedAt ? updatedAt : undefined,

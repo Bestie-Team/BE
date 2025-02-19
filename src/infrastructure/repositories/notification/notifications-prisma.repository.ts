@@ -13,6 +13,10 @@ export class NotificationsPrismaRepository implements NotificationsRepository {
     await this.prisma.notification.create({ data });
   }
 
+  async saveMany(data: NotificationEntity[]): Promise<void> {
+    await this.prisma.notification.createMany({ data });
+  }
+
   async findAllByUserId(
     userId: string,
     paginationInput: DateIdPaginationInput,

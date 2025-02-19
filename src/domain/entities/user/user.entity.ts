@@ -2,16 +2,28 @@ import { UserPrototype } from 'src/domain/types/user.types';
 import { Provider } from 'src/shared/types';
 
 export class UserEntity {
+  readonly id: string;
+  readonly email: string;
+  readonly name: string;
+  readonly accountId: string;
+  readonly provider: Provider;
+  readonly profileImageUrl: string | null;
+  readonly termsOfServiceConsent: boolean;
+  readonly privacyPolicyConsent: boolean;
+  readonly notificationToken: string | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+
   constructor(
-    readonly id: string,
-    readonly email: string,
-    readonly name: string,
-    readonly accountId: string,
-    readonly provider: Provider,
-    readonly profileImageUrl: string | null,
-    readonly createdAt: Date,
-    readonly updatedAt: Date,
-  ) {}
+    input: UserPrototype & {
+      id: string;
+      notificationToken: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    },
+  ) {
+    return Object.assign(this, input);
+  }
 
   static create(
     input: UserPrototype,
@@ -19,15 +31,12 @@ export class UserEntity {
     stdDate: Date,
     updatedAt?: Date,
   ): UserEntity {
-    return new UserEntity(
-      idGen(),
-      input.email,
-      input.name,
-      input.accountId,
-      input.provider,
-      input.profileImageUrl,
-      stdDate,
-      updatedAt ? updatedAt : stdDate,
-    );
+    return new UserEntity({
+      id: idGen(),
+      createdAt: stdDate,
+      updatedAt: updatedAt || stdDate,
+      notificationToken: null,
+      ...input,
+    });
   }
 }

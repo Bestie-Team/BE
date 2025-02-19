@@ -5,6 +5,7 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import type {
   Profile,
   SearchedUser,
+  User,
   UserBasicInfo,
   UserDetail,
 } from 'src/domain/types/user.types';
@@ -24,7 +25,7 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findOneByEmail(email: string): Promise<UserBasicInfo | null> {
-    return await this.prisma.activeUser.findUnique({
+    return await this.prisma.user.findUnique({
       select: {
         id: true,
         email: true,
@@ -34,30 +35,75 @@ export class UsersPrismaRepository implements UsersRepository {
       },
       where: {
         email,
+        deletedAt: null,
       },
     });
   }
 
   async findOneByAccountId(accountId: string): Promise<{ id: string } | null> {
-    return await this.prisma.activeUser.findUnique({
+    return await this.prisma.user.findUnique({
       select: {
         id: true,
       },
-      where: { accountId },
+      where: { accountId, deletedAt: null },
     });
   }
 
-  async findOneById(
-    id: string,
-  ): Promise<{ id: string; createdAt: Date; updatedAt: Date } | null> {
-    return await this.prisma.activeUser.findUnique({
+  async findOneById(id: string): Promise<
+    | (User & {
+        serviceNotificationConsent: boolean;
+        marketingNotificationConsent: boolean;
+        notificationToken: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+      })
+    | null
+  > {
+    return await this.prisma.user.findUnique({
       select: {
         id: true,
+        name: true,
+        accountId: true,
+        profileImageUrl: true,
         createdAt: true,
         updatedAt: true,
+        serviceNotificationConsent: true,
+        marketingNotificationConsent: true,
+        notificationToken: true,
       },
       where: {
         id,
+        deletedAt: null,
+      },
+    });
+  }
+
+  async findUsersByIds(ids: string[]): Promise<
+    (User & {
+      serviceNotificationConsent: boolean;
+      marketingNotificationConsent: boolean;
+      notificationToken: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    })[]
+  > {
+    return await this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        accountId: true,
+        profileImageUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        serviceNotificationConsent: true,
+        marketingNotificationConsent: true,
+        notificationToken: true,
+      },
+      where: {
+        deletedAt: null,
+        id: {
+          in: ids,
+        },
       },
     });
   }
@@ -69,7 +115,7 @@ export class UsersPrismaRepository implements UsersRepository {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
-      .selectFrom('active_user as u')
+      .selectFrom('user as u')
       .leftJoin('friend as f', (join) =>
         join
           .on((eb) =>
@@ -101,6 +147,7 @@ export class UsersPrismaRepository implements UsersRepository {
         ELSE 'NONE'
       END`.as('status'), // 요청 상태 추가
       ])
+      .where('u.deleted_at', 'is', null)
       .where('u.account_id', 'like', `%${search}%`)
       .where('u.id', '!=', userId)
       .where(({ eb, or, and }) =>
@@ -185,6 +232,7 @@ export class UsersPrismaRepository implements UsersRepository {
           .select(({ fn }) => fn.countAll().as('group_count'))
           .as('group_count'),
       )
+      .where('u.deleted_at', 'is', null)
       .where('u.id', '=', id)
       .executeTakeFirst();
 
@@ -211,6 +259,7 @@ export class UsersPrismaRepository implements UsersRepository {
       },
       where: {
         id,
+        deletedAt: null,
       },
     });
   }

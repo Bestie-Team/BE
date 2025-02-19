@@ -4,6 +4,7 @@ import { DateIdPaginationInput } from 'src/shared/types';
 
 export interface NotificationsRepository {
   save(data: NotificationEntity): Promise<void>;
+  saveMany(data: NotificationEntity[]): Promise<void>;
   findAllByUserId(
     userId: string,
     paginationInput: DateIdPaginationInput,

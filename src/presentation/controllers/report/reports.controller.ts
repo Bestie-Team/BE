@@ -17,6 +17,7 @@ import { ReportTypes } from 'src/shared/types';
 
 @ApiTags('/reports')
 @ApiBearerAuth()
+@ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @UseGuards(AuthGuard)
 @Controller('reports')
 export class ReportsController {

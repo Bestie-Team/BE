@@ -111,7 +111,15 @@ export class GatheringsReadService {
     if (!gathering) {
       throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);
     }
+    return gathering;
+  }
 
+  async getByIdOrThrow(id: string) {
+    const gathering = await this.gatheringsRepository.findOneById(id);
+
+    if (!gathering) {
+      throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);
+    }
     return gathering;
   }
 }

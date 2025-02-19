@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { NOT_FOUND_FEED_MESSAGE } from 'src/domain/error/messages';
 import { getFeedCursor } from 'src/domain/helpers/get-cursor';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
@@ -13,6 +14,15 @@ export class FeedsReadService {
     @Inject(FriendFeedVisibilitiesRepository)
     private readonly friendFeedVisibilitiesRepository: FriendFeedVisibilitiesRepository,
   ) {}
+
+  async getByIdOrThrow(id: string) {
+    const feed = await this.feedsRepository.findOneById(id);
+    if (!feed) {
+      throw new NotFoundException(NOT_FOUND_FEED_MESSAGE);
+    }
+
+    return feed;
+  }
 
   async getAllFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
     return await this.getFeeds(userId, feedPaginationInput, 'ALL');

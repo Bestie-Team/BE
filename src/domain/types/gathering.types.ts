@@ -31,8 +31,7 @@ export interface GatheringDetail extends Gathering {
   readonly members: User[];
 }
 
-export interface GatheringInvitation {
-  readonly id: string;
+interface GatheringInvitation {
   readonly name: string;
   readonly description: string;
   readonly sender: string;
@@ -41,6 +40,15 @@ export interface GatheringInvitation {
   readonly address: string;
   readonly invitation_image_url: string;
   readonly groupName: string | null;
+}
+
+export interface ReceivedGatheringInvitation extends GatheringInvitation {
+  readonly id: string;
+  readonly gatheringId: string;
+}
+
+export interface SentGatheringInvitation extends GatheringInvitation {
+  readonly gatheringId: string;
 }
 
 export interface UpdateInput {

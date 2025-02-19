@@ -2,7 +2,8 @@ import { Feed } from 'src/domain/types/feed.types';
 import { FriendRequest } from 'src/domain/types/friend.types';
 import {
   Gathering,
-  GatheringInvitation,
+  ReceivedGatheringInvitation,
+  SentGatheringInvitation,
 } from 'src/domain/types/gathering.types';
 import { Group } from 'src/domain/types/group.types';
 import { Notification } from 'src/domain/types/notification.types';
@@ -33,8 +34,20 @@ export const getGroupCursor = (groups: Group[], limit: number) => {
   return groups[limit - 1]?.joinDate.toISOString() || null;
 };
 
-export const getGatheringInvitationCursor = (
-  invitations: GatheringInvitation[],
+export const getSentGatheringInvitationCursor = (
+  invitations: SentGatheringInvitation[],
+  limit: number,
+) => {
+  return invitations[limit - 1]
+    ? {
+        createdAt: invitations[limit - 1].createdAt.toISOString(),
+        id: invitations[limit - 1].gatheringId,
+      }
+    : null;
+};
+
+export const getReceivedGatheringInvitationCursor = (
+  invitations: ReceivedGatheringInvitation[],
   limit: number,
 ) => {
   return invitations[limit - 1]

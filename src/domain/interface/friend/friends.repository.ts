@@ -28,7 +28,12 @@ export interface FriendsRepository {
   findOneBySenderAndReceiverId(
     firstUserId: string,
     secondUserId: string,
-  ): Promise<{ id: string; status: FriendStatus } | null>;
+  ): Promise<{
+    id: string;
+    status: FriendStatus;
+    senderId: string;
+    receiverId: string;
+  } | null>;
   findOneFriendByUserId(
     firstUserId: string,
     secondUserId: string,

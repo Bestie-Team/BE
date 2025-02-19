@@ -242,9 +242,14 @@ export class FriendsPrismaRepository implements FriendsRepository {
   async findOneBySenderAndReceiverId(
     firstUserId: string,
     secondUserId: string,
-  ): Promise<{ id: string; status: FriendStatus } | null> {
+  ): Promise<{
+    id: string;
+    status: FriendStatus;
+    senderId: string;
+    receiverId: string;
+  } | null> {
     return await this.prisma.friend.findFirst({
-      select: { id: true, status: true },
+      select: { id: true, status: true, senderId: true, receiverId: true },
       where: {
         OR: [
           {

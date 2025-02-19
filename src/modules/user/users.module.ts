@@ -9,6 +9,9 @@ import { UsersController } from 'src/presentation/controllers/user/users.control
     UsersService,
     { provide: UsersRepository, useClass: UsersPrismaRepository },
   ],
-  exports: [{ provide: UsersRepository, useClass: UsersPrismaRepository }],
+  exports: [
+    { provide: UsersRepository, useClass: UsersPrismaRepository },
+    UsersService,
+  ],
 })
 export class UsersModule {}

@@ -33,20 +33,17 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
   ): Promise<Gathering[]> {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const subquery = this.txHost.tx.$kysely
-      .selectFrom('gathering as g')
-      .innerJoin('gathering_participation as gp', 'gp.gathering_id', 'g.id')
+      .selectFrom('gathering_participation as gp')
+      .innerJoin('gathering as g', 'g.id', 'gp.gathering_id')
       .select(['g.id'])
       .where((eb) =>
-        eb.or([
-          eb.and([
-            eb('gp.participant_id', '=', userId),
-            eb(
-              'gp.status',
-              '=',
-              sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
-            ),
-          ]),
-          eb('g.host_user_id', '=', userId),
+        eb.and([
+          eb('gp.participant_id', '=', userId),
+          eb(
+            'gp.status',
+            '=',
+            sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+          ),
         ]),
       )
       .where('g.gathering_date', '>=', new Date(minDate))
@@ -79,20 +76,17 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
   ): Promise<EndedGathering[]> {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const subquery = this.txHost.tx.$kysely
-      .selectFrom('gathering as g')
-      .innerJoin('gathering_participation as gp', 'gp.gathering_id', 'g.id')
+      .selectFrom('gathering_participation as gp')
+      .innerJoin('gathering as g', 'g.id', 'gp.gathering_id')
       .select(['g.id'])
       .where((eb) =>
-        eb.or([
-          eb.and([
-            eb('gp.participant_id', '=', userId),
-            eb(
-              'gp.status',
-              '=',
-              sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
-            ),
-          ]),
-          eb('g.host_user_id', '=', userId),
+        eb.and([
+          eb('gp.participant_id', '=', userId),
+          eb(
+            'gp.status',
+            '=',
+            sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+          ),
         ]),
       )
       .where('g.gathering_date', '>=', new Date(minDate))
@@ -160,69 +154,41 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     paginationInput: DateIdPaginationInput,
   ): Promise<Gathering[]> {
     const { cursor, limit } = paginationInput;
-    const rows = await this.txHost.tx.$kysely
-      .selectFrom('gathering as g')
-      .select([
-        'g.id',
-        'g.name',
-        'g.gathering_date',
-        'g.invitation_image_url',
-        'g.description',
-      ])
-      .where('g.id', 'in', (eb) =>
-        eb
-          .selectFrom('gathering as g')
-          .leftJoin('gathering_participation as gp', 'gp.gathering_id', 'g.id')
-          .leftJoin('feed as f', 'f.gathering_id', 'g.id')
-          .select(['g.id'])
-          .where((eb) =>
-            eb.or([
-              eb.and([
-                eb('gp.participant_id', '=', userId),
-                eb(
-                  'gp.status',
-                  '=',
-                  sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
-                ),
-              ]),
-              eb('g.host_user_id', '=', userId),
-            ]),
-          )
-          .where('f.id', 'is', null)
-          .where('g.deleted_at', 'is', null)
-          .where('g.ended_at', 'is not', null)
-          .where((eb) =>
-            eb.or([
-              eb('g.gathering_date', '<', new Date(cursor.createdAt)),
-              eb.and([
-                eb('g.gathering_date', '=', new Date(cursor.createdAt)),
-                eb('g.id', '>', cursor.id),
-              ]),
-            ]),
-          )
-          .orderBy('g.gathering_date', 'desc')
-          .orderBy('g.id', 'asc')
-          .groupBy('g.id')
-          .limit(limit),
+    const subquery = this.txHost.tx.$kysely
+      .selectFrom('gathering_participation as gp')
+      .innerJoin('gathering as g', 'g.id', 'gp.gathering_id')
+      .leftJoin('feed as f', 'f.gathering_id', 'g.id')
+      .select(['g.id'])
+      .where('g.deleted_at', 'is', null)
+      .where('g.ended_at', 'is not', null)
+      .where((eb) =>
+        eb.or([eb('f.id', 'is', null), eb('f.writer_id', '!=', userId)]),
+      )
+      .where((eb) =>
+        eb.and([
+          eb('gp.participant_id', '=', userId),
+          eb(
+            'gp.status',
+            '=',
+            sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+          ),
+        ]),
+      )
+      .where((eb) =>
+        eb.or([
+          eb('g.gathering_date', '<', new Date(cursor.createdAt)),
+          eb.and([
+            eb('g.gathering_date', '=', new Date(cursor.createdAt)),
+            eb('g.id', '>', cursor.id),
+          ]),
+        ]),
       )
       .orderBy('g.gathering_date', 'desc')
       .orderBy('g.id', 'asc')
-      .execute();
+      .groupBy('g.id')
+      .limit(limit);
 
-    const result: { [key: string]: Gathering } = {};
-    rows.forEach((row) => {
-      if (!result[row.id]) {
-        result[row.id] = {
-          id: row.id,
-          name: row.name,
-          description: row.description,
-          gatheringDate: row.gathering_date,
-          invitationImageUrl: row.invitation_image_url,
-        };
-      }
-    });
-
-    return Object.values(result);
+    return await this.findGatherings(subquery);
   }
 
   async findGatherings(
@@ -303,9 +269,11 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
           invitationImageUrl: result.invitationImageUrl,
           name: result.name,
           hostUser: result.user,
-          members: result.participations.map((participant) => ({
-            ...participant.participant,
-          })),
+          members: result.participations
+            .filter((p) => p.participant.id !== result.user.id)
+            .map((participant) => ({
+              ...participant.participant,
+            })),
         }
       : null;
   }

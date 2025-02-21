@@ -39,6 +39,13 @@ export class GatheringInvitationsWriteService {
     );
   }
 
+  async acceptV2(participationId: string) {
+    await this.gatheringParticipationsRepository.updateStatus(
+      participationId,
+      'ACCEPTED',
+    );
+  }
+
   async reject(invitationId: string, userId: string) {
     await this.checkIsParticipant(invitationId, userId);
     await this.gatheringParticipationsRepository.delete(invitationId);

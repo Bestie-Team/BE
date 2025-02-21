@@ -77,6 +77,12 @@ export class GatheringCreationUseCase {
   ) {
     await this.gatheringsWriteService.create(gathering);
     await this.gatheringParticipationsWriteService.createMany(invitations);
+    const hostParticipation = invitations.find(
+      (invitation) => invitation.participantId === gathering.hostUserId,
+    ) as GatheringParticipationEntity;
+    await this.gatheringParticipationsWriteService.acceptV2(
+      hostParticipation.id,
+    );
   }
 
   private async notify(senderId: string, receiverIds: string[]) {

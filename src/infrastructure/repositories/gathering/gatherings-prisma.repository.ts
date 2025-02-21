@@ -157,12 +157,16 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('gathering as g', 'g.id', 'gp.gathering_id')
-      .leftJoin('feed as f', 'f.gathering_id', 'g.id')
       .select(['g.id'])
       .where('g.deleted_at', 'is', null)
       .where('g.ended_at', 'is not', null)
-      .where((eb) =>
-        eb.or([eb('f.id', 'is', null), eb('f.writer_id', '!=', userId)]),
+      .where('g.id', 'not in', (qb) =>
+        qb
+          .selectFrom('feed as f')
+          .select(['gathering_id'])
+          .where('f.deleted_at', 'is', null)
+          .where('f.gathering_id', 'is not', null)
+          .where('f.writer_id', '=', userId),
       )
       .where((eb) =>
         eb.and([

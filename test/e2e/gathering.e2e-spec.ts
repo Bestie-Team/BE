@@ -109,7 +109,8 @@ describe('GatheringsController (e2e)', () => {
       const invitations = await prisma.gatheringParticipation.findMany();
 
       expect(status).toEqual(201);
-      expect(invitations.length).toEqual(3);
+      // 자신도 포함해서 4개
+      expect(invitations.length).toEqual(4);
     });
 
     it('그룹 모임 생성 정상 동작', async () => {
@@ -141,6 +142,13 @@ describe('GatheringsController (e2e)', () => {
       const group = await prisma.group.create({
         data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
       });
+      const myGroupParticipation = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(
+          group.id,
+          loginedUser!.id,
+          new Date(),
+        ),
+      });
       const groupParticipation1 = await prisma.groupParticipation.create({
         data: generateGroupParticipationEntity(group.id, user1.id, new Date()),
       });
@@ -169,85 +177,10 @@ describe('GatheringsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<SearchUserResponse> = response;
       const invitations = await prisma.gatheringParticipation.findMany();
+      console.log(body);
 
       expect(status).toEqual(201);
-      expect(invitations.length).toEqual(3);
-    });
-
-    // 그룹 멤버를 조회하여 초대를 생성할 때, 자신도 그룹의 멤버이기 떄문에 포함되는 경우가 있었음.
-    it('그룹 모임 생성 시 자신에 대한 초대는 생성하지 않는다', async () => {
-      const { accessToken, accountId } = await login(app);
-      const loginedUser = await prisma.user.findFirst({
-        where: {
-          accountId,
-        },
-      });
-      const users = Array.from({ length: 10 }, (_, i) =>
-        generateUserEntity(`test${i}@test.com`, `account${i}_id`),
-      );
-      await prisma.user.createMany({ data: users });
-
-      const ownGroup = await prisma.group.create({
-        data: generateGroupEntity(loginedUser!.id),
-      });
-      const notOwnGroup = await prisma.group.create({
-        data: generateGroupEntity(users[9].id),
-      });
-      const ownGroupParticipations = Array.from({ length: 8 }, (_, i) =>
-        generateGroupParticipationEntity(ownGroup.id, users[i].id, new Date()),
-      );
-      await prisma.groupParticipation.createMany({
-        data: ownGroupParticipations,
-      });
-      const notOwnGroupParticipations = Array.from({ length: 8 }, (_, i) =>
-        generateGroupParticipationEntity(
-          notOwnGroup.id,
-          users[i].id,
-          new Date(),
-        ),
-      );
-      const loginedUserParticipation = await prisma.groupParticipation.create({
-        data: generateGroupParticipationEntity(
-          notOwnGroup.id,
-          loginedUser!.id,
-          new Date(),
-        ),
-      });
-      await prisma.groupParticipation.createMany({
-        data: notOwnGroupParticipations,
-      });
-
-      const dto = (groupId: string): CreateGatheringRequest => ({
-        name: '크리스마스 모임',
-        address: '내집',
-        description: '크리스마스 모임입니다~~',
-        friendIds: null,
-        gatheringDate: '2025-12-25T00:00:00.000Z',
-        groupId,
-        invitationImageUrl: 'https://image.com',
-        type: 'GROUP',
-      });
-
-      const ownGroupResponse = await request(app.getHttpServer())
-        .post('/gatherings')
-        .send(dto(ownGroup.id))
-        .set('Authorization', accessToken);
-      const { status: ownStatus }: ResponseResult<SearchUserResponse> =
-        ownGroupResponse;
-      const notOwnGroupResponse = await request(app.getHttpServer())
-        .post('/gatherings')
-        .send(dto(notOwnGroup.id))
-        .set('Authorization', accessToken);
-      const { status: notOwnStatus }: ResponseResult<SearchUserResponse> =
-        notOwnGroupResponse;
-
-      const ownParticipations = await prisma.gatheringParticipation.findMany({
-        where: { participantId: loginedUser!.id },
-      });
-
-      expect(ownStatus).toEqual(201);
-      expect(notOwnStatus).toEqual(201);
-      expect(ownParticipations.length).toEqual(0);
+      expect(invitations.length).toEqual(4);
     });
   });
 
@@ -586,6 +519,14 @@ describe('GatheringsController (e2e)', () => {
         ),
       );
       await prisma.gathering.createMany({ data: gatherings });
+      // 자신이 owner인 모임 참여 데이터 생성
+      const ownGatheringParticipations = Array.from({ length: 3 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i].id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      );
       // 모임3 ~ 7 참여.
       const acceptedGatherings = Array.from({ length: 5 }, (_, i) =>
         generateGatheringParticipationEntity(
@@ -612,6 +553,7 @@ describe('GatheringsController (e2e)', () => {
       );
       await prisma.gatheringParticipation.createMany({
         data: [
+          ...ownGatheringParticipations,
           ...acceptedGatherings,
           ...pendingGatherings,
           ...otherUserParticipation,
@@ -695,6 +637,15 @@ describe('GatheringsController (e2e)', () => {
         ),
       );
       await prisma.gathering.createMany({ data: gatherings });
+
+      // 자신이 owner인 모임 참여 데이터 생성
+      const ownGatheringParticipations = Array.from({ length: 3 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i].id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      );
       // 모임3 ~ 7 참여.
       const acceptedGatherings = Array.from({ length: 5 }, (_, i) =>
         generateGatheringParticipationEntity(
@@ -721,6 +672,7 @@ describe('GatheringsController (e2e)', () => {
       );
       await prisma.gatheringParticipation.createMany({
         data: [
+          ...ownGatheringParticipations,
           ...acceptedGatherings,
           ...pendingGatherings,
           ...otherUserParticipation,
@@ -818,6 +770,15 @@ describe('GatheringsController (e2e)', () => {
         ),
       );
       await prisma.gathering.createMany({ data: gatherings });
+
+      // 자신이 owner인 모임 참여 데이터 생성
+      const ownGatheringParticipations = Array.from({ length: 3 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i].id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      );
       // 모임3 ~ 7 참여.
       const acceptedGatherings = Array.from({ length: 5 }, (_, i) =>
         generateGatheringParticipationEntity(
@@ -844,6 +805,7 @@ describe('GatheringsController (e2e)', () => {
       );
       await prisma.gatheringParticipation.createMany({
         data: [
+          ...ownGatheringParticipations,
           ...acceptedGatherings,
           ...pendingGatherings,
           ...otherUserParticipation,
@@ -928,6 +890,7 @@ describe('GatheringsController (e2e)', () => {
     });
   });
 
+  // NOTE 손보기
   describe('(GET) /gatherings/{gatheringId} - 모임 상세 조회', () => {
     it('모임 상세 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);

@@ -110,8 +110,8 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       .limit(limit);
 
     const rows = await this.txHost.tx.$kysely
-      .selectFrom('gathering as g')
-      .leftJoin('feed as f', 'f.gathering_id', 'g.id')
+      .selectFrom('active_gathering as g')
+      .leftJoin('active_feed as f', 'f.gathering_id', 'g.id')
       .select([
         'g.id',
         'g.name',

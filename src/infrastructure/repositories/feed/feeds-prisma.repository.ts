@@ -162,7 +162,6 @@ export class FeedsPrismaRepository implements FeedsRepository {
         row.member_id &&
         row.member_account_id &&
         row.member_name &&
-        row.member_profile_image_url &&
         row.writer_id !== row.member_id &&
         !result[row.id].withMembers.find((m) => m.id === row.member_id)
       ) {

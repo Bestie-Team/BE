@@ -19,10 +19,7 @@ export class FriendFeedVisibilitiesPrismaRepository
     });
   }
 
-  async findVisibleUsersByFeedIds(
-    feedIds: string[],
-    userId: string,
-  ): Promise<{
+  async findVisibleUsersByFeedIds(feedIds: string[]): Promise<{
     [feedId: string]: User[];
   }> {
     const rows = await this.txHost.tx.$kysely
@@ -36,7 +33,6 @@ export class FriendFeedVisibilitiesPrismaRepository
         'au.profile_image_url',
       ])
       .where('fv.feed_id', 'in', feedIds)
-      .where('fv.user_id', '!=', userId)
       .execute();
 
     const result: { [feedId: string]: User[] } = {};

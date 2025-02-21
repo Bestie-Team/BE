@@ -3,10 +3,7 @@ import { User } from 'src/domain/types/user.types';
 
 export interface FriendFeedVisibilitiesRepository {
   saveMany(data: FriendFeedVisibilityEntity[]): Promise<void>;
-  findVisibleUsersByFeedIds(
-    feedIds: string[],
-    userId: string,
-  ): Promise<{
+  findVisibleUsersByFeedIds(feedIds: string[]): Promise<{
     [feedId: string]: User[];
   }>;
 }

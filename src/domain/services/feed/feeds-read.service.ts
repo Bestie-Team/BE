@@ -34,13 +34,11 @@ export class FeedsReadService {
 
   async getCommonFeedWithMember(
     feeds: Feed[],
-    userId: string,
   ): Promise<{ [feedId: string]: User[] }> {
     const commonFeeds = feeds.filter((feed) => !feed.gathering);
     return commonFeeds.length > 0
       ? await this.friendFeedVisibilitiesRepository.findVisibleUsersByFeedIds(
           commonFeeds.map((feed) => feed.id),
-          userId,
         )
       : {};
   }
@@ -59,7 +57,7 @@ export class FeedsReadService {
           )
         : await this.feedsRepository.findByUserId(userId, feedPaginationInput);
     const nextCursor = getFeedCursor(feeds, limit);
-    const withMembers = await this.getCommonFeedWithMember(feeds, userId);
+    const withMembers = await this.getCommonFeedWithMember(feeds);
     const feedsWithMembers = feeds.map((feed) => {
       const members = feed.gathering
         ? feed.withMembers

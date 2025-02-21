@@ -115,9 +115,6 @@ export class FeedsPrismaRepository implements FeedsRepository {
           .as('comment_count'),
       ])
       .where('f.id', 'in', () => subquery)
-      .where((eb) =>
-        eb.or([eb('gm.id', '!=', userId), eb('gm.id', 'is', null)]),
-      )
       .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id', 'asc')
       .orderBy('fi.index')

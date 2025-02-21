@@ -129,7 +129,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       if (!result.hasOwnProperty(row.id)) {
         result[row.id] = {
           id: row.id,
-          commentCount: Number(row.comment_count ?? 0),
+          commentCount: Number(row.comment_count || 0),
           content: row.content,
           createdAt: row.created_at,
           writer: {
@@ -138,36 +138,39 @@ export class FeedsPrismaRepository implements FeedsRepository {
             name: row.writer_name,
             profileImageUrl: row.writer_profile_image_url,
           },
-          gathering: null,
+          gathering:
+            row.gathering_id && row.gathering_date && row.gathering_name
+              ? {
+                  id: row.gathering_id,
+                  gatheringDate: row.gathering_date,
+                  name: row.gathering_name,
+                }
+              : null,
           images: [],
           withMembers: [],
         };
       }
 
-      if (row.image_url && !result[row.id].images.includes(row.image_url)) {
+      if (
+        row.image_url &&
+        !result[row.id].images.find((i) => i === row.image_url)
+      ) {
         result[row.id].images.push(row.image_url);
-      }
-
-      if (!result[row.id].gathering && row.gathering_id) {
-        result[row.id].gathering = {
-          // gathering의 컬럼들은 not null이므로 id가 있다면 다른 속성은 항상 존재함.
-          id: row.gathering_id,
-          gatheringDate: row.gathering_date!,
-          name: row.gathering_name!,
-        };
       }
 
       if (
         row.member_id &&
+        row.member_account_id &&
+        row.member_name &&
+        row.member_profile_image_url &&
         row.writer_id !== row.member_id &&
-        !result[row.id].withMembers.some((m) => m.id === row.member_id)
+        !result[row.id].withMembers.find((m) => m.id === row.member_id)
       ) {
         result[row.id].withMembers.push({
-          // user의 컬럼들은 모두 not null이므로 id가 있다면 다른 속성은 항상 존재함.
           id: row.member_id,
-          accountId: row.member_account_id!,
-          name: row.member_name!,
-          profileImageUrl: row.member_profile_image_url!,
+          accountId: row.member_account_id,
+          name: row.member_name,
+          profileImageUrl: row.member_profile_image_url,
         });
       }
     });

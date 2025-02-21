@@ -1,5 +1,8 @@
+import { Transactional } from '@nestjs-cls/transactional';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
+import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
+import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
 import { GroupsService } from 'src/domain/services/group/groups.service';
@@ -26,12 +29,10 @@ export class GatheringCreationUseCase {
     let inviteeIds: string[] = [];
 
     if (groupId) {
-      inviteeIds = (
-        await this.groupsService.getParticipantsById(groupId)
-      ).filter((userId) => userId !== hostUserId);
+      inviteeIds = await this.groupsService.getParticipantsById(groupId);
     }
     if (friendUserIds) {
-      inviteeIds = friendUserIds;
+      inviteeIds = [...friendUserIds, hostUserId];
       await this.gatheringsWriteService.checkIsFriend(
         hostUserId,
         friendUserIds,
@@ -66,10 +67,16 @@ export class GatheringCreationUseCase {
         inviteeIds,
       );
 
-    return await this.gatheringsWriteService.createTransaction(
-      gathering,
-      invitations,
-    );
+    return await this.transaction(gathering, invitations);
+  }
+
+  @Transactional()
+  private async transaction(
+    gathering: GatheringEntity,
+    invitations: GatheringParticipationEntity[],
+  ) {
+    await this.gatheringsWriteService.create(gathering);
+    await this.gatheringParticipationsWriteService.createMany(invitations);
   }
 
   private async notify(senderId: string, receiverIds: string[]) {

@@ -17,7 +17,6 @@ import {
   UpdateInput,
 } from 'src/domain/types/gathering.types';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
-import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 
@@ -32,17 +31,12 @@ export class GatheringsWriteService {
     private readonly friendsRepository: FriendsRepository,
   ) {}
 
-  async checkIsFriend(userId: string, friendUserIds: string[]) {
-    await checkIsFriendAll(this.friendsRepository, userId, friendUserIds);
+  async create(gathering: GatheringEntity) {
+    await this.gatheringsRepository.save(gathering);
   }
 
-  @Transactional()
-  async createTransaction(
-    gathering: GatheringEntity,
-    participations: GatheringParticipationEntity[],
-  ) {
-    await this.gatheringsRepository.save(gathering);
-    await this.gatheringParticipationsRepository.saveMany(participations);
+  async checkIsFriend(userId: string, friendUserIds: string[]) {
+    await checkIsFriendAll(this.friendsRepository, userId, friendUserIds);
   }
 
   createGathering(prototype: GatheringPrototype) {

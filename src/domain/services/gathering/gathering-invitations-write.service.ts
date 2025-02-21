@@ -11,6 +11,12 @@ export class GatheringInvitationsWriteService {
     private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
   ) {}
 
+  async createMany(gatheringParticiations: GatheringParticipationEntity[]) {
+    await this.gatheringParticipationsRepository.saveMany(
+      gatheringParticiations,
+    );
+  }
+
   createGatheringInvitations(gatheringId: string, userIds: string[]) {
     const stdDate = new Date();
     return userIds.map((participantId) =>
@@ -38,6 +44,12 @@ export class GatheringInvitationsWriteService {
     await this.gatheringParticipationsRepository.delete(invitationId);
   }
 
+  async deleteMany(gatheringId: string) {
+    await this.gatheringParticipationsRepository.deleteAllByGatheringId(
+      gatheringId,
+    );
+  }
+
   private async checkIsParticipant(invitationId: string, userId: string) {
     const participation =
       await this.gatheringParticipationsRepository.findOneByIdAndParticipantId(
@@ -47,9 +59,5 @@ export class GatheringInvitationsWriteService {
     if (!participation) {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
-  }
-
-  async createMany(participations: GatheringParticipationEntity[]) {
-    await this.gatheringParticipationsRepository.saveMany(participations);
   }
 }

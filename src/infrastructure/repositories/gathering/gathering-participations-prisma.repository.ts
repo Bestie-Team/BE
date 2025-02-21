@@ -51,7 +51,7 @@ export class GatheringParticipationsPrismaRepository
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const participationRows = await this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
-      .innerJoin('gathering as g', 'gp.gathering_id', 'g.id')
+      .innerJoin('active_gathering as g', 'gp.gathering_id', 'g.id')
       .innerJoin('user as hu', 'g.host_user_id', 'hu.id')
       .leftJoin('group as gr', 'g.group_id', 'gr.id')
       .select([
@@ -118,8 +118,8 @@ export class GatheringParticipationsPrismaRepository
   ): Promise<SentGatheringInvitation[]> {
     const { cursor, limit, maxDate, minDate } = paginatedDateRangeInput;
     const rows = await this.txHost.tx.$kysely
-      .selectFrom('gathering as g')
-      .innerJoin('user as hu', 'g.host_user_id', 'hu.id')
+      .selectFrom('active_gathering as g')
+      .innerJoin('active_user as hu', 'g.host_user_id', 'hu.id')
       .innerJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
       .leftJoin('group as gr', 'g.group_id', 'gr.id')
       .select([

@@ -38,7 +38,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
   }
 
   async findOneById(id: string): Promise<{ writerId: string } | null> {
-    return await this.txHost.tx.feed.findUnique({
+    return await this.txHost.tx.activeFeed.findUnique({
       select: { writerId: true },
       where: { id },
     });
@@ -48,13 +48,10 @@ export class FeedsPrismaRepository implements FeedsRepository {
     feedId: string,
     writerId: string,
   ): Promise<{ id: string } | null> {
-    return await this.txHost.tx.feed.findFirst({
+    return await this.txHost.tx.activeFeed.findFirst({
       where: {
         id: feedId,
         writerId,
-        writer: {
-          deletedAt: null,
-        },
       },
     });
   }
@@ -63,14 +60,11 @@ export class FeedsPrismaRepository implements FeedsRepository {
     gatheringId: string,
     writerId: string,
   ): Promise<{ id: string } | null> {
-    return await this.txHost.tx.feed.findFirst({
+    return await this.txHost.tx.activeFeed.findFirst({
       select: { id: true },
       where: {
         gatheringId,
         writerId,
-        writer: {
-          deletedAt: null,
-        },
       },
     });
   }
@@ -80,15 +74,14 @@ export class FeedsPrismaRepository implements FeedsRepository {
     order: Order,
     subquery: SelectQueryBuilder<any, any, any>,
   ): Promise<Feed[]> {
-    // NOTE active user feed 수정
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const rows = await this.txHost.tx.$kysely
-      .selectFrom('feed as f')
-      .innerJoin('user as u', 'f.writer_id', 'u.id')
+      .selectFrom('active_feed as f')
+      .innerJoin('active_user as u', 'f.writer_id', 'u.id')
       .leftJoin('feed_image as fi', 'f.id', 'fi.feed_id')
-      .leftJoin('gathering as g', 'f.gathering_id', 'g.id')
+      .leftJoin('active_gathering as g', 'f.gathering_id', 'g.id')
       .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
-      .leftJoin('user as gm', 'gp.participant_id', 'gm.id')
+      .leftJoin('active_user as gm', 'gp.participant_id', 'gm.id')
       .select([
         'f.id',
         'f.content',
@@ -108,7 +101,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
       ])
       .select((qb) => [
         qb
-          .selectFrom('feed_comment as fc')
+          .selectFrom('active_feed_comment as fc')
           .whereRef('fc.feed_id', '=', 'f.id')
           .where('fc.deleted_at', 'is', null)
           .select(({ fn }) => [fn.count<number>('fc.id').as('comment_count')])
@@ -183,12 +176,11 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const cursorComparison = order === 'ASC' ? '>' : '<';
 
     const query = this.txHost.tx.$kysely
-      .selectFrom('feed as f')
-      .select(['f.id'])
+      .selectFrom('active_feed as f')
+      .select('f.id')
       .leftJoin('friend_feed_visibility as fv', 'f.id', 'fv.feed_id')
-      .leftJoin('gathering as g', 'f.gathering_id', 'g.id')
+      .leftJoin('active_gathering as g', 'f.gathering_id', 'g.id')
       .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
-      .where('f.deleted_at', 'is', null)
       .where('f.id', 'not in', (qb) =>
         qb
           .selectFrom('blocked_feed as bf')
@@ -221,7 +213,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
           ]),
         ]),
       )
-      .groupBy('f.id')
+      .groupBy(['f.id', 'f.created_at'])
       .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id', 'asc')
       .limit(limit);
@@ -237,7 +229,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const cursorComparison = order === 'ASC' ? '>' : '<';
 
     const query = this.txHost.tx.$kysely
-      .selectFrom('feed as f')
+      .selectFrom('active_feed as f')
       .select('f.id')
       // NOTE 자신의 게시글을 숨기는 기능이 필요할까...
       .where('f.id', 'not in', (qb) =>
@@ -246,7 +238,6 @@ export class FeedsPrismaRepository implements FeedsRepository {
           .select('bf.feed_id as id')
           .where('bf.user_id', '=', userId),
       )
-      .where('f.deleted_at', 'is', null)
       .where('f.writer_id', '=', userId)
       .where('f.created_at', '>=', new Date(minDate))
       .where('f.created_at', '<=', new Date(maxDate))
@@ -259,7 +250,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
           ]),
         ]),
       )
-      .groupBy('f.id')
+      .groupBy(['f.id', 'f.created_at'])
       .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id', 'asc')
       .limit(limit);
@@ -274,7 +265,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
 
     const query = this.txHost.tx.$kysely
       .selectFrom('blocked_feed as bf')
-      .innerJoin('feed as f', 'bf.feed_id', 'f.id')
+      .innerJoin('active_feed as f', 'bf.feed_id', 'f.id')
       .select('f.id')
       .where('bf.user_id', '=', userId)
       .where((eb) =>

@@ -40,7 +40,7 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
   }
 
   async findOneById(id: string): Promise<{ writerId: string } | null> {
-    return await this.prisma.feedComment.findUnique({
+    return await this.prisma.activeFeedComment.findUnique({
       where: {
         id,
       },

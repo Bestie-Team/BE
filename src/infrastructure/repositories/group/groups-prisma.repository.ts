@@ -25,9 +25,10 @@ export class GroupsPrismaRepository implements GroupsRepository {
     const { cursor, limit } = paginationInput;
     const rows = await this.txHost.tx.$kysely
       .selectFrom('group as g')
+      // NOTE 그룹 참여는 hard delete 중이지만 active_user 미리 넣어줌.
       .innerJoin('group_participation as gp', 'g.id', 'gp.group_id')
-      .innerJoin('user as mu', 'gp.participant_id', 'mu.id')
-      .innerJoin('user as ou', 'g.owner_id', 'ou.id')
+      .innerJoin('active_user as mu', 'gp.participant_id', 'mu.id')
+      .innerJoin('active_user as ou', 'g.owner_id', 'ou.id')
       .select([
         'g.id as group_id',
         'g.name as group_name',

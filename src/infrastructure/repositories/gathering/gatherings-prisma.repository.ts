@@ -34,7 +34,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
-      .innerJoin('gathering as g', 'g.id', 'gp.gathering_id')
+      .innerJoin('active_gathering as g', 'g.id', 'gp.gathering_id')
       .select(['g.id'])
       .where((eb) =>
         eb.and([
@@ -61,11 +61,10 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
           ]),
         ]),
       )
-      .where('g.deleted_at', 'is', null)
       .where('g.ended_at', 'is', null)
       .orderBy('g.gathering_date', 'desc')
       .orderBy('g.id', 'asc')
-      .groupBy('g.id')
+      .groupBy(['g.id', 'g.gathering_date'])
       .limit(limit);
     return await this.findGatherings(subquery);
   }
@@ -77,7 +76,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
     const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
-      .innerJoin('gathering as g', 'g.id', 'gp.gathering_id')
+      .innerJoin('active_gathering as g', 'g.id', 'gp.gathering_id')
       .select(['g.id'])
       .where((eb) =>
         eb.and([
@@ -104,11 +103,10 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
           ]),
         ]),
       )
-      .where('g.deleted_at', 'is', null)
       .where('g.ended_at', 'is not', null)
       .orderBy('g.gathering_date', 'desc')
       .orderBy('g.id', 'asc')
-      .groupBy('g.id')
+      .groupBy(['g.id', 'g.gathering_date'])
       .limit(limit);
 
     const rows = await this.txHost.tx.$kysely
@@ -156,13 +154,13 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     const { cursor, limit } = paginationInput;
     const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
-      .innerJoin('gathering as g', 'g.id', 'gp.gathering_id')
+      .innerJoin('active_gathering as g', 'g.id', 'gp.gathering_id')
       .select(['g.id'])
       .where('g.deleted_at', 'is', null)
       .where('g.ended_at', 'is not', null)
       .where('g.id', 'not in', (qb) =>
         qb
-          .selectFrom('feed as f')
+          .selectFrom('active_feed as f')
           .select(['gathering_id'])
           .where('f.deleted_at', 'is', null)
           .where('f.gathering_id', 'is not', null)
@@ -189,7 +187,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       )
       .orderBy('g.gathering_date', 'desc')
       .orderBy('g.id', 'asc')
-      .groupBy('g.id')
+      .groupBy(['g.id', 'g.gathering_date'])
       .limit(limit);
 
     return await this.findGatherings(subquery);
@@ -199,7 +197,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     subquery: SelectQueryBuilder<any, any, any>,
   ): Promise<Gathering[]> {
     const rows = await this.txHost.tx.$kysely
-      .selectFrom('gathering as g')
+      .selectFrom('active_gathering as g')
       .select([
         'g.id',
         'g.name',
@@ -228,6 +226,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     return Object.values(result);
   }
 
+  // TODO 이렇게 조인 여러변 된 쿼리는 view 못 쓰니까 쿼리빌더로 변경하기
   async findDetailById(id: string): Promise<GatheringDetail | null> {
     const result = await this.txHost.tx.gathering.findUnique({
       select: {
@@ -261,6 +260,9 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       where: {
         id,
         deletedAt: null,
+        user: {
+          deletedAt: null,
+        },
       },
     });
 
@@ -286,12 +288,11 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     id: string,
     hostId: string,
   ): Promise<{ id: string; endedAt: Date | null } | null> {
-    return await this.txHost.tx.gathering.findFirst({
+    return await this.txHost.tx.activeGathering.findFirst({
       select: { id: true, endedAt: true },
       where: {
         id,
         hostUserId: hostId,
-        deletedAt: null,
       },
     });
   }
@@ -299,9 +300,9 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
   async findOneById(
     id: string,
   ): Promise<{ id: string; hostUserId: string; endedAt: Date | null } | null> {
-    return await this.txHost.tx.gathering.findUnique({
+    return await this.txHost.tx.activeGathering.findUnique({
       select: { id: true, hostUserId: true, endedAt: true },
-      where: { id, deletedAt: null },
+      where: { id },
     });
   }
 

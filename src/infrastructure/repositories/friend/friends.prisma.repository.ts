@@ -40,7 +40,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
   ): Promise<User[]> {
     const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
-      .selectFrom('user as u')
+      .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .where('u.id', '!=', userId)
       .where(({ eb, or, and }) =>
@@ -94,7 +94,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
-      .selectFrom('user as u')
+      .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .where('u.id', '!=', userId)
       .where(({ eb, or, and }) =>
@@ -154,7 +154,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
       .selectFrom('friend as f')
-      .innerJoin('user as u', 'f.sender_id', 'u.id')
+      .innerJoin('active_user as u', 'f.sender_id', 'u.id')
       .select([
         'f.id',
         'u.id as user_id',
@@ -200,7 +200,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
       .selectFrom('friend as f')
-      .innerJoin('user as u', 'f.receiver_id', 'u.id')
+      .innerJoin('active_user as u', 'f.receiver_id', 'u.id')
       .select([
         'f.id',
         'u.id as user_id',

@@ -115,7 +115,7 @@ export class UsersPrismaRepository implements UsersRepository {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
     const rows = await this.prisma.$kysely
-      .selectFrom('user as u')
+      .selectFrom('active_user as u')
       .leftJoin('friend as f', (join) =>
         join
           .on((eb) =>
@@ -147,7 +147,6 @@ export class UsersPrismaRepository implements UsersRepository {
         ELSE 'NONE'
       END`.as('status'), // 요청 상태 추가
       ])
-      .where('u.deleted_at', 'is', null)
       .where('u.account_id', 'like', `%${search}%`)
       .where('u.id', '!=', userId)
       .where(({ eb, or, and }) =>
@@ -197,7 +196,7 @@ export class UsersPrismaRepository implements UsersRepository {
 
   async findDetailById(id: string): Promise<UserDetail | null> {
     const row = await this.prisma.$kysely
-      .selectFrom('user as u')
+      .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .select((qb) =>
         qb
@@ -215,13 +214,8 @@ export class UsersPrismaRepository implements UsersRepository {
       )
       .select((qb) =>
         qb
-          .selectFrom('feed as f')
-          .where((eb) =>
-            eb.and([
-              eb('f.writer_id', '=', id),
-              eb('f.deleted_at', 'is', null),
-            ]),
-          )
+          .selectFrom('active_feed as f')
+          .where('f.writer_id', '=', id)
           .select(({ fn }) => fn.countAll().as('feed_count'))
           .as('feed_count'),
       )
@@ -232,7 +226,6 @@ export class UsersPrismaRepository implements UsersRepository {
           .select(({ fn }) => fn.countAll().as('group_count'))
           .as('group_count'),
       )
-      .where('u.deleted_at', 'is', null)
       .where('u.id', '=', id)
       .executeTakeFirst();
 

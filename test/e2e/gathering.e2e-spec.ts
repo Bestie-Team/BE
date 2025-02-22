@@ -953,6 +953,72 @@ describe('GatheringsController (e2e)', () => {
       expect(hostUser.profileImageUrl).toEqual(loginedUser!.profileImageUrl);
       expect(members.length).toEqual(3);
     });
+
+    it('모임장이 탈퇴한 경우 탈퇴한 회원으로 노출되어야 한다.', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findUnique({
+        where: {
+          accountId,
+        },
+      });
+      const user1 = await prisma.user.create({
+        data: generateUserEntity('test1@test.com', 'lighty_1', '이민수'),
+      });
+      const user2 = await prisma.user.create({
+        data: generateUserEntity('test2@test.com', 'lighty_2', '김민수'),
+      });
+      const gathering = await prisma.gathering.create({
+        data: generateGatheringEntity(
+          user1.id,
+          new Date(),
+          '두리 모임',
+          new Date(),
+        ),
+      });
+      const hostParticipation = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(
+          gathering.id,
+          user1.id,
+          'ACCEPTED',
+        ),
+      });
+      const otherParticipation1 = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(
+          gathering.id,
+          user2.id,
+          'ACCEPTED',
+        ),
+      });
+      const otherParticipation2 = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(
+          gathering.id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      });
+
+      // 모임장 탈퇴
+      await prisma.user.update({
+        data: {
+          deletedAt: new Date(),
+        },
+        where: {
+          id: user1.id,
+        },
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/gatherings/${gathering.id}`)
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GatheringDetail> = response;
+
+      expect(status).toEqual(200);
+      expect(body.hostUser.id).toEqual('');
+      expect(body.hostUser.accountId).toEqual('탈퇴한 사용자');
+      expect(body.hostUser.name).toEqual('');
+      expect(body.hostUser.profileImageUrl).toBeNull();
+    });
   });
 
   describe('(DELETE) /gatherings/{gatheringId} - 모임 삭제', () => {

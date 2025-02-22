@@ -4,7 +4,7 @@ export type GatheringType = 'GROUP' | 'FRIEND';
 export type GatheringParticipationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 export type GroupParticipationStatus = 'ACCEPTED' | 'REPORTED';
 export type Order = 'DESC' | 'ASC';
-export type ReportTypes = 'FRIEND' | 'FEED' | 'GROUP';
+export type ReportTypes = 'FRIEND' | 'FEED' | 'GROUP' | 'FEED_COMMENT';
 export type FriendRequestStatus = 'SENT' | 'RECEIVED' | 'NONE';
 
 export interface UserPaginationInput {

@@ -19,11 +19,11 @@ export class CreateReportRequest {
   @ApiProperty({
     description: '신고 종류',
     type: 'string',
-    enum: ['FRIEND', 'GROUP', 'FEED'],
+    enum: ['FRIEND', 'GROUP', 'FEED', 'FEED_COMMENT'],
     example: 'FRIEND',
   })
-  @IsIn(['FRIEND', 'GROUP', 'FEED'], {
-    message: 'type은 FRIEND, GROUP, FEED만 가능합니다.',
+  @IsIn(['FRIEND', 'GROUP', 'FEED', 'FEED_COMMENT'], {
+    message: 'type은 FRIEND, GROUP, FEED, FEED_COMMENT만 가능합니다.',
   })
   @Transform(({ value }) => value.toUpperCase(), { toClassOnly: true })
   readonly type: ReportTypes;

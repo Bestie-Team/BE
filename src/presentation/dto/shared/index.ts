@@ -60,5 +60,5 @@ export type Provider = 'GOOGLE' | 'KAKAO' | 'APPLE';
 export type FriendStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'REPORTED';
 export type GatheringType = 'GROUP' | 'FRIEND';
 export type Order = 'DESC' | 'ASC';
-export type ReportTypes = 'FRIEND' | 'FEED' | 'GROUP';
+export type ReportTypes = 'FRIEND' | 'FEED' | 'GROUP' | 'FEED_COMMENT';
 export type FriendRequestStatus = 'SENT' | 'RECEIVED' | 'NONE';

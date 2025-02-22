@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ReportsRepository } from 'src/domain/interface/report/reports.repository';
+import { FeedCommentReportsWriteService } from 'src/domain/services/report/feed-comment-reports-write.service';
 import { FeedReportsWriteService } from 'src/domain/services/report/feed-reports-write.service';
 import { FriendReportsWriteSerivce } from 'src/domain/services/report/friend-reports-write.service';
 import { GroupReportsWriteService } from 'src/domain/services/report/group-reports.write.service';
@@ -22,6 +23,7 @@ import { ReportsController } from 'src/presentation/controllers/report/reports.c
     FriendReportsWriteSerivce,
     GroupReportsWriteService,
     FeedReportsWriteService,
+    FeedCommentReportsWriteService,
     { provide: ReportsRepository, useClass: ReportsPrismaRepository },
   ],
 })

@@ -8,6 +8,8 @@ import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { login } from 'test/helpers/login';
 import {
+  generateFeedCommentEntity,
+  generateFeedEntity,
   generateFriendEntity,
   generateGatheringEntity,
   generateGatheringParticipationEntity,
@@ -35,6 +37,7 @@ describe('ReportsController (e2e)', () => {
     await prisma.gatheringParticipation.deleteMany();
     await prisma.gathering.deleteMany();
     await prisma.group.deleteMany();
+    await prisma.feedComment.deleteMany();
     await prisma.feed.deleteMany();
     await prisma.friend.deleteMany();
     await prisma.user.deleteMany();
@@ -44,7 +47,7 @@ describe('ReportsController (e2e)', () => {
     app.close();
   });
 
-  describe('(POST) /reports/friends - 친구 신고', () => {
+  describe('(POST) /reports/{type} - 신고', () => {
     it('친구 신고 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
@@ -101,6 +104,39 @@ describe('ReportsController (e2e)', () => {
 
       expect(status).toEqual(201);
       expect(afterReportInvitation.length).toEqual(0);
+    });
+
+    it('댓글 신고 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: { accountId },
+      });
+
+      const user = await prisma.user.create({
+        data: generateUserEntity('test@test.com', 'account_test'),
+      });
+      const feed = await prisma.feed.create({
+        data: generateFeedEntity(user.id, null),
+      });
+      const feedComment = await prisma.feedComment.create({
+        data: generateFeedCommentEntity(feed.id, user.id),
+      });
+
+      const dto: CreateReportRequest = {
+        reason: '욕설',
+        reportedId: feedComment.id,
+        type: 'FEED_COMMENT',
+      };
+
+      const response = await request(app.getHttpServer())
+        .post(`/reports/${dto.type}`)
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status, body } = response;
+      console.log(body);
+
+      expect(status).toEqual(201);
     });
   });
 });

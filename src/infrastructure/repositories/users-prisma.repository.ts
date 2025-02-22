@@ -247,18 +247,29 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findProfileById(id: string): Promise<Profile | null> {
-    return await this.prisma.user.findUnique({
-      select: {
-        id: true,
-        name: true,
-        accountId: true,
-        profileImageUrl: true,
-      },
-      where: {
-        id,
-        deletedAt: null,
-      },
-    });
+    const row = await this.prisma.$kysely
+      .selectFrom('active_user as u')
+      .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
+      .select(() => [
+        sql<boolean>`EXISTS (
+          SELECT 1
+          FROM notification n
+          WHERE n.user_id = ${id}
+            AND n.read_at IS NULL
+        )`.as('hasNewNotification'),
+      ])
+      .where('u.id', '=', id)
+      .executeTakeFirst();
+
+    return row
+      ? {
+          id: row.id,
+          accountId: row.account_id,
+          name: row.name,
+          profileImageUrl: row.profile_image_url,
+          hasNewNotification: row.hasNewNotification,
+        }
+      : null;
   }
 
   async update(data: Partial<UserEntity>): Promise<void> {

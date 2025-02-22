@@ -16,4 +16,7 @@ export class UserProfileResponse {
     type: 'string',
   })
   readonly profileImageUrl: string | null;
+
+  @ApiProperty({ example: true, description: '읽지 않은 알림이 있는지 여부.' })
+  readonly hasNewNotification: boolean;
 }

@@ -91,18 +91,19 @@ describe('ReportsController (e2e)', () => {
         reportedId: reportedUser.id,
         type: 'FRIEND',
       };
-      const type: ReportTypes = 'FRIEND';
 
       // when
       const response = await request(app.getHttpServer())
-        .post(`/reports/${type}`)
+        .post('/reports')
         .send(dto)
         .set('Authorization', accessToken);
       const { status } = response;
+      const report = await prisma.report.findMany();
       const afterReportInvitation =
         await prisma.gatheringParticipation.findMany();
 
       expect(status).toEqual(201);
+      expect(report.length).toEqual(1);
       expect(afterReportInvitation.length).toEqual(0);
     });
 
@@ -130,13 +131,14 @@ describe('ReportsController (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post(`/reports/${dto.type}`)
+        .post('/reports')
         .send(dto)
         .set('Authorization', accessToken);
-      const { status, body } = response;
-      console.log(body);
+      const { status } = response;
+      const report = await prisma.report.findMany();
 
       expect(status).toEqual(201);
+      expect(report.length).toEqual(1);
     });
   });
 });

@@ -239,8 +239,6 @@ describe('UsersController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<UserDetailResponse> = response;
 
-      console.log(body);
-
       expect(status).toEqual(200);
       expect(body.id).toEqual(loginedUser!.id);
       expect(body.accountId).toEqual(loginedUser!.accountId);
@@ -252,5 +250,51 @@ describe('UsersController (e2e)', () => {
     });
 
     // TODO 모든 카운트 정보가 0명일 떄 조회.
+  });
+
+  it('탈퇴한 회원은 친구 수에 집계되지 않아야 한다', async () => {
+    const { accessToken, accountId } = await login(app);
+
+    const loginedUser = await prisma.user.findFirst({
+      where: {
+        accountId,
+      },
+    });
+
+    const users = Array.from({ length: 10 }, (_, i) =>
+      generateUserEntity(`test${i}@test.com`, `accound${i}`, `김철수${i}`),
+    );
+    await prisma.user.createMany({ data: users });
+
+    const friendRelations = Array.from({ length: 10 }, (_, i) =>
+      generateFriendEntity(loginedUser!.id, users[i].id, 'ACCEPTED'),
+    );
+    await prisma.friend.createMany({ data: friendRelations });
+
+    // 친구 중 탈퇴한 사용자 2명
+    await prisma.user.update({
+      data: {
+        deletedAt: new Date(),
+      },
+      where: {
+        id: users[0].id,
+      },
+    });
+    await prisma.user.update({
+      data: {
+        deletedAt: new Date(),
+      },
+      where: {
+        id: users[1].id,
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/users/my')
+      .set('Authorization', accessToken);
+    const { status, body }: ResponseResult<UserDetailResponse> = response;
+
+    expect(status).toEqual(200);
+    expect(body.friendCount).toEqual(8);
   });
 });

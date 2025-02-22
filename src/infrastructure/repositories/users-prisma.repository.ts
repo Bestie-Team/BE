@@ -201,6 +201,8 @@ export class UsersPrismaRepository implements UsersRepository {
       .select((qb) =>
         qb
           .selectFrom('friend as f')
+          .innerJoin('active_user as sender', 'f.sender_id', 'sender.id')
+          .innerJoin('active_user as receiver', 'f.receiver_id', 'receiver.id')
           .where((eb) =>
             eb.or([eb('f.sender_id', '=', id), eb('f.receiver_id', '=', id)]),
           )

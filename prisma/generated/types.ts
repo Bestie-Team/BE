@@ -48,6 +48,7 @@ export const ReportTypes = {
   FRIEND: 'FRIEND',
   FEED: 'FEED',
   GROUP: 'GROUP',
+  FEED_COMMENT: 'FEED_COMMENT',
 } as const;
 export type ReportTypes = (typeof ReportTypes)[keyof typeof ReportTypes];
 export type ActiveFeed = {
@@ -89,6 +90,11 @@ export type ActiveUser = {
   name: string;
   account_id: string;
   profile_image_url: string | null;
+  terms_of_service_consent: boolean;
+  privacy_policy_consent: boolean;
+  marketing_notification_consent: Generated<boolean>;
+  service_notification_consent: Generated<boolean>;
+  notification_token: string | null;
   created_at: Timestamp;
   updated_at: Timestamp;
   deleted_at: Timestamp | null;

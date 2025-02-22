@@ -34,13 +34,13 @@ export class ReportsController {
     status: 201,
     description: '신고 완료',
   })
-  @Post(':type')
+  @Post()
   async reportFriend(
-    @Param('type', ValidateReportTypePipe) type: ReportTypes,
     @Body() dto: CreateReportRequest,
     @CurrentUser() userId: string,
   ) {
     // TODO service 코드 수정 후 분기 제거하고 레이어 나누기.
+    const { type } = dto;
     const input: ReportPrototype = { ...dto, reporterId: userId };
     type === 'FRIEND'
       ? await this.friendReportWriteService.report(input)

@@ -59,6 +59,7 @@ enum ReportTypes {
   FRIEND
   FEED
   GROUP
+  FEED_COMMENT
 }
 
 model User {

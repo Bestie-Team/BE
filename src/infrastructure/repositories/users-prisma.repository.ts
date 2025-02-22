@@ -224,6 +224,8 @@ export class UsersPrismaRepository implements UsersRepository {
       .select((qb) =>
         qb
           .selectFrom('group_participation as gp')
+          .innerJoin('group as g', 'gp.group_id', 'g.id')
+          .innerJoin('active_user as u', 'g.owner_id', 'u.id')
           .where('gp.participant_id', '=', id)
           .select(({ fn }) => fn.countAll().as('group_count'))
           .as('group_count'),

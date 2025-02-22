@@ -252,7 +252,7 @@ describe('UsersController (e2e)', () => {
     // TODO 모든 카운트 정보가 0명일 떄 조회.
   });
 
-  it('탈퇴한 회원은 친구 수에 집계되지 않아야 한다', async () => {
+  it('탈퇴한 회원은 친구 수에 집계되지 않는다', async () => {
     const { accessToken, accountId } = await login(app);
 
     const loginedUser = await prisma.user.findFirst({
@@ -296,5 +296,58 @@ describe('UsersController (e2e)', () => {
 
     expect(status).toEqual(200);
     expect(body.friendCount).toEqual(8);
+  });
+
+  it('탈퇴한 회원이 그룹장인 그룹은 그룹 수에 집계되지 않는다', async () => {
+    const { accessToken, accountId } = await login(app);
+
+    const loginedUser = await prisma.user.findFirst({
+      where: {
+        accountId,
+      },
+    });
+
+    const users = Array.from({ length: 10 }, (_, i) =>
+      generateUserEntity(`test${i}@test.com`, `accound${i}`, `김철수${i}`),
+    );
+    await prisma.user.createMany({ data: users });
+
+    const groups = Array.from({ length: 10 }, (_, i) =>
+      generateGroupEntity(users[i].id, `그룹명${i}`),
+    );
+    await prisma.group.createMany({ data: groups });
+
+    const ownGroupParticipations = groups.map((group) =>
+      generateGroupParticipationEntity(group.id, loginedUser!.id, new Date()),
+    );
+    await prisma.groupParticipation.createMany({
+      data: ownGroupParticipations,
+    });
+
+    // 그룹장인 회원 2명이 탈퇴한 경우
+    await prisma.user.update({
+      data: {
+        deletedAt: new Date(),
+      },
+      where: {
+        id: users[0].id,
+      },
+    });
+    await prisma.user.update({
+      data: {
+        deletedAt: new Date(),
+      },
+      where: {
+        id: users[1].id,
+      },
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/users/my')
+      .set('Authorization', accessToken);
+    const { status, body }: ResponseResult<UserDetailResponse> = response;
+
+    expect(status).toEqual(200);
+    expect(body.groupCount).toEqual(8);
   });
 });

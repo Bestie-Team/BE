@@ -163,6 +163,7 @@ model GatheringParticipation {
   gatheringId String @map("gathering_id")
   participantId String @map("participant_id")
   status GatheringParticipationStatus @default(PENDING)
+  readAt DateTime? @map("read_at")
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
 

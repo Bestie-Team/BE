@@ -161,6 +161,7 @@ export type GatheringParticipation = {
   gathering_id: string;
   participant_id: string;
   status: Generated<GatheringParticipationStatus>;
+  read_at: Timestamp | null;
   created_at: Timestamp;
   updated_at: Timestamp;
 };

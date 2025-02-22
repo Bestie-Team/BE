@@ -8,6 +8,7 @@ import {
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { ValidateReportTypePipe } from 'src/common/pipes/validate-report-type.pipe';
+import { FeedCommentReportsWriteService } from 'src/domain/services/report/feed-comment-reports-write.service';
 import { FeedReportsWriteService } from 'src/domain/services/report/feed-reports-write.service';
 import { FriendReportsWriteSerivce } from 'src/domain/services/report/friend-reports-write.service';
 import { GroupReportsWriteService } from 'src/domain/services/report/group-reports.write.service';
@@ -25,6 +26,7 @@ export class ReportsController {
     private readonly friendReportWriteService: FriendReportsWriteSerivce,
     private readonly groupReportWriteService: GroupReportsWriteService,
     private readonly feedReportsWriteService: FeedReportsWriteService,
+    private readonly feedCommentReportsWriteService: FeedCommentReportsWriteService,
   ) {}
 
   @ApiOperation({ summary: '신고' })
@@ -44,6 +46,8 @@ export class ReportsController {
       ? await this.friendReportWriteService.report(input)
       : type === 'GROUP'
       ? await this.groupReportWriteService.report(input)
-      : await this.feedReportsWriteService.report(input);
+      : type === 'FEED'
+      ? await this.feedReportsWriteService.report(input)
+      : await this.feedCommentReportsWriteService.report(input);
   }
 }

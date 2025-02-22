@@ -22,7 +22,7 @@ export class CreateReportRequest {
     enum: ['FRIEND', 'GROUP', 'FEED'],
     example: 'FRIEND',
   })
-  @IsIn(['FRIEND', 'GROUP', 'FEED'], {
+  @IsIn(['FRIEND', 'GROUP', 'FEED', 'FEED_COMMENT'], {
     message: 'type은 FRIEND, GROUP, FEED만 가능합니다.',
   })
   @Transform(({ value }) => value.toUpperCase(), { toClassOnly: true })

@@ -242,6 +242,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
             accountId: true,
             profileImageUrl: true,
             name: true,
+            deletedAt: true,
           },
         },
         participations: {
@@ -260,9 +261,6 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       where: {
         id,
         deletedAt: null,
-        user: {
-          deletedAt: null,
-        },
       },
     });
 
@@ -274,7 +272,14 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
           gatheringDate: result.gatheringDate,
           invitationImageUrl: result.invitationImageUrl,
           name: result.name,
-          hostUser: result.user,
+          hostUser: result.user.deletedAt
+            ? {
+                id: '',
+                accountId: '탈퇴한 사용자',
+                profileImageUrl: null,
+                name: '',
+              }
+            : result.user,
           members: result.participations
             .filter((p) => p.participant.id !== result.user.id)
             .map((participant) => ({

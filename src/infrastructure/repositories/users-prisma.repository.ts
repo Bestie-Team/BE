@@ -11,7 +11,7 @@ import type {
 } from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
 import { sql } from 'kysely';
-import { FriendStatus } from '@prisma/client';
+import { FriendStatus, GatheringParticipationStatus } from '@prisma/client';
 import { FriendRequestStatus } from 'src/shared/types';
 
 @Injectable()
@@ -237,9 +237,9 @@ export class UsersPrismaRepository implements UsersRepository {
       ? {
           id: row.id,
           accountId: row.account_id,
-          feedCount: Number(row.feed_count ?? 0),
-          friendCount: Number(row.friend_count ?? 0),
-          groupCount: Number(row.group_count ?? 0),
+          feedCount: Number(row.feed_count || 0),
+          friendCount: Number(row.friend_count || 0),
+          groupCount: Number(row.group_count || 0),
           name: row.name,
           profileImageUrl: row.profile_image_url,
         }
@@ -250,22 +250,27 @@ export class UsersPrismaRepository implements UsersRepository {
     const row = await this.prisma.$kysely
       .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
-      .select(() => [
-        sql<boolean>`EXISTS (
-          SELECT 1
-          FROM notification n
-          WHERE n.user_id = ${id}
-            AND n.read_at IS NULL
-        )`.as('hasNewNotification'),
-      ])
-      .select(() => [
-        sql<boolean>`EXISTS (
-          SELECT 1
-          FROM gathering_participation gp
-          WHERE gp.participant_id = ${id}
-            AND gp.read_at IS NULL
-        )`.as('hasNewInvitation'),
-      ])
+      .select((qb) =>
+        qb
+          .selectFrom('gathering_participation as gp')
+          .where('gp.participant_id', '=', id)
+          .where('gp.read_at', 'is', null)
+          .where(
+            'gp.status',
+            '=',
+            sql<GatheringParticipationStatus>`${GatheringParticipationStatus.PENDING}::"GatheringParticipationStatus"`,
+          )
+          .select(({ fn }) => fn.countAll().as('new_invitation_count'))
+          .as('new_invitation_count'),
+      )
+      .select((qb) =>
+        qb
+          .selectFrom('notification as n')
+          .where('n.user_id', '=', id)
+          .where('n.read_at', 'is', null)
+          .select(({ fn }) => fn.countAll().as('new_notification_count'))
+          .as('new_notification_count'),
+      )
       .where('u.id', '=', id)
       .executeTakeFirst();
 
@@ -275,8 +280,8 @@ export class UsersPrismaRepository implements UsersRepository {
           accountId: row.account_id,
           name: row.name,
           profileImageUrl: row.profile_image_url,
-          hasNewNotification: row.hasNewNotification,
-          hasNewInvitation: row.hasNewInvitation,
+          newNotificationCount: Number(row.new_notification_count || 0),
+          newInvitationCount: Number(row.new_invitation_count || 0),
         }
       : null;
   }

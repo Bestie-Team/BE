@@ -49,9 +49,13 @@ export class GroupsPrismaRepository implements GroupsRepository {
           qb
             .selectFrom('group_participation as gp')
             .innerJoin('group as g', 'g.id', 'gp.group_id')
+            // 이거 없으면 owner가 탈퇴한 그룹도 나옴.
+            // TODO 탈퇴시키고 테스트 작성
+            .innerJoin('active_user as ou', 'g.owner_id', 'ou.id')
             .select('gp.group_id as id')
             .where('gp.participant_id', '=', userId)
             .where('gp.created_at', '<', new Date(cursor))
+            .groupBy(['gp.group_id', 'gp.created_at', 'g.name'])
             .orderBy('gp.created_at', 'desc')
             .orderBy('g.name', 'asc')
             .limit(limit),
@@ -87,7 +91,6 @@ export class GroupsPrismaRepository implements GroupsRepository {
         row.member_id &&
         row.member_account_id &&
         row.member_name &&
-        row.member_profile_image_url &&
         row.member_id !== row.owner_id
       ) {
         const member = {

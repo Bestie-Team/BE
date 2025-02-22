@@ -25,10 +25,9 @@ export class GroupsPrismaRepository implements GroupsRepository {
     const { cursor, limit } = paginationInput;
     const rows = await this.txHost.tx.$kysely
       .selectFrom('group as g')
-      // NOTE 그룹 참여는 hard delete 중이지만 active_user 미리 넣어줌.
       .innerJoin('group_participation as gp', 'g.id', 'gp.group_id')
-      .innerJoin('active_user as mu', 'gp.participant_id', 'mu.id')
       .innerJoin('active_user as ou', 'g.owner_id', 'ou.id')
+      .leftJoin('active_user as mu', 'gp.participant_id', 'mu.id')
       .select([
         'g.id as group_id',
         'g.name as group_name',
@@ -84,7 +83,13 @@ export class GroupsPrismaRepository implements GroupsRepository {
       }
 
       // 그룹장은 멤버로 집계 X
-      if (row.member_id !== row.owner_id) {
+      if (
+        row.member_id &&
+        row.member_account_id &&
+        row.member_name &&
+        row.member_profile_image_url &&
+        row.member_id !== row.owner_id
+      ) {
         const member = {
           id: row.member_id,
           accountId: row.member_account_id,

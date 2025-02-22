@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -7,14 +7,12 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { ValidateReportTypePipe } from 'src/common/pipes/validate-report-type.pipe';
 import { FeedCommentReportsWriteService } from 'src/domain/services/report/feed-comment-reports-write.service';
 import { FeedReportsWriteService } from 'src/domain/services/report/feed-reports-write.service';
 import { FriendReportsWriteSerivce } from 'src/domain/services/report/friend-reports-write.service';
 import { GroupReportsWriteService } from 'src/domain/services/report/group-reports.write.service';
 import { ReportPrototype } from 'src/domain/types/report.types';
 import { CreateReportRequest } from 'src/presentation/dto/report/request/create-report.request';
-import { ReportTypes } from 'src/shared/types';
 
 @ApiTags('/reports')
 @ApiBearerAuth()

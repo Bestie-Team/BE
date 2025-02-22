@@ -258,6 +258,14 @@ export class UsersPrismaRepository implements UsersRepository {
             AND n.read_at IS NULL
         )`.as('hasNewNotification'),
       ])
+      .select(() => [
+        sql<boolean>`EXISTS (
+          SELECT 1
+          FROM gathering_participation gp
+          WHERE gp.participant_id = ${id}
+            AND gp.read_at IS NULL
+        )`.as('hasNewInvitation'),
+      ])
       .where('u.id', '=', id)
       .executeTakeFirst();
 
@@ -268,6 +276,7 @@ export class UsersPrismaRepository implements UsersRepository {
           name: row.name,
           profileImageUrl: row.profile_image_url,
           hasNewNotification: row.hasNewNotification,
+          hasNewInvitation: row.hasNewInvitation,
         }
       : null;
   }

@@ -19,4 +19,10 @@ export class UserProfileResponse {
 
   @ApiProperty({ example: true, description: '읽지 않은 알림이 있는지 여부.' })
   readonly hasNewNotification: boolean;
+
+  @ApiProperty({
+    example: true,
+    description: '읽지 않은 초대장이 있는지 여부.',
+  })
+  readonly hasNewInvitation: boolean;
 }

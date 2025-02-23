@@ -14,10 +14,7 @@ export class FriendsReader {
     private readonly friendsRepository: FriendsRepository,
   ) {}
 
-  async getFriendsByUserId(
-    userId: string,
-    paginationInput: UserPaginationInput,
-  ) {
+  async read(userId: string, paginationInput: UserPaginationInput) {
     const users = await this.friendsRepository.findFriendsByUserId(
       userId,
       paginationInput,
@@ -45,7 +42,7 @@ export class FriendsReader {
     };
   }
 
-  async getReceivedRequestsByUserId(
+  async readReceivedRequests(
     userId: string,
     paginationInput: UserPaginationInput,
   ) {
@@ -61,10 +58,7 @@ export class FriendsReader {
     };
   }
 
-  async getSentRequestsByUserId(
-    userId: string,
-    paginationInput: UserPaginationInput,
-  ) {
+  async readSentRequests(userId: string, paginationInput: UserPaginationInput) {
     const requests = await this.friendsRepository.findSentRequestsByUserId(
       userId,
       paginationInput,

@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   ParseUUIDPipe,
   Post,
   Query,
@@ -15,7 +14,6 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -101,7 +99,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendListResponse> {
-    return await this.friendsService.getFriendsByUserId(userId, paginationDto);
+    return await this.friendsService.read(userId, paginationDto);
   }
 
   @ApiOperation({ summary: '받은 친구 요청 목록 조회' })
@@ -115,7 +113,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendRequestListResponse> {
-    return await this.friendsService.getReceivedRequestsByUserId(
+    return await this.friendsService.readReceivedRequests(
       userId,
       paginationDto,
     );
@@ -132,10 +130,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendRequestListResponse> {
-    return await this.friendsService.getSentRequestsByUserId(
-      userId,
-      paginationDto,
-    );
+    return await this.friendsService.readSentRequests(userId, paginationDto);
   }
 
   @ApiOperation({ summary: '친구 검색' })

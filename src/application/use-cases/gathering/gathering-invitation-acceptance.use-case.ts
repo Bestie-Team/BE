@@ -4,7 +4,7 @@ import { APP_NAME } from 'src/common/constant';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
-import { UsersService } from 'src/domain/components/user/users.service';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 
 @Injectable()
 export class GatheringInvitationAcceptanceUseCase {
@@ -13,7 +13,7 @@ export class GatheringInvitationAcceptanceUseCase {
   constructor(
     private readonly gatheringInvitationsWriteService: GatheringInvitationsWriter,
     private readonly gatheringsReadService: GatheringsReader,
-    private readonly usersService: UsersService,
+    private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -26,10 +26,10 @@ export class GatheringInvitationAcceptanceUseCase {
 
   async notify(gatheringId: string, inviteeId: string) {
     const gathering = await this.gatheringsReadService.readOne(gatheringId);
-    const hostUser = await this.usersService.readOne(gathering.hostUserId);
+    const hostUser = await this.usersReader.readOne(gathering.hostUserId);
 
     if (hostUser.notificationToken && hostUser.serviceNotificationConsent) {
-      const invitee = await this.usersService.readOne(inviteeId);
+      const invitee = await this.usersReader.readOne(inviteeId);
       const message = `${invitee.name}님이 약속 초대를 수락했어요!`;
 
       this.notificationsService

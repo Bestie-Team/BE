@@ -7,8 +7,8 @@ import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gath
 import { GatheringsWriter } from 'src/domain/components/gathering/gatherings-writer';
 import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
-import { UsersService } from 'src/domain/components/user/users.service';
 import { GatheringPrototype } from 'src/domain/types/gathering.types';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 
 @Injectable()
 export class GatheringCreationUseCase {
@@ -18,7 +18,7 @@ export class GatheringCreationUseCase {
     private readonly gatheringsWriteService: GatheringsWriter,
     private readonly gatheringParticipationsWriteService: GatheringInvitationsWriter,
     private readonly groupsService: GroupsReader,
-    private readonly usersService: UsersService,
+    private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -86,8 +86,8 @@ export class GatheringCreationUseCase {
   }
 
   private async notify(senderId: string, receiverIds: string[]) {
-    const sender = await this.usersService.readOne(senderId);
-    const receivers = await this.usersService.readMulti(receiverIds);
+    const sender = await this.usersReader.readOne(senderId);
+    const receivers = await this.usersReader.readMulti(receiverIds);
 
     const notificationPromises = receivers.map(async (receiver) => {
       if (receiver.notificationToken && receiver.serviceNotificationConsent) {

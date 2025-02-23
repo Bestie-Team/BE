@@ -3,7 +3,7 @@ import { APP_NAME } from 'src/common/constant';
 import { FeedCommentsService } from 'src/domain/components/feed-comment/feed-comments.service';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
-import { UsersService } from 'src/domain/components/user/users.service';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 import { FeedCommentPrototype } from 'src/domain/types/feed-comment.types';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class FeedCommentCreationUseCase {
   constructor(
     private readonly feedCommentsService: FeedCommentsService,
     private readonly feedsReadService: FeedsReader,
-    private readonly usersService: UsersService,
+    private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -31,10 +31,10 @@ export class FeedCommentCreationUseCase {
       return;
     }
 
-    const feedWriter = await this.usersService.readOne(feed.writerId);
+    const feedWriter = await this.usersReader.readOne(feed.writerId);
 
     if (feedWriter.notificationToken && feedWriter.serviceNotificationConsent) {
-      const commentWriter = await this.usersService.readOne(writerId);
+      const commentWriter = await this.usersReader.readOne(writerId);
 
       this.notificationsService
         .createV2({

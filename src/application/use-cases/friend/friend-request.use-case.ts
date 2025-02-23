@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
 import { FriendsWriter } from 'src/domain/components/friend/friends-writer';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
-import { UsersService } from 'src/domain/components/user/users.service';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 import { FriendPrototype } from 'src/domain/types/friend.types';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class FriendRequestUseCase {
   constructor(
     private readonly friendWriteService: FriendsWriter,
     private readonly notificationService: NotificationsService,
-    private readonly usersService: UsersService,
+    private readonly usersReader: UsersReader,
   ) {}
 
   async execute(input: FriendPrototype) {
@@ -25,10 +25,10 @@ export class FriendRequestUseCase {
   }
 
   async notify(senderId: string, receiverId: string) {
-    const receiver = await this.usersService.readOne(receiverId);
+    const receiver = await this.usersReader.readOne(receiverId);
 
     if (receiver.notificationToken && receiver.serviceNotificationConsent) {
-      const sender = await this.usersService.readOne(senderId);
+      const sender = await this.usersReader.readOne(senderId);
       const message = `${sender.name}님이 친구 요청을 보냈어요!`;
 
       this.notificationService

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
 import { GroupsWriter } from 'src/domain/components/group/groups-writer';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
-import { UsersService } from 'src/domain/components/user/users.service';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 import { GroupPrototype } from 'src/domain/types/group.types';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class GroupCreationUseCase {
 
   constructor(
     private readonly groupsWriteService: GroupsWriter,
-    private readonly usersService: UsersService,
+    private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -30,8 +30,8 @@ export class GroupCreationUseCase {
     senderId: string,
     inviteeIds: string[],
   ) {
-    const sender = await this.usersService.readOne(senderId);
-    const invitees = await this.usersService.readMulti(inviteeIds);
+    const sender = await this.usersReader.readOne(senderId);
+    const invitees = await this.usersReader.readMulti(inviteeIds);
 
     const notificationPromises = invitees.map(async (invitee) => {
       if (invitee.notificationToken && invitee.serviceNotificationConsent) {

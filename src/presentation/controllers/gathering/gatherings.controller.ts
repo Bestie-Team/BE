@@ -30,9 +30,9 @@ import { ApiFileOperation } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GatheringInvitationsReader } from 'src/domain/services/gathering/gathering-invitations-reader';
-import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
-import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
-import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
+import { GatheringInvitationsWriter } from 'src/domain/services/gathering/gathering-invitations-writer';
+import { GatheringsReader } from 'src/domain/services/gathering/gatherings-reader';
+import { GatheringsWriter } from 'src/domain/services/gathering/gatherings-writer';
 import { gatheringInvitationConverter } from 'src/presentation/converters/gathering/gathering-invitation.converters';
 import { gatheringConverter } from 'src/presentation/converters/gathering/gathering.converters';
 import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
@@ -56,9 +56,9 @@ import { SentGatheringInvitationListResponse } from 'src/presentation/dto/gather
 @Controller('gatherings')
 export class GatheringsController {
   constructor(
-    private readonly gatheringsWriteService: GatheringsWriteService,
-    private readonly gatheringsReadService: GatheringsReadService,
-    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriteService,
+    private readonly gatheringsWriteService: GatheringsWriter,
+    private readonly gatheringsReadService: GatheringsReader,
+    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriter,
     private readonly gatheringInvitationsReadService: GatheringInvitationsReader,
     private readonly gatheringCreationUseCase: GatheringCreationUseCase,
     private readonly gatheringInvitationAcceptanceUseCase: GatheringInvitationAcceptanceUseCase,

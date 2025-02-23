@@ -21,7 +21,7 @@ import { GatheringParticipationsRepository } from 'src/domain/interface/gatherin
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 
 @Injectable()
-export class GatheringsWriteService {
+export class GatheringsWriter {
   constructor(
     @Inject(GatheringsRepository)
     private readonly gatheringsRepository: GatheringsRepository,

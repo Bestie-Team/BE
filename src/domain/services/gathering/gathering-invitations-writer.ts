@@ -5,7 +5,7 @@ import { GatheringParticipationsRepository } from 'src/domain/interface/gatherin
 import { FORBIDDEN_MESSAGE } from 'src/domain/error/messages';
 
 @Injectable()
-export class GatheringInvitationsWriteService {
+export class GatheringInvitationsWriter {
   constructor(
     @Inject(GatheringParticipationsRepository)
     private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,

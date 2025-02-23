@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InvitationAcceptanceInput } from 'src/application/types/gathering.types';
 import { APP_NAME } from 'src/common/constant';
-import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
-import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
+import { GatheringInvitationsWriter } from 'src/domain/services/gathering/gathering-invitations-writer';
+import { GatheringsReader } from 'src/domain/services/gathering/gatherings-reader';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
 import { UsersService } from 'src/domain/services/user/users.service';
 
@@ -11,8 +11,8 @@ export class GatheringInvitationAcceptanceUseCase {
   private readonly logger = new Logger('GatheringInvitationAcceptanceUseCase');
 
   constructor(
-    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriteService,
-    private readonly gatheringsReadService: GatheringsReadService,
+    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriter,
+    private readonly gatheringsReadService: GatheringsReader,
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
   ) {}

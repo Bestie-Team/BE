@@ -3,8 +3,8 @@ import { GatheringCreationUseCase } from 'src/application/use-cases/gathering/ga
 import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance.use-case';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { GatheringInvitationsReader } from 'src/domain/services/gathering/gathering-invitations-reader';
-import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
-import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
+import { GatheringsReader } from 'src/domain/services/gathering/gatherings-reader';
+import { GatheringsWriter } from 'src/domain/services/gathering/gatherings-writer';
 import { GatheringsPrismaRepository } from 'src/infrastructure/repositories/gathering/gatherings-prisma.repository';
 import { FriendsModule } from 'src/modules/friend/friends.module';
 import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
@@ -25,13 +25,13 @@ import { GatheringsController } from 'src/presentation/controllers/gathering/gat
   providers: [
     GatheringCreationUseCase,
     GatheringInvitationAcceptanceUseCase,
-    GatheringsWriteService,
-    GatheringsReadService,
+    GatheringsWriter,
+    GatheringsReader,
     GatheringInvitationsReader,
     { provide: GatheringsRepository, useClass: GatheringsPrismaRepository },
   ],
   exports: [
-    GatheringsWriteService,
+    GatheringsWriter,
     { provide: GatheringsRepository, useClass: GatheringsPrismaRepository },
   ],
 })

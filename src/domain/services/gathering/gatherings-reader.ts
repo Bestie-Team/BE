@@ -10,7 +10,7 @@ import {
 import { EndedGathering, Gathering } from 'src/domain/types/gathering.types';
 
 @Injectable()
-export class GatheringsReadService {
+export class GatheringsReader {
   constructor(
     @Inject(GatheringsRepository)
     private readonly gatheringsRepository: GatheringsRepository,

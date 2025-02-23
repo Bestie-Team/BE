@@ -3,8 +3,8 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
-import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
-import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
+import { GatheringInvitationsWriter } from 'src/domain/services/gathering/gathering-invitations-writer';
+import { GatheringsWriter } from 'src/domain/services/gathering/gatherings-writer';
 import { GroupsService } from 'src/domain/services/group/groups.service';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
 import { UsersService } from 'src/domain/services/user/users.service';
@@ -15,8 +15,8 @@ export class GatheringCreationUseCase {
   private readonly logger = new Logger('GatheringCreationUseCase');
 
   constructor(
-    private readonly gatheringsWriteService: GatheringsWriteService,
-    private readonly gatheringParticipationsWriteService: GatheringInvitationsWriteService,
+    private readonly gatheringsWriteService: GatheringsWriter,
+    private readonly gatheringParticipationsWriteService: GatheringInvitationsWriter,
     private readonly groupsService: GroupsService,
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,

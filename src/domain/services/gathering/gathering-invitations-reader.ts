@@ -6,7 +6,7 @@ import {
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 import { PaginatedDateRangeInput } from 'src/shared/types';
 
-export class GatheringInvitationsReadService {
+export class GatheringInvitationsReader {
   constructor(
     @Inject(GatheringParticipationsRepository)
     private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,

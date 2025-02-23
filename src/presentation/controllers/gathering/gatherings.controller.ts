@@ -29,7 +29,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { ApiFileOperation } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
+import { GatheringInvitationsReader } from 'src/domain/services/gathering/gathering-invitations-reader';
 import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
 import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
 import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
@@ -59,7 +59,7 @@ export class GatheringsController {
     private readonly gatheringsWriteService: GatheringsWriteService,
     private readonly gatheringsReadService: GatheringsReadService,
     private readonly gatheringInvitationsWriteService: GatheringInvitationsWriteService,
-    private readonly gatheringInvitationsReadService: GatheringInvitationsReadService,
+    private readonly gatheringInvitationsReadService: GatheringInvitationsReader,
     private readonly gatheringCreationUseCase: GatheringCreationUseCase,
     private readonly gatheringInvitationAcceptanceUseCase: GatheringInvitationAcceptanceUseCase,
   ) {}

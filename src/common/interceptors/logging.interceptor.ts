@@ -16,15 +16,19 @@ export class LoggingInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<any> | Promise<Observable<any>> {
+    const startTime = Date.now();
     const ctx = context.switchToHttp();
     const req = ctx.getRequest<Request>();
     const message = this.generateMessage(req);
 
-    return next
-      .handle()
-      .pipe(
-        tap(() => process.env.NODE_ENV !== 'test' && this.logger.log(message)),
-      );
+    return next.handle().pipe(
+      tap(() => {
+        const duration = Date.now() - startTime;
+        if (process.env.NODE_ENV !== 'test') {
+          this.logger.log(`${message} \nduration: ${duration}ms`);
+        }
+      }),
+    );
   }
 
   private generateMessage(req: Request) {

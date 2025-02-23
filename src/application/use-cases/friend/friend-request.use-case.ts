@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
-import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
+import { FriendsWriter } from 'src/domain/services/friend/friends-writer';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
 import { UsersService } from 'src/domain/services/user/users.service';
 import { FriendPrototype } from 'src/domain/types/friend.types';
@@ -10,7 +10,7 @@ export class FriendRequestUseCase {
   private readonly logger = new Logger('FriendRequestUseCase');
 
   constructor(
-    private readonly friendWriteService: FriendWriteService,
+    private readonly friendWriteService: FriendsWriter,
     private readonly notificationService: NotificationsService,
     private readonly usersService: UsersService,
   ) {}

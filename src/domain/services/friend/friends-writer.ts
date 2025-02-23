@@ -22,7 +22,7 @@ import { FriendPrototype } from 'src/domain/types/friend.types';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 
 @Injectable()
-export class FriendWriteService {
+export class FriendsWriter {
   constructor(
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,

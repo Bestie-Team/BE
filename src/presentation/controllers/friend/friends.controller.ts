@@ -28,7 +28,7 @@ import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 import { SearchFriendRequest } from 'src/presentation/dto/friend/request/search-friend.request';
 import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
-import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
+import { FriendsWriter } from 'src/domain/services/friend/friends-writer';
 import { FriendRequestUseCase } from 'src/application/use-cases/friend/friend-request.use-case';
 import { FriendAcceptanceUseCase } from 'src/application/use-cases/friend/friend-acceptance.use-case';
 import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';
@@ -41,7 +41,7 @@ import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-f
 export class FriendsController {
   constructor(
     private readonly friendsService: FriendsService,
-    private readonly friendWriteService: FriendWriteService,
+    private readonly friendWriteService: FriendsWriter,
     private readonly friendRequestUseCase: FriendRequestUseCase,
     private readonly friendAcceptanceUseCase: FriendAcceptanceUseCase,
   ) {}

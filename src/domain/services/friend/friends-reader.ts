@@ -6,15 +6,12 @@ import {
   getUserCursor,
 } from 'src/domain/helpers/get-cursor';
 import { SearchInput } from 'src/domain/types/user.types';
-import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 
 @Injectable()
-export class FriendsService {
+export class FriendsReader {
   constructor(
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,
-    @Inject(GatheringParticipationsRepository)
-    private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
   ) {}
 
   async getFriendsByUserId(

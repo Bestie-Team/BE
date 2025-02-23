@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { FriendsService } from 'src/domain/services/friend/friends.service';
+import { FriendsReader } from 'src/domain/services/friend/friends-reader';
 import { CreateFriendRequest } from 'src/presentation/dto/friend/request/create-friend.request';
 import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-list.response';
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
@@ -40,7 +40,7 @@ import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-f
 @Controller('friends')
 export class FriendsController {
   constructor(
-    private readonly friendsService: FriendsService,
+    private readonly friendsService: FriendsReader,
     private readonly friendWriteService: FriendsWriter,
     private readonly friendRequestUseCase: FriendRequestUseCase,
     private readonly friendAcceptanceUseCase: FriendAcceptanceUseCase,

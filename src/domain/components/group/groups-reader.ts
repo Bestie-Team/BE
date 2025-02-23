@@ -26,9 +26,9 @@ export class GroupsReader {
     };
   }
 
-  async getParticipantsById(id: string) {
+  async readParticipants(groupId: string) {
     const participations =
-      await this.groupParticipationsRepository.findMembersByGroupId(id);
+      await this.groupParticipationsRepository.findMembersByGroupId(groupId);
     return participations.map((participation) => participation.participantId);
   }
 }

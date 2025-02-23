@@ -29,7 +29,7 @@ export class GatheringCreationUseCase {
     let inviteeIds: string[] = [];
 
     if (groupId) {
-      inviteeIds = await this.groupsService.getParticipantsById(groupId);
+      inviteeIds = await this.groupsService.readParticipants(groupId);
     }
     if (friendUserIds) {
       inviteeIds = [...friendUserIds, hostUserId];

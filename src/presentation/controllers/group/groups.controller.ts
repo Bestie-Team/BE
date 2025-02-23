@@ -107,10 +107,7 @@ export class GroupsController {
     @Query() paginationDto: PaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<GroupListResponse> {
-    const domain = await this.groupsService.read(
-      userId,
-      paginationDto,
-    );
+    const domain = await this.groupsService.read(userId, paginationDto);
     return toListDto(domain);
   }
 

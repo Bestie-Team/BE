@@ -28,7 +28,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { BlockedFeedsService } from 'src/domain/services/feed/blocked-feeds.service';
 import { FeedsReader } from 'src/domain/services/feed/feeds-reader';
-import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
+import { FeedsWriter } from 'src/domain/services/feed/feeds-writer';
 import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
 import { BlockedFeedListRequest } from 'src/presentation/dto/feed/request/blocked-feed-list.request';
 import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
@@ -46,7 +46,7 @@ import { UploadImageListResponse } from 'src/presentation/dto/file/response/uplo
 @Controller('feeds')
 export class FeedsController {
   constructor(
-    private readonly feedsWriteService: FeedsWriteService,
+    private readonly feedsWriteService: FeedsWriter,
     private readonly feedsReadService: FeedsReader,
     private readonly blockedFeedsService: BlockedFeedsService,
   ) {}

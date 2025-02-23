@@ -30,7 +30,7 @@ import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/frie
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 
 @Injectable()
-export class FeedsWriteService {
+export class FeedsWriter {
   constructor(
     @Inject(FeedsRepository)
     private readonly feedsRepository: FeedsRepository,

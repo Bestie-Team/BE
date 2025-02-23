@@ -4,7 +4,7 @@ import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
 import { BlockedFeedsService } from 'src/domain/services/feed/blocked-feeds.service';
 import { FeedsReader } from 'src/domain/services/feed/feeds-reader';
-import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
+import { FeedsWriter } from 'src/domain/services/feed/feeds-writer';
 import { BlockedFeedsPrismaRepository } from 'src/infrastructure/repositories/feed/blocked-feeds-prisma.repository';
 import { FeedsPrismaRepository } from 'src/infrastructure/repositories/feed/feeds-prisma.repository';
 import { FriendFeedVisibilitiesPrismaRepository } from 'src/infrastructure/repositories/feed/friend-feed-visibilities-prisma.repository';
@@ -16,7 +16,7 @@ import { FeedsController } from 'src/presentation/controllers/feed/feeds.control
   imports: [FriendsModule, GatheringsModule],
   controllers: [FeedsController],
   providers: [
-    FeedsWriteService,
+    FeedsWriter,
     FeedsReader,
     BlockedFeedsService,
     { provide: FeedsRepository, useClass: FeedsPrismaRepository },

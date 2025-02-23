@@ -7,7 +7,7 @@ import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
 import { User } from 'src/domain/types/user.types';
 
 @Injectable()
-export class FeedsReadService {
+export class FeedsReader {
   constructor(
     @Inject(FeedsRepository)
     private readonly feedsRepository: FeedsRepository,

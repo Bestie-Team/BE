@@ -49,7 +49,7 @@ export class GroupsPrismaRepository implements GroupsRepository {
           qb
             .selectFrom('group_participation as gp')
             .innerJoin('group as g', 'g.id', 'gp.group_id')
-            // 이거 없으면 owner가 탈퇴한 그룹도 나옴.
+            // 탈퇴한 회원이 owner인 그룹이 여기서는 나오는데 밖에서 걸러지면서 개수 다르게 나왔음.
             // TODO 탈퇴시키고 테스트 작성
             .innerJoin('active_user as ou', 'g.owner_id', 'ou.id')
             .select('gp.group_id as id')

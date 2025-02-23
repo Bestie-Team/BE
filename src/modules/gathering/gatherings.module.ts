@@ -12,6 +12,7 @@ import { GroupsModule } from 'src/modules/group/groups.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { UsersModule } from 'src/modules/user/users.module';
 import { GatheringsController } from 'src/presentation/controllers/gathering/gatherings.controller';
+import { GatheringsService } from 'src/domain/services/gatherings/gatherings.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { GatheringsController } from 'src/presentation/controllers/gathering/gat
   providers: [
     GatheringCreationUseCase,
     GatheringInvitationAcceptanceUseCase,
+    GatheringsService,
     GatheringsWriter,
     GatheringsReader,
     GatheringInvitationsReader,

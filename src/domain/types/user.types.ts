@@ -46,6 +46,7 @@ export interface Profile {
   readonly profileImageUrl: string | null;
   readonly newNotificationCount: number;
   readonly newInvitationCount: number;
+  readonly hasFeed: boolean;
 }
 
 export interface SearchInput {

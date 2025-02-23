@@ -271,6 +271,13 @@ export class UsersPrismaRepository implements UsersRepository {
           .select(({ fn }) => fn.countAll().as('new_notification_count'))
           .as('new_notification_count'),
       )
+      .select(() =>
+        sql<boolean>`EXISTS (
+          SELECT 1
+          FROM active_feed as f
+          WHERE f.writer_id = ${id}
+        )`.as('has_feed'),
+      )
       .where('u.id', '=', id)
       .executeTakeFirst();
 
@@ -282,6 +289,7 @@ export class UsersPrismaRepository implements UsersRepository {
           profileImageUrl: row.profile_image_url,
           newNotificationCount: Number(row.new_notification_count || 0),
           newInvitationCount: Number(row.new_invitation_count || 0),
+          hasFeed: row.has_feed,
         }
       : null;
   }

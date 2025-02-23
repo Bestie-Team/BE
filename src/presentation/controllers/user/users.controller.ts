@@ -109,7 +109,7 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: '회원 프로필 조회 (로그인 시 응답하는 회원 정보와 동일)',
+    summary: '회원 프로필 (홈 화면에서 매번 호출하는 정보)',
   })
   @ApiResponse({
     status: 200,

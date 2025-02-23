@@ -25,4 +25,10 @@ export class UserProfileResponse {
     description: '읽지 않은 초대장 수.',
   })
   readonly newInvitationCount: number;
+
+  @ApiProperty({
+    example: true,
+    description: '작성한 피드가 하나라도 존재하지는지 여부.',
+  })
+  readonly hasFeed: boolean;
 }

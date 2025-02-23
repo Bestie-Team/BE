@@ -220,7 +220,7 @@ export class GatheringsController {
     @CurrentUser() userId: string,
   ): Promise<ReceivedGatheringInvitationListResponse> {
     const domain =
-      await this.gatheringInvitationsReadService.getReceivedInvitations(
+      await this.gatheringInvitationsReadService.readReceived(
         userId,
         dto,
       );
@@ -239,7 +239,7 @@ export class GatheringsController {
     @CurrentUser() userId: string,
   ): Promise<SentGatheringInvitationListResponse> {
     const domain =
-      await this.gatheringInvitationsReadService.getSentInvitations(
+      await this.gatheringInvitationsReadService.readSent(
         userId,
         dto,
       );

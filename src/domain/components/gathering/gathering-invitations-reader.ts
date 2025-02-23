@@ -12,7 +12,7 @@ export class GatheringInvitationsReader {
     private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
   ) {}
 
-  async getReceivedInvitations(
+  async readReceived(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ) {
@@ -32,7 +32,7 @@ export class GatheringInvitationsReader {
     };
   }
 
-  async getSentInvitations(
+  async readSent(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ) {

@@ -119,7 +119,7 @@ export class GatheringsController {
     @Query() dto: NoFeedGatheringListRequest,
     @CurrentUser() userId: string,
   ) {
-    const domain = await this.gatheringsReadService.getGatheringsWithoutFeed(
+    const domain = await this.gatheringsReadService.readUnwrittenFeed(
       userId,
       dto,
     );
@@ -137,7 +137,7 @@ export class GatheringsController {
     @Query() dto: GatheringListRequest,
     @CurrentUser() userId: string,
   ): Promise<EndedGatheringsListResponse> {
-    const domain = await this.gatheringsReadService.getEndedGatherings(
+    const domain = await this.gatheringsReadService.readEnded(
       userId,
       dto,
     );
@@ -155,7 +155,7 @@ export class GatheringsController {
     @Query() dto: GatheringListRequest,
     @CurrentUser() userId: string,
   ): Promise<GatheringListResponse> {
-    const domain = await this.gatheringsReadService.getWaitingGatherings(
+    const domain = await this.gatheringsReadService.read(
       userId,
       dto,
     );
@@ -172,7 +172,7 @@ export class GatheringsController {
   async getDetail(
     @Param('gatheringId', ParseUUIDPipe) gatheringId: string,
   ): Promise<GatheringDetailResponse> {
-    const domain = await this.gatheringsReadService.getDetail(gatheringId);
+    const domain = await this.gatheringsReadService.readDetail(gatheringId);
     return gatheringConverter.toDto(domain);
   }
 

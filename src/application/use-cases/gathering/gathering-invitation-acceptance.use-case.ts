@@ -25,7 +25,7 @@ export class GatheringInvitationAcceptanceUseCase {
   }
 
   async notify(gatheringId: string, inviteeId: string) {
-    const gathering = await this.gatheringsReadService.getByIdOrThrow(
+    const gathering = await this.gatheringsReadService.readOne(
       gatheringId,
     );
     const hostUser = await this.usersService.getUserByIdOrThrow(

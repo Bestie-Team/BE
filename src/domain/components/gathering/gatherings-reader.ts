@@ -16,7 +16,7 @@ export class GatheringsReader {
     private readonly gatheringsRepository: GatheringsRepository,
   ) {}
 
-  async getGatheringsWithoutFeed(
+  async readUnwrittenFeed(
     userId: string,
     paginationInput: DateIdPaginationInput,
   ) {
@@ -33,7 +33,7 @@ export class GatheringsReader {
     };
   }
 
-  async getWaitingGatherings(
+  async read(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<{
@@ -55,7 +55,7 @@ export class GatheringsReader {
     };
   }
 
-  async getEndedGatherings(
+  async readEnded(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<{
@@ -104,7 +104,7 @@ export class GatheringsReader {
     };
   }
 
-  async getDetail(gatheringId: string) {
+  async readDetail(gatheringId: string) {
     const gathering = await this.gatheringsRepository.findDetailById(
       gatheringId,
     );
@@ -114,7 +114,7 @@ export class GatheringsReader {
     return gathering;
   }
 
-  async getByIdOrThrow(id: string) {
+  async readOne(id: string) {
     const gathering = await this.gatheringsRepository.findOneById(id);
 
     if (!gathering) {

@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
-import { FriendsWriter } from 'src/domain/services/friend/friends-writer';
-import { NotificationsService } from 'src/domain/services/notification/notifications.service';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { FriendsWriter } from 'src/domain/components/friend/friends-writer';
+import { NotificationsService } from 'src/domain/components/notification/notifications.service';
+import { UsersService } from 'src/domain/components/user/users.service';
 import { FriendPrototype } from 'src/domain/types/friend.types';
 
 @Injectable()

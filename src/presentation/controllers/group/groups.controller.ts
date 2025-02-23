@@ -32,8 +32,8 @@ import {
 } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { GroupsWriter } from 'src/domain/services/group/groups-writer';
-import { GroupsReader } from 'src/domain/services/group/groups-reader';
+import { GroupsWriter } from 'src/domain/components/group/groups-writer';
+import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { toListDto } from 'src/presentation/converters/group/group.converters';
 import { AddGroupMemberRequest, PaginationRequest } from 'src/presentation/dto';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';

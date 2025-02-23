@@ -22,13 +22,13 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { FriendsReader } from 'src/domain/services/friend/friends-reader';
+import { FriendsReader } from 'src/domain/components/friend/friends-reader';
 import { CreateFriendRequest } from 'src/presentation/dto/friend/request/create-friend.request';
 import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-list.response';
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 import { SearchFriendRequest } from 'src/presentation/dto/friend/request/search-friend.request';
 import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
-import { FriendsWriter } from 'src/domain/services/friend/friends-writer';
+import { FriendsWriter } from 'src/domain/components/friend/friends-writer';
 import { FriendRequestUseCase } from 'src/application/use-cases/friend/friend-request.use-case';
 import { FriendAcceptanceUseCase } from 'src/application/use-cases/friend/friend-acceptance.use-case';
 import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';

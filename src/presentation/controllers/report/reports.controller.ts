@@ -7,10 +7,10 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { FeedCommentReportsWriteService } from 'src/domain/services/report/feed-comment-reports-write.service';
-import { FeedReportsWriteService } from 'src/domain/services/report/feed-reports-write.service';
-import { FriendReportsWriteSerivce } from 'src/domain/services/report/friend-reports-write.service';
-import { GroupReportsWriteService } from 'src/domain/services/report/group-reports.write.service';
+import { FeedCommentReportsWriteService } from 'src/domain/components/report/feed-comment-reports-write.service';
+import { FeedReportsWriteService } from 'src/domain/components/report/feed-reports-write.service';
+import { FriendReportsWriteSerivce } from 'src/domain/components/report/friend-reports-write.service';
+import { GroupReportsWriteService } from 'src/domain/components/report/group-reports.write.service';
 import { ReportPrototype } from 'src/domain/types/report.types';
 import { CreateReportRequest } from 'src/presentation/dto/report/request/create-report.request';
 

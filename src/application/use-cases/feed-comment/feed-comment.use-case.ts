@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
-import { FeedCommentsService } from 'src/domain/services/feed-comment/feed-comments.service';
-import { FeedsReader } from 'src/domain/services/feed/feeds-reader';
-import { NotificationsService } from 'src/domain/services/notification/notifications.service';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { FeedCommentsService } from 'src/domain/components/feed-comment/feed-comments.service';
+import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
+import { NotificationsService } from 'src/domain/components/notification/notifications.service';
+import { UsersService } from 'src/domain/components/user/users.service';
 import { FeedCommentPrototype } from 'src/domain/types/feed-comment.types';
 
 @Injectable()

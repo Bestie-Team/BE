@@ -7,7 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ValidateProviderPipe } from 'src/common/pipes/validate-provider.pipe';
-import { AuthService } from 'src/domain/services/auth/auth.service';
+import { AuthService } from 'src/domain/components/auth/auth.service';
 import { LoginRequest } from 'src/presentation/dto/auth/request/login.request';
 import { LoginResponse } from 'src/presentation/dto/auth/response/login.response';
 import { RegisterRequest } from 'src/presentation/dto/auth/request/register.request';

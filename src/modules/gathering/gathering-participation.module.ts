@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
-import { GatheringInvitationsWriter } from 'src/domain/services/gathering/gathering-invitations-writer';
+import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { GatheringParticipationsPrismaRepository } from 'src/infrastructure/repositories/gathering/gathering-participations-prisma.repository';
 
 @Module({

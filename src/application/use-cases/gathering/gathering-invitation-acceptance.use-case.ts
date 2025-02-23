@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InvitationAcceptanceInput } from 'src/application/types/gathering.types';
 import { APP_NAME } from 'src/common/constant';
-import { GatheringInvitationsWriter } from 'src/domain/services/gathering/gathering-invitations-writer';
-import { GatheringsReader } from 'src/domain/services/gathering/gatherings-reader';
-import { NotificationsService } from 'src/domain/services/notification/notifications.service';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
+import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
+import { NotificationsService } from 'src/domain/components/notification/notifications.service';
+import { UsersService } from 'src/domain/components/user/users.service';
 
 @Injectable()
 export class GatheringInvitationAcceptanceUseCase {

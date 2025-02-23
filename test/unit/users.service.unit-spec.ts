@@ -4,7 +4,7 @@ import { ClsModule } from 'nestjs-cls';
 import { clsOptions } from 'src/configs/cls/cls-options';
 import { ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE } from 'src/domain/error/messages';
 import { UsersRepository } from 'src/domain/interface/users.repository';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { UsersService } from 'src/domain/components/user/users.service';
 import { PrismaModule } from 'src/infrastructure/prisma/prisma.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { UsersPrismaRepository } from 'src/infrastructure/repositories/users-prisma.repository';

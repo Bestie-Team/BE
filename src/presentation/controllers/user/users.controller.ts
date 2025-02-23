@@ -25,7 +25,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { ApiFileOperation } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateProfileImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { UsersService } from 'src/domain/components/user/users.service';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { SearchUserRequest } from 'src/presentation/dto/user/request/search-user.request';
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';

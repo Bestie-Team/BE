@@ -15,7 +15,7 @@ export class FeedsReader {
     private readonly friendFeedVisibilitiesRepository: FriendFeedVisibilitiesRepository,
   ) {}
 
-  async getByIdOrThrow(id: string) {
+  async readOne(id: string) {
     const feed = await this.feedsRepository.findOneById(id);
     if (!feed) {
       throw new NotFoundException(NOT_FOUND_FEED_MESSAGE);
@@ -24,15 +24,15 @@ export class FeedsReader {
     return feed;
   }
 
-  async getAllFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
+  async readAll(userId: string, feedPaginationInput: FeedPaginationInput) {
     return await this.getFeeds(userId, feedPaginationInput, 'ALL');
   }
 
-  async getMyFeeds(userId: string, feedPaginationInput: FeedPaginationInput) {
+  async readOwn(userId: string, feedPaginationInput: FeedPaginationInput) {
     return await this.getFeeds(userId, feedPaginationInput, 'MY');
   }
 
-  async getCommonFeedWithMember(
+  private async getCommonFeedWithMember(
     feeds: Feed[],
   ): Promise<{ [feedId: string]: User[] }> {
     const commonFeeds = feeds.filter((feed) => !feed.gathering);

@@ -25,7 +25,7 @@ export class FeedCommentCreationUseCase {
   }
 
   async notify(feedId: string, writerId: string) {
-    const feed = await this.feedsReadService.getByIdOrThrow(feedId);
+    const feed = await this.feedsReadService.readOne(feedId);
 
     if (feed.writerId === writerId) {
       return;

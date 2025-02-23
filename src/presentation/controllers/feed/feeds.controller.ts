@@ -147,7 +147,7 @@ export class FeedsController {
     @Query() dto: FeedListRequest,
     @CurrentUser() userId: string,
   ): Promise<FeedListResponse> {
-    const domain = await this.feedsReadService.getAllFeeds(userId, dto);
+    const domain = await this.feedsReadService.readAll(userId, dto);
     return feedConverter.toListDto(domain);
   }
 
@@ -161,7 +161,7 @@ export class FeedsController {
     @Query() dto: FeedListRequest,
     @CurrentUser() userId: string,
   ): Promise<FeedListResponse> {
-    const domain = await this.feedsReadService.getMyFeeds(userId, dto);
+    const domain = await this.feedsReadService.readOwn(userId, dto);
     return feedConverter.toListDto(domain);
   }
 

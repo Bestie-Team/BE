@@ -32,8 +32,8 @@ import {
 } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { GroupsWriteService } from 'src/domain/services/group/groups-write.service';
-import { GroupsService } from 'src/domain/services/group/groups.service';
+import { GroupsWriter } from 'src/domain/services/group/groups-writer';
+import { GroupsReader } from 'src/domain/services/group/groups-reader';
 import { toListDto } from 'src/presentation/converters/group/group.converters';
 import { AddGroupMemberRequest, PaginationRequest } from 'src/presentation/dto';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
@@ -49,8 +49,8 @@ import { GroupListResponse } from 'src/presentation/dto/group/response/group-lis
 @Controller('groups')
 export class GroupsController {
   constructor(
-    private readonly groupsWriteService: GroupsWriteService,
-    private readonly groupsService: GroupsService,
+    private readonly groupsWriteService: GroupsWriter,
+    private readonly groupsService: GroupsReader,
     private readonly groupCreationUseCase: GroupCreationUseCase,
   ) {}
 

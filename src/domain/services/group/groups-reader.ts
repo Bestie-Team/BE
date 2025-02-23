@@ -5,7 +5,7 @@ import { PaginationInput } from 'src/shared/types';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 
 @Injectable()
-export class GroupsService {
+export class GroupsReader {
   constructor(
     @Inject(GroupsRepository)
     private readonly groupsRepository: GroupsRepository,

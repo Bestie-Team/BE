@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
-import { GroupsWriteService } from 'src/domain/services/group/groups-write.service';
+import { GroupsWriter } from 'src/domain/services/group/groups-writer';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
 import { UsersService } from 'src/domain/services/user/users.service';
 import { GroupPrototype } from 'src/domain/types/group.types';
@@ -10,7 +10,7 @@ export class GroupCreationUseCase {
   private readonly logger = new Logger('GroupCreationUseCase');
 
   constructor(
-    private readonly groupsWriteService: GroupsWriteService,
+    private readonly groupsWriteService: GroupsWriter,
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
   ) {}

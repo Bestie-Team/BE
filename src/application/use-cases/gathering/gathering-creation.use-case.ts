@@ -5,7 +5,7 @@ import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gath
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringInvitationsWriter } from 'src/domain/services/gathering/gathering-invitations-writer';
 import { GatheringsWriter } from 'src/domain/services/gathering/gatherings-writer';
-import { GroupsService } from 'src/domain/services/group/groups.service';
+import { GroupsReader } from 'src/domain/services/group/groups-reader';
 import { NotificationsService } from 'src/domain/services/notification/notifications.service';
 import { UsersService } from 'src/domain/services/user/users.service';
 import { GatheringPrototype } from 'src/domain/types/gathering.types';
@@ -17,7 +17,7 @@ export class GatheringCreationUseCase {
   constructor(
     private readonly gatheringsWriteService: GatheringsWriter,
     private readonly gatheringParticipationsWriteService: GatheringInvitationsWriter,
-    private readonly groupsService: GroupsService,
+    private readonly groupsService: GroupsReader,
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
   ) {}

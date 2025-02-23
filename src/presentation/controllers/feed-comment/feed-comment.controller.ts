@@ -56,7 +56,7 @@ export class FeedCommentController {
   async getComments(
     @Query('feedId', ParseUUIDPipe) feedId: string,
   ): Promise<FeedCommentResponse[]> {
-    const domain = await this.feedCommentService.getComment(feedId);
+    const domain = await this.feedCommentService.readAll(feedId);
     return FeedCommentConverter.toListDto(domain);
   }
 

@@ -26,7 +26,7 @@ export class FeedCommentsService {
     await this.feedCommentRepository.save(comment);
   }
 
-  async getComment(feedId: string) {
+  async readAll(feedId: string) {
     return await this.feedCommentRepository.findByFeedId(feedId);
   }
 

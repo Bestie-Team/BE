@@ -7,6 +7,7 @@ import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringPrototype } from 'src/domain/types/gathering.types';
+import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
 
 @Injectable()
 export class GatheringsService {
@@ -14,6 +15,7 @@ export class GatheringsService {
     private readonly gatheringsWriter: GatheringsWriter,
     private readonly gatheringsParticipationsWriter: GatheringInvitationsWriter,
     private readonly groupsReader: GroupsReader,
+    private readonly notificationsManager: NotificationsManager,
   ) {}
 
   async create(input: GatheringPrototype, friendUserIds: string[] | null) {
@@ -42,6 +44,7 @@ export class GatheringsService {
     );
 
     await this.createTransaction(gathering, participations);
+    this.notificationsManager.sendGatheringCreation(hostUserId, inviteeIds);
   }
 
   @Transactional()

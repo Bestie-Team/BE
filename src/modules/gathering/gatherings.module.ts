@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { GatheringCreationUseCase } from 'src/application/use-cases/gathering/gathering-creation.use-case';
 import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance.use-case';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
@@ -24,7 +23,6 @@ import { GatheringsService } from 'src/domain/services/gatherings/gatherings.ser
   ],
   controllers: [GatheringsController],
   providers: [
-    GatheringCreationUseCase,
     GatheringInvitationAcceptanceUseCase,
     GatheringsService,
     GatheringsWriter,

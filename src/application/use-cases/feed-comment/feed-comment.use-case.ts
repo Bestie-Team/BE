@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
-import { FeedCommentsService } from 'src/domain/components/feed-comment/feed-comments.service';
+import { FeedCommentsService } from 'src/domain/services/feed-comments/feed-comments.service';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
 import { UsersReader } from 'src/domain/components/user/users-reader';

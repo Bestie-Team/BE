@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FeedCommentCreationUseCase } from 'src/application/use-cases/feed-comment/feed-comment.use-case';
 import { FeedCommentRepository } from 'src/domain/interface/feed-comment/feed-comments.repository';
-import { FeedCommentsService } from 'src/domain/components/feed-comment/feed-comments.service';
+import { FeedCommentsService } from 'src/domain/services/feed-comments/feed-comments.service';
 import { FeedCommentPrismaRepository } from 'src/infrastructure/repositories/feed-comment/feed-comment-prisma.repository';
 import { FeedsModule } from 'src/modules/feed/feeds.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';

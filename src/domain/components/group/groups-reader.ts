@@ -13,7 +13,7 @@ export class GroupsReader {
     private readonly groupParticipationsRepository: GroupParticipationsRepository,
   ) {}
 
-  async getGroupsByUserId(userId: string, paginationInput: PaginationInput) {
+  async read(userId: string, paginationInput: PaginationInput) {
     const groups = await this.groupsRepository.findGroupsByUserId(
       userId,
       paginationInput,

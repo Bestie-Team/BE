@@ -31,14 +31,10 @@ export class FeedCommentCreationUseCase {
       return;
     }
 
-    const feedWriter = await this.usersService.getUserByIdOrThrow(
-      feed.writerId,
-    );
+    const feedWriter = await this.usersService.readOne(feed.writerId);
 
     if (feedWriter.notificationToken && feedWriter.serviceNotificationConsent) {
-      const commentWriter = await this.usersService.getUserByIdOrThrow(
-        writerId,
-      );
+      const commentWriter = await this.usersService.readOne(writerId);
 
       this.notificationsService
         .createV2({

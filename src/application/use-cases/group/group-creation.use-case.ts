@@ -30,8 +30,8 @@ export class GroupCreationUseCase {
     senderId: string,
     inviteeIds: string[],
   ) {
-    const sender = await this.usersService.getUserByIdOrThrow(senderId);
-    const invitees = await this.usersService.getUsersByIds(inviteeIds);
+    const sender = await this.usersService.readOne(senderId);
+    const invitees = await this.usersService.readMulti(inviteeIds);
 
     const notificationPromises = invitees.map(async (invitee) => {
       if (invitee.notificationToken && invitee.serviceNotificationConsent) {

@@ -105,7 +105,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Get('my')
   async getDetail(@CurrentUser() userId: string): Promise<UserDetailResponse> {
-    return await this.usersService.getDetail(userId);
+    return await this.usersService.readDetail(userId);
   }
 
   @ApiOperation({
@@ -126,7 +126,7 @@ export class UsersController {
   async getProfile(
     @CurrentUser() userId: string,
   ): Promise<UserProfileResponse> {
-    return await this.usersService.getProfile(userId);
+    return await this.usersService.readProfile(userId);
   }
 
   @ApiOperation({

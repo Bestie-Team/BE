@@ -25,15 +25,11 @@ export class GatheringInvitationAcceptanceUseCase {
   }
 
   async notify(gatheringId: string, inviteeId: string) {
-    const gathering = await this.gatheringsReadService.readOne(
-      gatheringId,
-    );
-    const hostUser = await this.usersService.getUserByIdOrThrow(
-      gathering.hostUserId,
-    );
+    const gathering = await this.gatheringsReadService.readOne(gatheringId);
+    const hostUser = await this.usersService.readOne(gathering.hostUserId);
 
     if (hostUser.notificationToken && hostUser.serviceNotificationConsent) {
-      const invitee = await this.usersService.getUserByIdOrThrow(inviteeId);
+      const invitee = await this.usersService.readOne(inviteeId);
       const message = `${invitee.name}님이 약속 초대를 수락했어요!`;
 
       this.notificationsService

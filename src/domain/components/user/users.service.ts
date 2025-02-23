@@ -55,7 +55,7 @@ export class UsersService {
     await this.usersRepository.update({ id: userId, notificationToken: token });
   }
 
-  async getDetail(id: string) {
+  async readDetail(id: string) {
     const user = await this.usersRepository.findDetailById(id);
     if (!user) {
       throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
@@ -64,7 +64,7 @@ export class UsersService {
     return user;
   }
 
-  async getProfile(id: string) {
+  async readProfile(id: string) {
     const user = await this.usersRepository.findProfileById(id);
     if (!user) {
       throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
@@ -73,7 +73,7 @@ export class UsersService {
     return user;
   }
 
-  async getUserByIdOrThrow(userId: string) {
+  async readOne(userId: string) {
     const user = await this.usersRepository.findOneById(userId);
     if (!user) {
       throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
@@ -82,7 +82,7 @@ export class UsersService {
     return user;
   }
 
-  async getUsersByIds(userIds: string[]) {
+  async readMulti(userIds: string[]) {
     return this.usersRepository.findUsersByIds(userIds);
   }
 
@@ -96,7 +96,7 @@ export class UsersService {
   }
 
   private async checkAccountIdChangeCooldown(userId: string, today: Date) {
-    const { createdAt, updatedAt } = await this.getUserByIdOrThrow(userId);
+    const { createdAt, updatedAt } = await this.readOne(userId);
 
     if (
       createdAt.getTime() !== updatedAt.getTime() &&

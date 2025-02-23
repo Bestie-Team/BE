@@ -86,8 +86,8 @@ export class GatheringCreationUseCase {
   }
 
   private async notify(senderId: string, receiverIds: string[]) {
-    const sender = await this.usersService.getUserByIdOrThrow(senderId);
-    const receivers = await this.usersService.getUsersByIds(receiverIds);
+    const sender = await this.usersService.readOne(senderId);
+    const receivers = await this.usersService.readMulti(receiverIds);
 
     const notificationPromises = receivers.map(async (receiver) => {
       if (receiver.notificationToken && receiver.serviceNotificationConsent) {

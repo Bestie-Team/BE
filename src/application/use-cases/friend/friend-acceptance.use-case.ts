@@ -23,10 +23,10 @@ export class FriendAcceptanceUseCase {
   }
 
   async notify(senderId: string, receiverId: string) {
-    const sender = await this.usersService.getUserByIdOrThrow(senderId);
+    const sender = await this.usersService.readOne(senderId);
 
     if (sender.notificationToken && sender.serviceNotificationConsent) {
-      const receiver = await this.usersService.getUserByIdOrThrow(receiverId);
+      const receiver = await this.usersService.readOne(receiverId);
       const message = `${receiver.name}님이 친구 요청을 수락했어요!`;
 
       this.notificationsService

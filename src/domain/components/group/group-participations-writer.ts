@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
+import { GroupParticipationStatus } from 'src/shared/types';
 
 @Injectable()
 export class GroupParticipationsWriter {
@@ -17,5 +18,15 @@ export class GroupParticipationsWriter {
     {
       await this.groupParticipationsRepository.delete(groupId, participantId);
     }
+  }
+
+  async updateStatus(
+    groupId: string,
+    participantId: string,
+    status: GroupParticipationStatus,
+  ) {
+    await this.groupParticipationsRepository.update(groupId, participantId, {
+      status,
+    });
   }
 }

@@ -10,31 +10,18 @@ import { GroupsService } from 'src/domain/services/groups/groups.service';
 import { GroupParticipationsWriter } from 'src/domain/components/group/group-participations-writer';
 import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
 import { GroupsComponentModule } from 'src/modules/group/groups-component.module';
+import { GroupParticipationsModule } from 'src/modules/group/group-participations.module';
 
 @Module({
   imports: [
     GroupsComponentModule,
+    GroupParticipationsModule,
     UsersModule,
     NotificationsModule,
     FriendsCheckerModule,
   ],
   controllers: [GroupsController],
-  providers: [
-    GroupCreationUseCase,
-    GroupsService,
-    GroupParticipationsWriter,
-    GroupParticipationsReader,
-    {
-      provide: GroupParticipationsRepository,
-      useClass: GroupParticipationsPrismaRepository,
-    },
-  ],
-  exports: [
-    GroupParticipationsReader,
-    {
-      provide: GroupParticipationsRepository,
-      useClass: GroupParticipationsPrismaRepository,
-    },
-  ],
+  providers: [GroupCreationUseCase, GroupsService],
+  exports: [],
 })
 export class GroupsModule {}

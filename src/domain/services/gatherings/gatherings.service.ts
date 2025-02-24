@@ -3,7 +3,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { GatheringsWriter } from 'src/domain/components/gathering/gatherings-writer';
-import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringPrototype } from 'src/domain/types/gathering.types';

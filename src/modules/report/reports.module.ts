@@ -7,17 +7,17 @@ import { GroupReportsWriteService } from 'src/domain/components/report/group-rep
 import { ReportsWriter } from 'src/domain/components/report/reports-writer';
 import { ReportsPrismaRepository } from 'src/infrastructure/repositories/report/reports-prisma.repository';
 import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
-import { GroupsModule } from 'src/modules/group/groups.module';
 import { ReportsController } from 'src/presentation/controllers/report/reports.controller';
 import { FeedsComponentModule } from 'src/modules/feed/feeds.component.module';
 import { BlockedFeedsModule } from 'src/modules/feed/blocked-feeds.module';
 import { FriendsComponentModule } from 'src/modules/friend/friends-componenet.module';
+import { GroupParticipationsModule } from 'src/modules/group/group-participations.module';
 
 @Module({
   imports: [
     FriendsComponentModule,
     GatheringParticipationModules,
-    GroupsModule,
+    GroupParticipationsModule,
     BlockedFeedsModule,
     FeedsComponentModule,
   ],

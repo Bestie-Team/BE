@@ -11,4 +11,10 @@ export class GroupParticipationsReader {
   async readMulti(userIds: string[]) {
     return this.groupParticipationsRepository.findByUserIds(userIds);
   }
+
+  async readParticipants(groupId: string) {
+    const participations =
+      await this.groupParticipationsRepository.findMembersByGroupId(groupId);
+    return participations.map((participation) => participation.participantId);
+  }
 }

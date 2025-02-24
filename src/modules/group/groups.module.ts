@@ -32,6 +32,7 @@ import { GroupParticipationsReader } from 'src/domain/components/group/group-par
   ],
   exports: [
     GroupsReader,
+    GroupParticipationsReader,
     { provide: GroupsRepository, useClass: GroupsPrismaRepository },
     {
       provide: GroupParticipationsRepository,

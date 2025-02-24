@@ -8,13 +8,14 @@ import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gath
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
 import { GatheringPrototype } from 'src/domain/types/gathering.types';
 import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
+import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
 
 @Injectable()
 export class GatheringsService {
   constructor(
+    private readonly groupParticipationsReader: GroupParticipationsReader,
     private readonly gatheringsWriter: GatheringsWriter,
     private readonly gatheringsParticipationsWriter: GatheringInvitationsWriter,
-    private readonly groupsReader: GroupsReader,
     private readonly notificationsManager: NotificationsManager,
   ) {}
 
@@ -25,7 +26,9 @@ export class GatheringsService {
     let inviteeIds: string[] = [];
 
     if (groupId) {
-      inviteeIds = await this.groupsReader.readParticipants(groupId);
+      inviteeIds = await this.groupParticipationsReader.readParticipants(
+        groupId,
+      );
     }
     if (friendUserIds) {
       inviteeIds = [...friendUserIds, hostUserId];

@@ -1,19 +1,15 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { FORBIDDEN_MESSAGE } from '@nestjs/core/guards';
-import { v4 } from 'uuid';
 import {
   CANT_REQUEST_REPORTED_FRIEND_MESSAGE,
   FRIEND_ALREADY_EXIST_MESSAGE,
   FRIEND_REQUEST_ALREADY_EXIST_MESSAGE,
   IS_NOT_FRIEND_RELATION_MESSAGE,
-  NOT_FOUND_FRIEND_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
@@ -48,26 +44,6 @@ export class FriendsWriter {
         throw new BadRequestException(CANT_REQUEST_REPORTED_FRIEND_MESSAGE);
       }
     }
-  }
-
-  async accept(senderId: string, receiverId: string) {
-    const friendRequest =
-      await this.friendsRepository.findOneBySenderAndReceiverId(
-        senderId,
-        receiverId,
-      );
-
-    if (!friendRequest) {
-      throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
-    }
-    if (friendRequest.receiverId !== receiverId) {
-      throw new ForbiddenException(FORBIDDEN_MESSAGE);
-    }
-
-    await this.updateById(friendRequest.id, {
-      status: 'ACCEPTED',
-      updatedAt: new Date(),
-    });
   }
 
   async reject(senderId: string, receiverId: string) {

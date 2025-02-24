@@ -6,10 +6,10 @@ import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/frie
 import { FeedsPrismaRepository } from 'src/infrastructure/repositories/feed/feeds-prisma.repository';
 import { FriendFeedVisibilitiesPrismaRepository } from 'src/infrastructure/repositories/feed/friend-feed-visibilities-prisma.repository';
 import { FriendsModule } from 'src/modules/friend/friends.module';
-import { GatheringsModule } from 'src/modules/gathering/gatherings.module';
+import { GatheringsComponentModule } from 'src/modules/gathering/gatherings-component.module';
 
 @Module({
-  imports: [FriendsModule, GatheringsModule],
+  imports: [FriendsModule, GatheringsComponentModule],
   providers: [
     FeedsWriter,
     FeedsReader,

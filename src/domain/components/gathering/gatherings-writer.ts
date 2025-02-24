@@ -19,6 +19,7 @@ import {
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
+import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
 
 @Injectable()
 export class GatheringsWriter {
@@ -26,8 +27,7 @@ export class GatheringsWriter {
     @Inject(GatheringsRepository)
     private readonly gatheringsRepository: GatheringsRepository,
     private readonly gatheringParticiationsWriter: GatheringInvitationsWriter,
-    @Inject(FriendsRepository)
-    private readonly friendsRepository: FriendsRepository,
+    private readonly friendsChecker: FriendsChecker,
   ) {}
 
   async create(gathering: GatheringEntity) {
@@ -35,7 +35,7 @@ export class GatheringsWriter {
   }
 
   async checkIsFriend(userId: string, friendUserIds: string[]) {
-    await checkIsFriendAll(this.friendsRepository, userId, friendUserIds);
+    await this.friendsChecker.checkIsFriendAll(userId, friendUserIds);
   }
 
   createGathering(prototype: GatheringPrototype) {

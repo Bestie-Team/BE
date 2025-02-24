@@ -27,6 +27,13 @@ export class FriendsReader {
     };
   }
 
+  async readOne(firstUserId: string, secondUserId: string) {
+    return await this.friendsRepository.findOneBySenderAndReceiverId(
+      firstUserId,
+      secondUserId,
+    );
+  }
+
   async search(userId: string, searchInput: SearchInput) {
     const { search, paginationInput } = searchInput;
     const searchedUsers =

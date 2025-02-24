@@ -41,7 +41,7 @@ export class FriendsService {
   }
 
   async unfriend(friendUserId: string, userId: string) {
-    await this.friendsWriter.checkExistAcceptedFriend(friendUserId, userId);
+    await this.friendsChecker.checkExistAcceptedFriend(friendUserId, userId);
     await this.deleteTransaction(friendUserId, userId);
   }
 

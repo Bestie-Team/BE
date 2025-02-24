@@ -67,4 +67,13 @@ export class FriendsChecker {
 
     return friendRequest;
   }
+
+  async checkExistAcceptedFriend(friendUserId: string, userId: string) {
+    const friend = await this.friendsReader.readOne(friendUserId, userId);
+    if (!friend || friend.status !== 'ACCEPTED') {
+      throw new NotFoundException(IS_NOT_FRIEND_RELATION_MESSAGE);
+    }
+
+    return friend;
+  }
 }

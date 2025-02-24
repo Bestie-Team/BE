@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance.use-case';
-import { FriendsModule } from 'src/modules/friend/friends.module';
 import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
 import { GroupsModule } from 'src/modules/group/groups.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
@@ -11,7 +10,6 @@ import { GatheringsComponentModule } from 'src/modules/gathering/gatherings-comp
 
 @Module({
   imports: [
-    FriendsModule,
     GroupsModule,
     GatheringsComponentModule,
     GatheringParticipationModules,

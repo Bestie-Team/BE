@@ -11,10 +11,6 @@ import { UsersWriter } from 'src/domain/components/user/users-writer';
     UsersWriter,
     { provide: UsersRepository, useClass: UsersPrismaRepository },
   ],
-  exports: [
-    { provide: UsersRepository, useClass: UsersPrismaRepository },
-    UsersReader,
-    UsersWriter,
-  ],
+  exports: [UsersReader, UsersWriter],
 })
 export class UsersModule {}

@@ -5,6 +5,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { UsersReader } from 'src/domain/components/user/users-reader';
+import { UserEntity } from 'src/domain/entities/user/user.entity';
 import {
   ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE,
   DUPLICATE_ACCOUNT_ID_MESSAGE,
@@ -19,6 +20,10 @@ export class UsersWriter {
     private readonly usersRepository: UsersRepository,
     private readonly usersReader: UsersReader,
   ) {}
+
+  async create(user: UserEntity) {
+    await this.usersRepository.save(user);
+  }
 
   async updateProfileImage(userId: string, profileImageUrl: string) {
     await this.usersRepository.update({ id: userId, profileImageUrl });

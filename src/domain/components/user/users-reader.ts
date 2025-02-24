@@ -52,6 +52,22 @@ export class UsersReader {
     return user;
   }
 
+  async readOneByEmail(email: string) {
+    const user = await this.usersRepository.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
+    }
+
+    return user;
+  }
+
+  /**
+   * 검색 결과가 없는 경우 null을 반환함.
+   */
+  async readOneByAccountId(accountId: string): Promise<{ id: string } | null> {
+    return await this.usersRepository.findOneByAccountId(accountId);
+  }
+
   async readMulti(userIds: string[]) {
     return this.usersRepository.findUsersByIds(userIds);
   }

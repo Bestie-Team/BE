@@ -172,10 +172,10 @@ export class FriendsController {
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
-  async delete(
+  async unfriend(
     @Query('userId', ParseUUIDPipe) friendUserId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.friendsService.delete(friendUserId, userId);
+    await this.friendsService.unfriend(friendUserId, userId);
   }
 }

@@ -5,14 +5,12 @@ import { FriendsWriter } from 'src/domain/components/friend/friends-writer';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendPrototype } from 'src/domain/types/friend.types';
-import { FriendsReader } from 'src/domain/components/friend/friends-reader';
 import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
 
 @Injectable()
 export class FriendsService {
   constructor(
     private readonly friendsChecker: FriendsChecker,
-    private readonly friendsReader: FriendsReader,
     private readonly friendsWriter: FriendsWriter,
     private readonly gatheringParticipationWriter: GatheringInvitationsWriter,
   ) {}
@@ -42,7 +40,7 @@ export class FriendsService {
     await this.friendsWriter.delete(senderId, receiverId);
   }
 
-  async delete(friendUserId: string, userId: string) {
+  async unfriend(friendUserId: string, userId: string) {
     await this.friendsWriter.checkExistAcceptedFriend(friendUserId, userId);
     await this.deleteTransaction(friendUserId, userId);
   }

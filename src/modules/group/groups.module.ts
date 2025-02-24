@@ -10,6 +10,9 @@ import { NotificationsModule } from 'src/modules/notification/notifications.modu
 import { UsersModule } from 'src/modules/user/users.module';
 import { GroupsController } from 'src/presentation/controllers/group/groups.controller';
 import { FriendsCheckerModule } from 'src/modules/friend/friends-chcker.module';
+import { GroupsService } from 'src/domain/services/groups/groups.service';
+import { GroupParticipationsWriter } from 'src/domain/components/group/group-participations-writer';
+import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
 
 @Module({
   imports: [UsersModule, NotificationsModule, FriendsCheckerModule],
@@ -18,6 +21,9 @@ import { FriendsCheckerModule } from 'src/modules/friend/friends-chcker.module';
     GroupCreationUseCase,
     GroupsWriter,
     GroupsReader,
+    GroupsService,
+    GroupParticipationsWriter,
+    GroupParticipationsReader,
     { provide: GroupsRepository, useClass: GroupsPrismaRepository },
     {
       provide: GroupParticipationsRepository,

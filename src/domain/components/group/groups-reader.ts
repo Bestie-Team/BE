@@ -26,6 +26,15 @@ export class GroupsReader {
     };
   }
 
+  async readOne(groupId: string, ownerId: string) {
+    const group = await this.groupsRepository.findOneByGroupAndOwnerId(
+      groupId,
+      ownerId,
+    );
+
+    return group;
+  }
+
   async readParticipants(groupId: string) {
     const participations =
       await this.groupParticipationsRepository.findMembersByGroupId(groupId);

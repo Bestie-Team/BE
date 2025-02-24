@@ -3,6 +3,7 @@ import { APP_NAME } from 'src/common/constant';
 import { GroupsWriter } from 'src/domain/components/group/groups-writer';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
 import { UsersReader } from 'src/domain/components/user/users-reader';
+import { GroupsService } from 'src/domain/services/groups/groups.service';
 import { GroupPrototype } from 'src/domain/types/group.types';
 
 @Injectable()
@@ -11,13 +12,14 @@ export class GroupCreationUseCase {
 
   constructor(
     private readonly groupsWriteService: GroupsWriter,
+    private readonly groupsService: GroupsService,
     private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
   async execute(input: GroupPrototype, inviteeIds: string[]) {
     const { name, ownerId } = input;
-    await this.groupsWriteService.create(input, inviteeIds);
+    await this.groupsService.create(input, inviteeIds);
     this.notify(
       name,
       ownerId,

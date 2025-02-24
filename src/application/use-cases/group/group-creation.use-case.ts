@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
-import { GroupsWriteService } from 'src/domain/services/group/groups-write.service';
-import { NotificationsService } from 'src/domain/services/notification/notifications.service';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { GroupsWriter } from 'src/domain/components/group/groups-writer';
+import { NotificationsService } from 'src/domain/components/notification/notifications.service';
+import { UsersReader } from 'src/domain/components/user/users-reader';
+import { GroupsService } from 'src/domain/services/groups/groups.service';
 import { GroupPrototype } from 'src/domain/types/group.types';
 
 @Injectable()
@@ -10,14 +11,15 @@ export class GroupCreationUseCase {
   private readonly logger = new Logger('GroupCreationUseCase');
 
   constructor(
-    private readonly groupsWriteService: GroupsWriteService,
-    private readonly usersService: UsersService,
+    private readonly groupsWriteService: GroupsWriter,
+    private readonly groupsService: GroupsService,
+    private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
   async execute(input: GroupPrototype, inviteeIds: string[]) {
     const { name, ownerId } = input;
-    await this.groupsWriteService.create(input, inviteeIds);
+    await this.groupsService.create(input, inviteeIds);
     this.notify(
       name,
       ownerId,
@@ -30,8 +32,8 @@ export class GroupCreationUseCase {
     senderId: string,
     inviteeIds: string[],
   ) {
-    const sender = await this.usersService.getUserByIdOrThrow(senderId);
-    const invitees = await this.usersService.getUsersByIds(inviteeIds);
+    const sender = await this.usersReader.readOne(senderId);
+    const invitees = await this.usersReader.readMulti(inviteeIds);
 
     const notificationPromises = invitees.map(async (invitee) => {
       if (invitee.notificationToken && invitee.serviceNotificationConsent) {

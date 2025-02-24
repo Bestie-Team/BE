@@ -4,26 +4,28 @@ import { ClsModule } from 'nestjs-cls';
 import { clsOptions } from 'src/configs/cls/cls-options';
 import { ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE } from 'src/domain/error/messages';
 import { UsersRepository } from 'src/domain/interface/users.repository';
-import { UsersService } from 'src/domain/services/user/users.service';
 import { PrismaModule } from 'src/infrastructure/prisma/prisma.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { UsersPrismaRepository } from 'src/infrastructure/repositories/users-prisma.repository';
 import { generateUserEntity } from 'test/helpers/generators';
+import { UsersWriter } from 'src/domain/components/user/users-writer';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 
-describe('UsersService', () => {
-  let usersService: UsersService;
+describe('UsersWriter', () => {
+  let usersWriter: UsersWriter;
   let prisma: PrismaService;
 
   beforeAll(async () => {
     const app: TestingModule = await Test.createTestingModule({
       imports: [ClsModule.forRoot(clsOptions), PrismaModule],
       providers: [
-        UsersService,
+        UsersWriter,
+        UsersReader,
         { provide: UsersRepository, useClass: UsersPrismaRepository },
       ],
     }).compile();
 
-    usersService = app.get<UsersService>(UsersService);
+    usersWriter = app.get<UsersWriter>(UsersWriter);
     prisma = app.get<PrismaService>(PrismaService);
   });
 
@@ -48,7 +50,7 @@ describe('UsersService', () => {
     const today = new Date('2024-02-01T00:00:00.000Z');
 
     await expect(
-      async () => await usersService.updateAccountId(id, newAccountId, today),
+      async () => await usersWriter.updateAccountId(id, newAccountId, today),
     ).rejects.toThrow(
       new UnprocessableEntityException(ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE),
     );
@@ -70,7 +72,7 @@ describe('UsersService', () => {
     const newAccountId = 'new_lighty';
     const today = new Date('2024-02-02T00:00:00.000Z');
 
-    await usersService.updateAccountId(id, newAccountId, today);
+    await usersWriter.updateAccountId(id, newAccountId, today);
     const updatedUser = await prisma.user.findUnique({
       where: { id },
     });

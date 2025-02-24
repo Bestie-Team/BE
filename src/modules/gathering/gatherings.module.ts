@@ -1,38 +1,22 @@
 import { Module } from '@nestjs/common';
-import { GatheringCreationUseCase } from 'src/application/use-cases/gathering/gathering-creation.use-case';
 import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance.use-case';
-import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
-import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
-import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
-import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
-import { GatheringsPrismaRepository } from 'src/infrastructure/repositories/gathering/gatherings-prisma.repository';
-import { FriendsModule } from 'src/modules/friend/friends.module';
-import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
-import { GroupsModule } from 'src/modules/group/groups.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { UsersModule } from 'src/modules/user/users.module';
 import { GatheringsController } from 'src/presentation/controllers/gathering/gatherings.controller';
+import { GatheringsService } from 'src/domain/services/gatherings/gatherings.service';
+import { GatheringsComponentModule } from 'src/modules/gathering/gatherings-component.module';
+import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
+import { GroupParticipationsModule } from 'src/modules/group/group-participations.module';
 
 @Module({
   imports: [
-    FriendsModule,
-    GroupsModule,
+    GroupParticipationsModule,
+    GatheringsComponentModule,
     GatheringParticipationModules,
     UsersModule,
     NotificationsModule,
   ],
   controllers: [GatheringsController],
-  providers: [
-    GatheringCreationUseCase,
-    GatheringInvitationAcceptanceUseCase,
-    GatheringsWriteService,
-    GatheringsReadService,
-    GatheringInvitationsReadService,
-    { provide: GatheringsRepository, useClass: GatheringsPrismaRepository },
-  ],
-  exports: [
-    GatheringsWriteService,
-    { provide: GatheringsRepository, useClass: GatheringsPrismaRepository },
-  ],
+  providers: [GatheringInvitationAcceptanceUseCase, GatheringsService],
 })
 export class GatheringsModule {}

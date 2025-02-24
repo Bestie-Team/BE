@@ -1,19 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InvitationAcceptanceInput } from 'src/application/types/gathering.types';
 import { APP_NAME } from 'src/common/constant';
-import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
-import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
-import { NotificationsService } from 'src/domain/services/notification/notifications.service';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
+import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
+import { NotificationsService } from 'src/domain/components/notification/notifications.service';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 
 @Injectable()
 export class GatheringInvitationAcceptanceUseCase {
   private readonly logger = new Logger('GatheringInvitationAcceptanceUseCase');
 
   constructor(
-    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriteService,
-    private readonly gatheringsReadService: GatheringsReadService,
-    private readonly usersService: UsersService,
+    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriter,
+    private readonly gatheringsReadService: GatheringsReader,
+    private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -25,15 +25,11 @@ export class GatheringInvitationAcceptanceUseCase {
   }
 
   async notify(gatheringId: string, inviteeId: string) {
-    const gathering = await this.gatheringsReadService.getByIdOrThrow(
-      gatheringId,
-    );
-    const hostUser = await this.usersService.getUserByIdOrThrow(
-      gathering.hostUserId,
-    );
+    const gathering = await this.gatheringsReadService.readOne(gatheringId);
+    const hostUser = await this.usersReader.readOne(gathering.hostUserId);
 
     if (hostUser.notificationToken && hostUser.serviceNotificationConsent) {
-      const invitee = await this.usersService.getUserByIdOrThrow(inviteeId);
+      const invitee = await this.usersReader.readOne(inviteeId);
       const message = `${invitee.name}님이 약속 초대를 수락했어요!`;
 
       this.notificationsService

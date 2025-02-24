@@ -32,8 +32,7 @@ import {
 } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { GroupsWriteService } from 'src/domain/services/group/groups-write.service';
-import { GroupsService } from 'src/domain/services/group/groups.service';
+import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { toListDto } from 'src/presentation/converters/group/group.converters';
 import { AddGroupMemberRequest, PaginationRequest } from 'src/presentation/dto';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
@@ -41,6 +40,7 @@ import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-i
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
 import { UpdateGroupRequest } from 'src/presentation/dto/group/request/update-group.request';
 import { GroupListResponse } from 'src/presentation/dto/group/response/group-list.response';
+import { GroupsService } from 'src/domain/services/groups/groups.service';
 
 @ApiTags('/groups')
 @ApiBearerAuth()
@@ -49,8 +49,9 @@ import { GroupListResponse } from 'src/presentation/dto/group/response/group-lis
 @Controller('groups')
 export class GroupsController {
   constructor(
-    private readonly groupsWriteService: GroupsWriteService,
+    // private readonly groupsWriteService: GroupsWriter,
     private readonly groupsService: GroupsService,
+    private readonly groupsReader: GroupsReader,
     private readonly groupCreationUseCase: GroupCreationUseCase,
   ) {}
 
@@ -107,10 +108,7 @@ export class GroupsController {
     @Query() paginationDto: PaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<GroupListResponse> {
-    const domain = await this.groupsService.getGroupsByUserId(
-      userId,
-      paginationDto,
-    );
+    const domain = await this.groupsReader.read(userId, paginationDto);
     return toListDto(domain);
   }
 
@@ -142,11 +140,7 @@ export class GroupsController {
     @CurrentUser() userId: string,
   ) {
     const { userIds: participantIds } = dto;
-    await this.groupsWriteService.addNewMembers(
-      groupId,
-      userId,
-      participantIds,
-    );
+    await this.groupsService.addMembers(groupId, userId, participantIds);
   }
 
   @ApiOperation({ summary: '그룹 나가기 (그룹원)' })
@@ -165,7 +159,7 @@ export class GroupsController {
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.groupsWriteService.leaveGroup(groupId, userId);
+    await this.groupsService.leaveGroup(groupId, userId);
   }
 
   @ApiOperation({
@@ -187,7 +181,7 @@ export class GroupsController {
     @Body() dto: UpdateGroupRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.groupsWriteService.update(groupId, userId, dto);
+    await this.groupsService.update(groupId, userId, dto);
   }
 
   @ApiOperation({ summary: '그룹 삭제 (그룹장)' })
@@ -210,6 +204,6 @@ export class GroupsController {
     @Param('groupId', ParseUUIDPipe) groupId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.groupsWriteService.deleteGroup(groupId, userId);
+    await this.groupsService.delete(groupId, userId);
   }
 }

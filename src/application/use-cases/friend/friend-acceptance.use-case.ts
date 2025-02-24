@@ -1,32 +1,32 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FriendAcceptanceInput } from 'src/application/types/friend.types';
 import { APP_NAME } from 'src/common/constant';
-import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
-import { NotificationsService } from 'src/domain/services/notification/notifications.service';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { NotificationsService } from 'src/domain/components/notification/notifications.service';
+import { UsersReader } from 'src/domain/components/user/users-reader';
+import { FriendsService } from 'src/domain/services/friends/friends.service';
 
 @Injectable()
 export class FriendAcceptanceUseCase {
   private readonly logger = new Logger('FriendAcceptanceUseCase');
 
   constructor(
-    private readonly friendWriteService: FriendWriteService,
-    private readonly usersService: UsersService,
+    private readonly friendsService: FriendsService,
+    private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
   async execute(input: FriendAcceptanceInput) {
     const { senderId, receiverId } = input;
 
-    await this.friendWriteService.accept(senderId, receiverId);
+    await this.friendsService.accept(senderId, receiverId);
     this.notify(senderId, receiverId);
   }
 
   async notify(senderId: string, receiverId: string) {
-    const sender = await this.usersService.getUserByIdOrThrow(senderId);
+    const sender = await this.usersReader.readOne(senderId);
 
     if (sender.notificationToken && sender.serviceNotificationConsent) {
-      const receiver = await this.usersService.getUserByIdOrThrow(receiverId);
+      const receiver = await this.usersReader.readOne(receiverId);
       const message = `${receiver.name}님이 친구 요청을 수락했어요!`;
 
       this.notificationsService

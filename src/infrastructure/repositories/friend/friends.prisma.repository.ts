@@ -1,3 +1,5 @@
+import { TransactionHost } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { FriendStatus as PrismaFriendStatus } from '@prisma/client';
 import { sql } from 'kysely';
@@ -5,16 +7,17 @@ import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { FriendRequest } from 'src/domain/types/friend.types';
 import { User } from 'src/domain/types/user.types';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { SearchInput } from 'src/infrastructure/types/user.types';
 import { FriendStatus, UserPaginationInput } from 'src/shared/types';
 
 @Injectable()
 export class FriendsPrismaRepository implements FriendsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly txHost: TransactionHost<TransactionalAdapterPrisma>,
+  ) {}
 
   async save(data: FriendEntity): Promise<void> {
-    await this.prisma.friend.create({
+    await this.txHost.tx.friend.create({
       data,
     });
   }
@@ -22,7 +25,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
   async findOneById(
     id: string,
   ): Promise<{ id: string; receiverId: string; senderId: string } | null> {
-    return await this.prisma.friend.findUnique({
+    return await this.txHost.tx.friend.findUnique({
       select: {
         id: true,
         receiverId: true,
@@ -39,7 +42,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     paginationInput: UserPaginationInput,
   ): Promise<User[]> {
     const { cursor, limit } = paginationInput;
-    const rows = await this.prisma.$kysely
+    const rows = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .where('u.id', '!=', userId)
@@ -93,7 +96,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
   ): Promise<User[]> {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
-    const rows = await this.prisma.$kysely
+    const rows = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .where('u.id', '!=', userId)
@@ -152,7 +155,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]> {
     const { cursor, limit } = paginationInput;
-    const rows = await this.prisma.$kysely
+    const rows = await this.txHost.tx.$kysely
       .selectFrom('friend as f')
       .innerJoin('active_user as u', 'f.sender_id', 'u.id')
       .select([
@@ -198,7 +201,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]> {
     const { cursor, limit } = paginationInput;
-    const rows = await this.prisma.$kysely
+    const rows = await this.txHost.tx.$kysely
       .selectFrom('friend as f')
       .innerJoin('active_user as u', 'f.receiver_id', 'u.id')
       .select([
@@ -248,7 +251,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     senderId: string;
     receiverId: string;
   } | null> {
-    return await this.prisma.friend.findFirst({
+    return await this.txHost.tx.friend.findFirst({
       select: { id: true, status: true, senderId: true, receiverId: true },
       where: {
         OR: [
@@ -266,7 +269,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
   async findOneFriendByUserId(
     senderOrReceiverId: string,
   ): Promise<{ senderId: string; receiverId: string } | null> {
-    return await this.prisma.friend.findFirst({
+    return await this.txHost.tx.friend.findFirst({
       select: { senderId: true, receiverId: true },
       where: {
         OR: [
@@ -277,18 +280,37 @@ export class FriendsPrismaRepository implements FriendsRepository {
     });
   }
 
-  async update(id: string, data: Partial<FriendEntity>): Promise<void> {
-    await this.prisma.friend.update({
+  async update(
+    senderId: string,
+    receiverId: string,
+    data: Partial<FriendEntity>,
+  ): Promise<void> {
+    await this.txHost.tx.friend.updateMany({
       data,
-      where: { id },
+      where: {
+        OR: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
+      },
     });
   }
 
-  async delete(id: string): Promise<void> {
-    await this.prisma.friend.delete({
+  async delete(senderId: string, receiverId: string): Promise<void> {
+    await this.txHost.tx.friend.deleteMany({
       where: {
-        id,
+        OR: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
       },
+    });
+  }
+
+  async updateById(id: string, data: Partial<FriendEntity>): Promise<void> {
+    await this.txHost.tx.friend.update({
+      data,
+      where: { id },
     });
   }
 
@@ -296,7 +318,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     firstUserId: string,
     secondUserId: string,
   ): Promise<void> {
-    await this.prisma.friend.deleteMany({
+    await this.txHost.tx.friend.deleteMany({
       where: {
         OR: [
           {

@@ -22,17 +22,16 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { GatheringCreationUseCase } from 'src/application/use-cases/gathering/gathering-creation.use-case';
 import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance.use-case';
 import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { ApiFileOperation } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { GatheringInvitationsReadService } from 'src/domain/services/gathering/gathering-invitations-read.service';
-import { GatheringInvitationsWriteService } from 'src/domain/services/gathering/gathering-invitations-write.service';
-import { GatheringsReadService } from 'src/domain/services/gathering/gatherings-read.service';
-import { GatheringsWriteService } from 'src/domain/services/gathering/gatherings-write.service';
+import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
+import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
+import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
+import { GatheringsWriter } from 'src/domain/components/gathering/gatherings-writer';
 import { gatheringInvitationConverter } from 'src/presentation/converters/gathering/gathering-invitation.converters';
 import { gatheringConverter } from 'src/presentation/converters/gathering/gathering.converters';
 import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
@@ -48,6 +47,7 @@ import { GatheringDetailResponse } from 'src/presentation/dto/gathering/response
 import { ReceivedGatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/received-gathering-invitation-list.response';
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
 import { SentGatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/sent-gathering-invitation-list.response';
+import { GatheringsService } from 'src/domain/services/gatherings/gatherings.service';
 
 @ApiTags('/gatherings')
 @ApiBearerAuth()
@@ -56,11 +56,11 @@ import { SentGatheringInvitationListResponse } from 'src/presentation/dto/gather
 @Controller('gatherings')
 export class GatheringsController {
   constructor(
-    private readonly gatheringsWriteService: GatheringsWriteService,
-    private readonly gatheringsReadService: GatheringsReadService,
-    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriteService,
-    private readonly gatheringInvitationsReadService: GatheringInvitationsReadService,
-    private readonly gatheringCreationUseCase: GatheringCreationUseCase,
+    private readonly gatheringsWriteService: GatheringsWriter,
+    private readonly gatheringsReadService: GatheringsReader,
+    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriter,
+    private readonly gatheringInvitationsReadService: GatheringInvitationsReader,
+    private readonly gatheringsService: GatheringsService,
     private readonly gatheringInvitationAcceptanceUseCase: GatheringInvitationAcceptanceUseCase,
   ) {}
 
@@ -102,7 +102,7 @@ export class GatheringsController {
     @CurrentUser() userId: string,
   ) {
     const { friendIds, ...rest } = dto;
-    await this.gatheringCreationUseCase.execute(
+    await this.gatheringsService.create(
       { ...rest, hostUserId: userId },
       friendIds,
     );
@@ -119,7 +119,7 @@ export class GatheringsController {
     @Query() dto: NoFeedGatheringListRequest,
     @CurrentUser() userId: string,
   ) {
-    const domain = await this.gatheringsReadService.getGatheringsWithoutFeed(
+    const domain = await this.gatheringsReadService.readUnwrittenFeed(
       userId,
       dto,
     );
@@ -137,10 +137,7 @@ export class GatheringsController {
     @Query() dto: GatheringListRequest,
     @CurrentUser() userId: string,
   ): Promise<EndedGatheringsListResponse> {
-    const domain = await this.gatheringsReadService.getEndedGatherings(
-      userId,
-      dto,
-    );
+    const domain = await this.gatheringsReadService.readEnded(userId, dto);
     return gatheringConverter.toEndedListDto(domain);
   }
 
@@ -155,10 +152,7 @@ export class GatheringsController {
     @Query() dto: GatheringListRequest,
     @CurrentUser() userId: string,
   ): Promise<GatheringListResponse> {
-    const domain = await this.gatheringsReadService.getWaitingGatherings(
-      userId,
-      dto,
-    );
+    const domain = await this.gatheringsReadService.read(userId, dto);
     return gatheringConverter.toListDto(domain);
   }
 
@@ -172,7 +166,7 @@ export class GatheringsController {
   async getDetail(
     @Param('gatheringId', ParseUUIDPipe) gatheringId: string,
   ): Promise<GatheringDetailResponse> {
-    const domain = await this.gatheringsReadService.getDetail(gatheringId);
+    const domain = await this.gatheringsReadService.readDetail(gatheringId);
     return gatheringConverter.toDto(domain);
   }
 
@@ -219,11 +213,10 @@ export class GatheringsController {
     @Query() dto: GatheringInvitationListRequest,
     @CurrentUser() userId: string,
   ): Promise<ReceivedGatheringInvitationListResponse> {
-    const domain =
-      await this.gatheringInvitationsReadService.getReceivedInvitations(
-        userId,
-        dto,
-      );
+    const domain = await this.gatheringInvitationsReadService.readReceived(
+      userId,
+      dto,
+    );
     return gatheringInvitationConverter.toRecevedListDto(domain);
   }
 
@@ -238,11 +231,10 @@ export class GatheringsController {
     @Query() dto: GatheringInvitationListRequest,
     @CurrentUser() userId: string,
   ): Promise<SentGatheringInvitationListResponse> {
-    const domain =
-      await this.gatheringInvitationsReadService.getSentInvitations(
-        userId,
-        dto,
-      );
+    const domain = await this.gatheringInvitationsReadService.readSent(
+      userId,
+      dto,
+    );
     return gatheringInvitationConverter.toSentListDto(domain);
   }
 

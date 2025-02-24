@@ -20,7 +20,7 @@ import {
 import { FeedCommentCreationUseCase } from 'src/application/use-cases/feed-comment/feed-comment.use-case';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { FeedCommentsService } from 'src/domain/services/feed-comment/feed-comments.service';
+import { FeedCommentsService } from 'src/domain/services/feed-comments/feed-comments.service';
 import { FeedCommentConverter } from 'src/presentation/converters/feed-comment/feed-comment.converters';
 import { CreateFeedCommentRequest } from 'src/presentation/dto/comment/request/create-feed-comment.request';
 import { FeedCommentResponse } from 'src/presentation/dto/comment/response/feed-comment-list.response';
@@ -56,7 +56,7 @@ export class FeedCommentController {
   async getComments(
     @Query('feedId', ParseUUIDPipe) feedId: string,
   ): Promise<FeedCommentResponse[]> {
-    const domain = await this.feedCommentService.getComment(feedId);
+    const domain = await this.feedCommentService.readAll(feedId);
     return FeedCommentConverter.toListDto(domain);
   }
 

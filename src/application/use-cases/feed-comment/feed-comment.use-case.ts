@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
-import { FeedCommentsService } from 'src/domain/services/feed-comment/feed-comments.service';
-import { FeedsReadService } from 'src/domain/services/feed/feeds-read.service';
-import { NotificationsService } from 'src/domain/services/notification/notifications.service';
-import { UsersService } from 'src/domain/services/user/users.service';
+import { FeedCommentsService } from 'src/domain/services/feed-comments/feed-comments.service';
+import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
+import { NotificationsService } from 'src/domain/components/notification/notifications.service';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 import { FeedCommentPrototype } from 'src/domain/types/feed-comment.types';
 
 @Injectable()
@@ -12,8 +12,8 @@ export class FeedCommentCreationUseCase {
 
   constructor(
     private readonly feedCommentsService: FeedCommentsService,
-    private readonly feedsReadService: FeedsReadService,
-    private readonly usersService: UsersService,
+    private readonly feedsReadService: FeedsReader,
+    private readonly usersReader: UsersReader,
     private readonly notificationsService: NotificationsService,
   ) {}
 
@@ -25,20 +25,16 @@ export class FeedCommentCreationUseCase {
   }
 
   async notify(feedId: string, writerId: string) {
-    const feed = await this.feedsReadService.getByIdOrThrow(feedId);
+    const feed = await this.feedsReadService.readOne(feedId);
 
     if (feed.writerId === writerId) {
       return;
     }
 
-    const feedWriter = await this.usersService.getUserByIdOrThrow(
-      feed.writerId,
-    );
+    const feedWriter = await this.usersReader.readOne(feed.writerId);
 
     if (feedWriter.notificationToken && feedWriter.serviceNotificationConsent) {
-      const commentWriter = await this.usersService.getUserByIdOrThrow(
-        writerId,
-      );
+      const commentWriter = await this.usersReader.readOne(writerId);
 
       this.notificationsService
         .createV2({

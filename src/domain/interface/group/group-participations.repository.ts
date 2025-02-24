@@ -12,7 +12,11 @@ export interface GroupParticipationsRepository {
    */
   findMembersByGroupId(groupId: string): Promise<{ participantId: string }[]>;
   delete(groupId: string, participantId: string): Promise<void>;
-  update(id: string, data: Partial<GroupParticipationEntity>): Promise<void>;
+  update(
+    groupId: string,
+    participantId: string,
+    data: Partial<GroupParticipationEntity>,
+  ): Promise<void>;
 }
 
 export const GroupParticipationsRepository = Symbol(

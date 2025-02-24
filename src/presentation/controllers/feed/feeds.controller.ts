@@ -26,9 +26,9 @@ import { IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { BlockedFeedsService } from 'src/domain/services/feed/blocked-feeds.service';
-import { FeedsReadService } from 'src/domain/services/feed/feeds-read.service';
-import { FeedsWriteService } from 'src/domain/services/feed/feeds-write.service';
+import { BlockedFeedsService } from 'src/domain/components/feed/blocked-feeds.service';
+import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
+import { FeedsWriter } from 'src/domain/components/feed/feeds-writer';
 import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
 import { BlockedFeedListRequest } from 'src/presentation/dto/feed/request/blocked-feed-list.request';
 import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
@@ -46,8 +46,8 @@ import { UploadImageListResponse } from 'src/presentation/dto/file/response/uplo
 @Controller('feeds')
 export class FeedsController {
   constructor(
-    private readonly feedsWriteService: FeedsWriteService,
-    private readonly feedsReadService: FeedsReadService,
+    private readonly feedsWriteService: FeedsWriter,
+    private readonly feedsReadService: FeedsReader,
     private readonly blockedFeedsService: BlockedFeedsService,
   ) {}
 
@@ -147,7 +147,7 @@ export class FeedsController {
     @Query() dto: FeedListRequest,
     @CurrentUser() userId: string,
   ): Promise<FeedListResponse> {
-    const domain = await this.feedsReadService.getAllFeeds(userId, dto);
+    const domain = await this.feedsReadService.readAll(userId, dto);
     return feedConverter.toListDto(domain);
   }
 
@@ -161,7 +161,7 @@ export class FeedsController {
     @Query() dto: FeedListRequest,
     @CurrentUser() userId: string,
   ): Promise<FeedListResponse> {
-    const domain = await this.feedsReadService.getMyFeeds(userId, dto);
+    const domain = await this.feedsReadService.readOwn(userId, dto);
     return feedConverter.toListDto(domain);
   }
 

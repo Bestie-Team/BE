@@ -25,7 +25,6 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { ApiFileOperation } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateProfileImageMulterOptions } from 'src/configs/multer-s3/multer-options';
-import { UsersService } from 'src/domain/services/user/users.service';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { SearchUserRequest } from 'src/presentation/dto/user/request/search-user.request';
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
@@ -38,12 +37,17 @@ import {
 } from 'src/presentation/dto';
 import { UserDetailResponse } from 'src/presentation/dto/user/response/user-detail.response';
 import { UserProfileResponse } from 'src/presentation/dto/user/response/user-profile.response';
+import { UsersWriter } from 'src/domain/components/user/users-writer';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 
 @ApiTags('/users')
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersWriter: UsersWriter,
+    private readonly usersReader: UsersReader,
+  ) {}
 
   @ApiFileOperation()
   @ApiBody({ type: FileRequest })
@@ -88,7 +92,7 @@ export class UsersController {
     @CurrentUser() userId: string,
   ): Promise<SearchUserResponse> {
     const { search, ...paginationInput } = dto;
-    return await this.usersService.search(userId, { search, paginationInput });
+    return await this.usersReader.search(userId, { search, paginationInput });
   }
 
   @ApiOperation({ summary: '회원 상세 조회' })
@@ -105,7 +109,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Get('my')
   async getDetail(@CurrentUser() userId: string): Promise<UserDetailResponse> {
-    return await this.usersService.getDetail(userId);
+    return await this.usersReader.readDetail(userId);
   }
 
   @ApiOperation({
@@ -126,7 +130,7 @@ export class UsersController {
   async getProfile(
     @CurrentUser() userId: string,
   ): Promise<UserProfileResponse> {
-    return await this.usersService.getProfile(userId);
+    return await this.usersReader.readProfile(userId);
   }
 
   @ApiOperation({
@@ -143,7 +147,7 @@ export class UsersController {
   })
   @Get('availability')
   async existAccountId(@Query('accountId') accountId: string) {
-    await this.usersService.checkDuplicateAccountId(accountId);
+    await this.usersWriter.checkDuplicateAccountId(accountId);
   }
 
   @ApiOperation({ summary: '프로필 사진 변경' })
@@ -159,7 +163,7 @@ export class UsersController {
     @Body() dto: ChangeProfileImageRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.usersService.updateProfileImage(userId, dto.profileImageUrl);
+    await this.usersWriter.updateProfileImage(userId, dto.profileImageUrl);
   }
 
   @ApiOperation({ summary: '계정 아이디 변경' })
@@ -187,7 +191,7 @@ export class UsersController {
     @Body() dto: ChangeAccountIdRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.usersService.updateAccountId(userId, dto.accountId);
+    await this.usersWriter.updateAccountId(userId, dto.accountId);
   }
 
   @ApiOperation({ summary: '알림 토큰 변경' })
@@ -199,7 +203,7 @@ export class UsersController {
     @Body() dto: UpdateNotificationTokenRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.usersService.updateNotificationToken(dto.token, userId);
+    await this.usersWriter.updateNotificationToken(dto.token, userId);
   }
 
   @ApiOperation({
@@ -216,6 +220,6 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
   async delete(@CurrentUser() userId: string) {
-    await this.usersService.delete(userId);
+    await this.usersWriter.delete(userId);
   }
 }

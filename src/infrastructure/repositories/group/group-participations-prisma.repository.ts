@@ -68,14 +68,18 @@ export class GroupParticipationsPrismaRepository
   }
 
   async update(
-    id: string,
+    groupId: string,
+    participantId: string,
     data: Partial<GroupParticipationEntity>,
   ): Promise<void> {
     try {
       await this.txHost.tx.groupParticipation.update({
         data,
         where: {
-          id,
+          groupId_participantId: {
+            groupId,
+            participantId,
+          },
         },
       });
     } catch (e: unknown) {

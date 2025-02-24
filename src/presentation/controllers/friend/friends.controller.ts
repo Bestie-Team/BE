@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   ParseUUIDPipe,
   Post,
   Query,
@@ -15,23 +14,22 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { FriendsService } from 'src/domain/services/friend/friends.service';
+import { FriendsReader } from 'src/domain/components/friend/friends-reader';
 import { CreateFriendRequest } from 'src/presentation/dto/friend/request/create-friend.request';
 import { FriendListResponse } from 'src/presentation/dto/friend/response/friend-list.response';
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 import { SearchFriendRequest } from 'src/presentation/dto/friend/request/search-friend.request';
 import { UserPaginationRequest } from 'src/presentation/dto/user/request/user-pagination.request';
-import { FriendWriteService } from 'src/domain/services/friend/friend-write.service';
 import { FriendRequestUseCase } from 'src/application/use-cases/friend/friend-request.use-case';
 import { FriendAcceptanceUseCase } from 'src/application/use-cases/friend/friend-acceptance.use-case';
 import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';
+import { FriendsService } from 'src/domain/services/friends/friends.service';
 
 @ApiTags('/friends')
 @ApiBearerAuth()
@@ -40,8 +38,8 @@ import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-f
 @Controller('friends')
 export class FriendsController {
   constructor(
+    private readonly friendsReader: FriendsReader,
     private readonly friendsService: FriendsService,
-    private readonly friendWriteService: FriendWriteService,
     private readonly friendRequestUseCase: FriendRequestUseCase,
     private readonly friendAcceptanceUseCase: FriendAcceptanceUseCase,
   ) {}
@@ -87,7 +85,7 @@ export class FriendsController {
   })
   @Post('reject')
   async reject(@Body() dto: AccepFriendRequest, @CurrentUser() userId: string) {
-    await this.friendWriteService.reject(dto.senderId, userId);
+    await this.friendsService.reject(dto.senderId, userId);
   }
 
   @ApiOperation({ summary: '친구 목록 조회' })
@@ -101,7 +99,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendListResponse> {
-    return await this.friendsService.getFriendsByUserId(userId, paginationDto);
+    return await this.friendsReader.read(userId, paginationDto);
   }
 
   @ApiOperation({ summary: '받은 친구 요청 목록 조회' })
@@ -115,10 +113,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendRequestListResponse> {
-    return await this.friendsService.getReceivedRequestsByUserId(
-      userId,
-      paginationDto,
-    );
+    return await this.friendsReader.readReceivedRequests(userId, paginationDto);
   }
 
   @ApiOperation({ summary: '보낸 친구 요청 목록 조회' })
@@ -132,10 +127,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendRequestListResponse> {
-    return await this.friendsService.getSentRequestsByUserId(
-      userId,
-      paginationDto,
-    );
+    return await this.friendsReader.readSentRequests(userId, paginationDto);
   }
 
   @ApiOperation({ summary: '친구 검색' })
@@ -156,7 +148,7 @@ export class FriendsController {
     @CurrentUser() userId: string,
   ): Promise<FriendListResponse> {
     const { search, ...paginationInput } = dto;
-    return await this.friendsService.search(userId, {
+    return await this.friendsReader.search(userId, {
       search,
       paginationInput,
     });
@@ -178,10 +170,10 @@ export class FriendsController {
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
-  async delete(
+  async unfriend(
     @Query('userId', ParseUUIDPipe) friendUserId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.friendWriteService.delete(friendUserId, userId);
+    await this.friendsService.unfriend(friendUserId, userId);
   }
 }

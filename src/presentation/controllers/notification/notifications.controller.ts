@@ -18,7 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { NotificationsService } from 'src/domain/services/notification/notifications.service';
+import { NotificationsService } from 'src/domain/components/notification/notifications.service';
 import { notificationConverter } from 'src/presentation/converters/notification/notification.converters';
 import { NotificationListRequest } from 'src/presentation/dto/notification/request/notification-list.request';
 import { NotificationListResponse } from 'src/presentation/dto/notification/response/notification-list.response';

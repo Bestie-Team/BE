@@ -28,4 +28,18 @@ export class GatheringParticipationEntity {
       proto.status,
     );
   }
+
+  static createBulk(
+    input: { gatheringId: string; participantIds: string[] },
+    idGen: () => string,
+    stdDate: Date,
+  ) {
+    return input.participantIds.map((participantId) =>
+      this.create(
+        { gatheringId: input.gatheringId, participantId },
+        idGen,
+        stdDate,
+      ),
+    );
+  }
 }

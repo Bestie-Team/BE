@@ -277,18 +277,37 @@ export class FriendsPrismaRepository implements FriendsRepository {
     });
   }
 
-  async update(id: string, data: Partial<FriendEntity>): Promise<void> {
-    await this.prisma.friend.update({
+  async update(
+    senderId: string,
+    receiverId: string,
+    data: Partial<FriendEntity>,
+  ): Promise<void> {
+    await this.prisma.friend.updateMany({
       data,
-      where: { id },
+      where: {
+        OR: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
+      },
     });
   }
 
-  async delete(id: string): Promise<void> {
-    await this.prisma.friend.delete({
+  async delete(senderId: string, receiverId: string): Promise<void> {
+    await this.prisma.friend.deleteMany({
       where: {
-        id,
+        OR: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
       },
+    });
+  }
+
+  async updateById(id: string, data: Partial<FriendEntity>): Promise<void> {
+    await this.prisma.friend.update({
+      data,
+      where: { id },
     });
   }
 

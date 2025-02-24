@@ -33,6 +33,7 @@ export class FriendsWriter {
     await this.friendsRepository.save(friend);
   }
 
+  // NOTE
   async checkExistFriend(senderId: string, receiverId: string) {
     const existFriend =
       await this.friendsRepository.findOneBySenderAndReceiverId(
@@ -59,15 +60,14 @@ export class FriendsWriter {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
 
-    await this.friendsRepository.update(friendRequest.id, {
+    await this.update(senderId, receiverId, {
       status: 'ACCEPTED',
       updatedAt: new Date(),
     });
   }
 
   async reject(senderId: string, receiverId: string) {
-    const friendRequest = await this.checkExistRequest(senderId, receiverId);
-    await this.friendsRepository.delete(friendRequest.id);
+    await this.friendsRepository.delete(senderId, receiverId);
   }
 
   async checkExistRequest(senderId: string, receiverId: string) {
@@ -83,8 +83,16 @@ export class FriendsWriter {
     return friendRequest;
   }
 
-  async update(id: string, data: Partial<FriendEntity>) {
-    await this.friendsRepository.update(id, data);
+  async update(
+    senderId: string,
+    receiverId: string,
+    data: Partial<FriendEntity>,
+  ) {
+    await this.friendsRepository.update(senderId, receiverId, data);
+  }
+
+  async updateById(id: string, data: Partial<FriendEntity>) {
+    await this.friendsRepository.updateById(id, data);
   }
 
   async delete(friendUserId: string, userId: string) {

@@ -40,7 +40,7 @@ export class FriendReportsWriteSerivce {
     const { reportedId, reporterId } = prototype;
     await this.deleteAllPendingGatheringInvitation(reporterId, reportedId);
     await this.saveReport(prototype);
-    await this.friendsWriter.update(friendRelationId, {
+    await this.friendsWriter.updateById(friendRelationId, {
       status: 'REPORTED',
     });
   }

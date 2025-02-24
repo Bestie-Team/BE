@@ -41,8 +41,13 @@ export interface FriendsRepository {
     senderId: string;
     receiverId: string;
   } | null>;
-  update(id: string, data: Partial<FriendEntity>): Promise<void>;
-  delete(id: string): Promise<void>;
+  update(
+    senderId: string,
+    receiverId: string,
+    data: Partial<FriendEntity>,
+  ): Promise<void>;
+  updateById(id: string, data: Partial<FriendEntity>): Promise<void>;
+  delete(senderId: string, receiverId: string): Promise<void>;
   deleteByUserIds(firstUserId: string, secondUserId: string): Promise<void>;
 }
 

@@ -5,6 +5,7 @@ import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
 import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
 import { User } from 'src/domain/types/user.types';
+import { DateIdPaginationInput } from 'src/shared/types';
 
 @Injectable()
 export class FeedsReader {
@@ -30,6 +31,13 @@ export class FeedsReader {
 
   async readOwn(userId: string, feedPaginationInput: FeedPaginationInput) {
     return await this.getFeeds(userId, feedPaginationInput, 'MY');
+  }
+
+  async readBlocked(userId: string, paginationInput: DateIdPaginationInput) {
+    return await this.feedsRepository.findBlockedFeedsByUserId(
+      userId,
+      paginationInput,
+    );
   }
 
   private async getCommonFeedWithMember(

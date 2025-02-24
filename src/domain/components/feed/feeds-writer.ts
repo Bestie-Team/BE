@@ -23,11 +23,11 @@ import {
   NOT_FOUND_GATHERING_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
-import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { calcDiffDate } from 'src/utils/date';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
+import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
 
 @Injectable()
 export class FeedsWriter {
@@ -36,10 +36,9 @@ export class FeedsWriter {
     private readonly feedsRepository: FeedsRepository,
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,
-    @Inject(GatheringsRepository)
-    private readonly gatheringsRepository: GatheringsRepository,
     @Inject(FriendFeedVisibilitiesRepository)
     private readonly friendFeedVisibilitiesRepository: FriendFeedVisibilitiesRepository,
+    private readonly gatheringsReader: GatheringsReader,
   ) {}
 
   async createGatheringFeed(
@@ -88,7 +87,7 @@ export class FeedsWriter {
     writerId: string,
     today: Date,
   ) {
-    const gathering = await this.gatheringsRepository.findOneById(gatheringId);
+    const gathering = await this.gatheringsReader.readOne(gatheringId);
     if (!gathering) {
       throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);
     }

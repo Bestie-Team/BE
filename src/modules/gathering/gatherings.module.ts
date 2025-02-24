@@ -28,9 +28,6 @@ import { GatheringsService } from 'src/domain/services/gatherings/gatherings.ser
     GatheringsReader,
     { provide: GatheringsRepository, useClass: GatheringsPrismaRepository },
   ],
-  exports: [
-    GatheringsWriter,
-    { provide: GatheringsRepository, useClass: GatheringsPrismaRepository },
-  ],
+  exports: [GatheringsWriter, GatheringsReader],
 })
 export class GatheringsModule {}

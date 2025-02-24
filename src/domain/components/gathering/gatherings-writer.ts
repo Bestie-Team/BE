@@ -11,13 +11,11 @@ import {
   CANT_DELETE_END_GATHERING,
   FORBIDDEN_MESSAGE,
 } from 'src/domain/error/messages';
-import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import {
   GatheringPrototype,
   UpdateInput,
 } from 'src/domain/types/gathering.types';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
-import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
 

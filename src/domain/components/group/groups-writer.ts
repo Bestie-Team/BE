@@ -11,7 +11,6 @@ import { v4 } from 'uuid';
 import { GroupEntity } from 'src/domain/entities/group/group.entity';
 import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
 import { GroupPrototype } from 'src/domain/types/group.types';
-import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import {
   CANT_INVITE_REPORTED_USER,
   FORBIDDEN_MESSAGE,
@@ -20,25 +19,20 @@ import {
 } from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
-import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
+import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
 
 @Injectable()
 export class GroupsWriter {
   constructor(
     @Inject(GroupsRepository)
     private readonly groupsRepository: GroupsRepository,
-    @Inject(FriendsRepository)
-    private readonly friendsRepository: FriendsRepository,
     @Inject(GroupParticipationsRepository)
     private readonly groupParticipationsRepository: GroupParticipationsRepository,
+    private readonly friendsChecker: FriendsChecker,
   ) {}
 
   async create(prototype: GroupPrototype, friendIds: string[]) {
-    await checkIsFriendAll(
-      this.friendsRepository,
-      prototype.ownerId,
-      friendIds,
-    );
+    await this.friendsChecker.checkIsFriendAll(prototype.ownerId, friendIds);
     const stdDate = new Date();
     const group = GroupEntity.create(prototype, v4, new Date());
     const groupParticipations = [prototype.ownerId, ...friendIds].map(
@@ -58,7 +52,7 @@ export class GroupsWriter {
     inviterId: string,
     participantIds: string[],
   ) {
-    await checkIsFriendAll(this.friendsRepository, inviterId, participantIds);
+    await this.friendsChecker.checkIsFriendAll(inviterId, participantIds);
     await this.checkExisting(participantIds);
     const stdDate = new Date();
     const groupParticipations = participantIds.map((participantId) =>

@@ -22,22 +22,20 @@ import {
   IS_NOT_DONE_GATHERING_MESSAGE,
   NOT_FOUND_GATHERING_MESSAGE,
 } from 'src/domain/error/messages';
-import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { calcDiffDate } from 'src/utils/date';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
-import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
 import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
+import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
 
 @Injectable()
 export class FeedsWriter {
   constructor(
     @Inject(FeedsRepository)
     private readonly feedsRepository: FeedsRepository,
-    @Inject(FriendsRepository)
-    private readonly friendsRepository: FriendsRepository,
     @Inject(FriendFeedVisibilitiesRepository)
     private readonly friendFeedVisibilitiesRepository: FriendFeedVisibilitiesRepository,
+    private readonly friendsChecker: FriendsChecker,
     private readonly gatheringsReader: GatheringsReader,
   ) {}
 
@@ -68,7 +66,7 @@ export class FeedsWriter {
     friendIds: string[],
   ) {
     const { writerId } = prototype;
-    await checkIsFriendAll(this.friendsRepository, writerId, friendIds);
+    await this.friendsChecker.checkIsFriendAll(writerId, friendIds);
     await this.createFriendFeedTransaction(prototype, imageUrls, friendIds);
   }
 

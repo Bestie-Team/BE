@@ -6,13 +6,13 @@ import { GroupsWriter } from 'src/domain/components/group/groups-writer';
 import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { GroupParticipationsPrismaRepository } from 'src/infrastructure/repositories/group/group-participations-prisma.repository';
 import { GroupsPrismaRepository } from 'src/infrastructure/repositories/group/groups-prisma.repository';
-import { FriendsModule } from 'src/modules/friend/friends.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { UsersModule } from 'src/modules/user/users.module';
 import { GroupsController } from 'src/presentation/controllers/group/groups.controller';
+import { FriendsCheckerModule } from 'src/modules/friend/friends-chcker.module';
 
 @Module({
-  imports: [FriendsModule, UsersModule, NotificationsModule],
+  imports: [UsersModule, NotificationsModule, FriendsCheckerModule],
   controllers: [GroupsController],
   providers: [
     GroupCreationUseCase,

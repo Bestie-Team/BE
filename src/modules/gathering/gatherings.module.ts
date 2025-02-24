@@ -18,6 +18,5 @@ import { GroupParticipationsModule } from 'src/modules/group/group-participation
   ],
   controllers: [GatheringsController],
   providers: [GatheringInvitationAcceptanceUseCase, GatheringsService],
-  exports: [],
 })
 export class GatheringsModule {}

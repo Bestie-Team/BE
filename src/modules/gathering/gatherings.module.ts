@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance.use-case';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
-import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
 import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
 import { GatheringsWriter } from 'src/domain/components/gathering/gatherings-writer';
 import { GatheringsPrismaRepository } from 'src/infrastructure/repositories/gathering/gatherings-prisma.repository';
@@ -27,7 +26,6 @@ import { GatheringsService } from 'src/domain/services/gatherings/gatherings.ser
     GatheringsService,
     GatheringsWriter,
     GatheringsReader,
-    GatheringInvitationsReader,
     { provide: GatheringsRepository, useClass: GatheringsPrismaRepository },
   ],
   exports: [

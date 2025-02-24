@@ -17,16 +17,15 @@ import {
   UpdateInput,
 } from 'src/domain/types/gathering.types';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
-import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 import { checkIsFriendAll } from 'src/domain/helpers/check-is-friend';
+import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 
 @Injectable()
 export class GatheringsWriter {
   constructor(
     @Inject(GatheringsRepository)
     private readonly gatheringsRepository: GatheringsRepository,
-    @Inject(GatheringParticipationsRepository)
-    private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
+    private readonly gatheringParticiationsWriter: GatheringInvitationsWriter,
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,
   ) {}
@@ -82,8 +81,6 @@ export class GatheringsWriter {
   @Transactional()
   async deleteTransaction(gatheringId: string) {
     await this.gatheringsRepository.delete(gatheringId);
-    await this.gatheringParticipationsRepository.deleteAllByGatheringId(
-      gatheringId,
-    );
+    await this.gatheringParticiationsWriter.deleteMany(gatheringId);
   }
 }

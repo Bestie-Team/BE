@@ -4,9 +4,9 @@ import { v4 } from 'uuid';
 import { ReportEntity } from 'src/domain/entities/report/report.entity';
 import { IS_NOT_FRIEND_RELATION_MESSAGE } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
-import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 import { ReportsRepository } from 'src/domain/interface/report/reports.repository';
 import { ReportPrototype } from 'src/domain/types/report.types';
+import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 
 @Injectable()
 export class FriendReportsWriteSerivce {
@@ -15,8 +15,7 @@ export class FriendReportsWriteSerivce {
     private readonly reportsRepository: ReportsRepository,
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,
-    @Inject(GatheringParticipationsRepository)
-    private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
+    private readonly gatheringParticipationsWriter: GatheringInvitationsWriter,
   ) {}
 
   async report(prototype: ReportPrototype) {
@@ -56,7 +55,7 @@ export class FriendReportsWriteSerivce {
     firstUserId: string,
     secondUserId: string,
   ) {
-    return await this.gatheringParticipationsRepository.deleteAllPendingInvitation(
+    return await this.gatheringParticipationsWriter.deletePending(
       firstUserId,
       secondUserId,
     );

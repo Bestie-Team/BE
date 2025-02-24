@@ -9,6 +9,7 @@ import { GatheringParticipationModules } from 'src/modules/gathering/gathering-p
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { UsersModule } from 'src/modules/user/users.module';
 import { FriendsController } from 'src/presentation/controllers/friend/friends.controller';
+import { FriendsService } from 'src/domain/services/friends/friends.service';
 
 @Module({
   imports: [UsersModule, GatheringParticipationModules, NotificationsModule],
@@ -18,6 +19,7 @@ import { FriendsController } from 'src/presentation/controllers/friend/friends.c
     FriendAcceptanceUseCase,
     FriendsWriter,
     FriendsReader,
+    FriendsService,
     { provide: FriendsRepository, useClass: FriendsPrismaRepository },
   ],
   exports: [{ provide: FriendsRepository, useClass: FriendsPrismaRepository }],

@@ -1,4 +1,3 @@
-import { Transactional } from '@nestjs-cls/transactional';
 import {
   BadRequestException,
   ConflictException,
@@ -17,7 +16,6 @@ import {
   NOT_FOUND_FRIEND_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
-import { GatheringParticipationsRepository } from 'src/domain/interface/gathering/gathering-participations.repository';
 import { FriendPrototype } from 'src/domain/types/friend.types';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 
@@ -26,8 +24,6 @@ export class FriendsWriter {
   constructor(
     @Inject(FriendsRepository)
     private readonly friendsRepository: FriendsRepository,
-    @Inject(GatheringParticipationsRepository)
-    private readonly gatheringParticipationsRepository: GatheringParticipationsRepository,
   ) {}
 
   async request(prototype: FriendPrototype) {
@@ -88,17 +84,10 @@ export class FriendsWriter {
   }
 
   async delete(friendUserId: string, userId: string) {
-    await this.checkExistAcceptedFriend(friendUserId, userId);
-    await this.deleteTransaction(friendUserId, userId);
-  }
-
-  @Transactional()
-  async deleteTransaction(friendUserId: string, userId: string) {
-    await this.deleteAllPendingGatheringInvitation(friendUserId, userId);
     await this.friendsRepository.deleteByUserIds(friendUserId, userId);
   }
 
-  private async checkExistAcceptedFriend(friendUserId: string, userId: string) {
+  async checkExistAcceptedFriend(friendUserId: string, userId: string) {
     const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
       friendUserId,
       userId,
@@ -106,15 +95,5 @@ export class FriendsWriter {
     if (!friend || friend.status !== 'ACCEPTED') {
       throw new NotFoundException(IS_NOT_FRIEND_RELATION_MESSAGE);
     }
-  }
-
-  private async deleteAllPendingGatheringInvitation(
-    firstUserId: string,
-    secondUserId: string,
-  ) {
-    return await this.gatheringParticipationsRepository.deleteAllPendingInvitation(
-      firstUserId,
-      secondUserId,
-    );
   }
 }

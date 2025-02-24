@@ -30,6 +30,7 @@ import { FriendsWriter } from 'src/domain/components/friend/friends-writer';
 import { FriendRequestUseCase } from 'src/application/use-cases/friend/friend-request.use-case';
 import { FriendAcceptanceUseCase } from 'src/application/use-cases/friend/friend-acceptance.use-case';
 import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';
+import { FriendsService } from 'src/domain/services/friends/friends.service';
 
 @ApiTags('/friends')
 @ApiBearerAuth()
@@ -38,8 +39,9 @@ import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-f
 @Controller('friends')
 export class FriendsController {
   constructor(
-    private readonly friendsService: FriendsReader,
-    private readonly friendWriteService: FriendsWriter,
+    private readonly friendsReader: FriendsReader,
+    private readonly friendsWriter: FriendsWriter,
+    private readonly friendsService: FriendsService,
     private readonly friendRequestUseCase: FriendRequestUseCase,
     private readonly friendAcceptanceUseCase: FriendAcceptanceUseCase,
   ) {}
@@ -85,7 +87,7 @@ export class FriendsController {
   })
   @Post('reject')
   async reject(@Body() dto: AccepFriendRequest, @CurrentUser() userId: string) {
-    await this.friendWriteService.reject(dto.senderId, userId);
+    await this.friendsWriter.reject(dto.senderId, userId);
   }
 
   @ApiOperation({ summary: '친구 목록 조회' })
@@ -99,7 +101,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendListResponse> {
-    return await this.friendsService.read(userId, paginationDto);
+    return await this.friendsReader.read(userId, paginationDto);
   }
 
   @ApiOperation({ summary: '받은 친구 요청 목록 조회' })
@@ -113,10 +115,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendRequestListResponse> {
-    return await this.friendsService.readReceivedRequests(
-      userId,
-      paginationDto,
-    );
+    return await this.friendsReader.readReceivedRequests(userId, paginationDto);
   }
 
   @ApiOperation({ summary: '보낸 친구 요청 목록 조회' })
@@ -130,7 +129,7 @@ export class FriendsController {
     @Query() paginationDto: UserPaginationRequest,
     @CurrentUser() userId: string,
   ): Promise<FriendRequestListResponse> {
-    return await this.friendsService.readSentRequests(userId, paginationDto);
+    return await this.friendsReader.readSentRequests(userId, paginationDto);
   }
 
   @ApiOperation({ summary: '친구 검색' })
@@ -151,7 +150,7 @@ export class FriendsController {
     @CurrentUser() userId: string,
   ): Promise<FriendListResponse> {
     const { search, ...paginationInput } = dto;
-    return await this.friendsService.search(userId, {
+    return await this.friendsReader.search(userId, {
       search,
       paginationInput,
     });
@@ -177,6 +176,6 @@ export class FriendsController {
     @Query('userId', ParseUUIDPipe) friendUserId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.friendWriteService.delete(friendUserId, userId);
+    await this.friendsService.delete(friendUserId, userId);
   }
 }

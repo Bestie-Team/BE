@@ -57,6 +57,13 @@ export class GatheringInvitationsWriter {
     );
   }
 
+  async deletePending(senderId: string, receiverId: string) {
+    await this.gatheringParticipationsRepository.deleteAllPendingInvitation(
+      senderId,
+      receiverId,
+    );
+  }
+
   private async checkIsParticipant(invitationId: string, userId: string) {
     const participation =
       await this.gatheringParticipationsRepository.findOneByIdAndParticipantId(

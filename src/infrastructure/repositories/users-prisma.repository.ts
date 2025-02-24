@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/domain/entities/user/user.entity';
 import { UsersRepository } from 'src/domain/interface/users.repository';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import type {
   Profile,
   SearchedUser,
@@ -13,19 +12,23 @@ import { SearchInput } from 'src/infrastructure/types/user.types';
 import { sql } from 'kysely';
 import { FriendStatus, GatheringParticipationStatus } from '@prisma/client';
 import { FriendRequestStatus } from 'src/shared/types';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
+import { TransactionHost } from '@nestjs-cls/transactional';
 
 @Injectable()
 export class UsersPrismaRepository implements UsersRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly txHost: TransactionHost<TransactionalAdapterPrisma>,
+  ) {}
 
   async save(data: UserEntity): Promise<void> {
-    await this.prisma.user.create({
+    await this.txHost.tx.user.create({
       data,
     });
   }
 
   async findOneByEmail(email: string): Promise<UserBasicInfo | null> {
-    return await this.prisma.user.findUnique({
+    return await this.txHost.tx.user.findUnique({
       select: {
         id: true,
         email: true,
@@ -41,7 +44,7 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findOneByAccountId(accountId: string): Promise<{ id: string } | null> {
-    return await this.prisma.user.findUnique({
+    return await this.txHost.tx.user.findUnique({
       select: {
         id: true,
       },
@@ -59,7 +62,7 @@ export class UsersPrismaRepository implements UsersRepository {
       })
     | null
   > {
-    return await this.prisma.user.findUnique({
+    return await this.txHost.tx.user.findUnique({
       select: {
         id: true,
         name: true,
@@ -87,7 +90,7 @@ export class UsersPrismaRepository implements UsersRepository {
       updatedAt: Date;
     })[]
   > {
-    return await this.prisma.user.findMany({
+    return await this.txHost.tx.user.findMany({
       select: {
         id: true,
         name: true,
@@ -114,7 +117,7 @@ export class UsersPrismaRepository implements UsersRepository {
   ): Promise<SearchedUser[]> {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
-    const rows = await this.prisma.$kysely
+    const rows = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .leftJoin('friend as f', (join) =>
         join
@@ -195,7 +198,7 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findDetailById(id: string): Promise<UserDetail | null> {
-    const row = await this.prisma.$kysely
+    const row = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .select((qb) =>
@@ -247,7 +250,7 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findProfileById(id: string): Promise<Profile | null> {
-    const row = await this.prisma.$kysely
+    const row = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
       .select((qb) =>
@@ -296,7 +299,7 @@ export class UsersPrismaRepository implements UsersRepository {
 
   async update(data: Partial<UserEntity>): Promise<void> {
     const { id, ...updateDate } = data;
-    await this.prisma.user.update({
+    await this.txHost.tx.user.update({
       data: updateDate,
       where: {
         id,
@@ -305,7 +308,7 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.user.update({
+    await this.txHost.tx.user.update({
       data: {
         deletedAt: new Date(),
       },

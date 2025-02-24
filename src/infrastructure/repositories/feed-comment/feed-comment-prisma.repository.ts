@@ -1,21 +1,24 @@
+import { TransactionHost } from '@nestjs-cls/transactional';
+import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable } from '@nestjs/common';
 import { FeedCommentEntity } from 'src/domain/entities/feed-comment/feed-comment.entity';
 import { FeedCommentRepository } from 'src/domain/interface/feed-comment/feed-comments.repository';
 import { FeedComment } from 'src/domain/types/feed-comment.types';
-import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 
 @Injectable()
 export class FeedCommentPrismaRepository implements FeedCommentRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly txHost: TransactionHost<TransactionalAdapterPrisma>,
+  ) {}
 
   async save(data: FeedCommentEntity): Promise<void> {
-    await this.prisma.feedComment.create({
+    await this.txHost.tx.feedComment.create({
       data,
     });
   }
 
   async findByFeedId(feedId: string): Promise<FeedComment[]> {
-    return await this.prisma.feedComment.findMany({
+    return await this.txHost.tx.feedComment.findMany({
       select: {
         id: true,
         content: true,
@@ -40,7 +43,7 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
   }
 
   async findOneById(id: string): Promise<{ writerId: string } | null> {
-    return await this.prisma.activeFeedComment.findUnique({
+    return await this.txHost.tx.activeFeedComment.findUnique({
       where: {
         id,
       },
@@ -48,7 +51,7 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.feedComment.update({
+    await this.txHost.tx.feedComment.update({
       data: {
         deletedAt: new Date(),
       },

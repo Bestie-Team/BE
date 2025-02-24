@@ -16,7 +16,6 @@ import {
   NOT_FOUND_FRIEND_MESSAGE,
 } from 'src/domain/error/messages';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
-import { FriendPrototype } from 'src/domain/types/friend.types';
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 
 @Injectable()
@@ -26,10 +25,7 @@ export class FriendsWriter {
     private readonly friendsRepository: FriendsRepository,
   ) {}
 
-  async request(prototype: FriendPrototype) {
-    const stdDate = new Date();
-    const friend = FriendEntity.create(prototype, v4, stdDate);
-
+  async create(friend: FriendEntity) {
     await this.friendsRepository.save(friend);
   }
 
@@ -55,12 +51,20 @@ export class FriendsWriter {
   }
 
   async accept(senderId: string, receiverId: string) {
-    const friendRequest = await this.checkExistRequest(senderId, receiverId);
+    const friendRequest =
+      await this.friendsRepository.findOneBySenderAndReceiverId(
+        senderId,
+        receiverId,
+      );
+
+    if (!friendRequest) {
+      throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
+    }
     if (friendRequest.receiverId !== receiverId) {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
 
-    await this.update(senderId, receiverId, {
+    await this.updateById(friendRequest.id, {
       status: 'ACCEPTED',
       updatedAt: new Date(),
     });
@@ -68,19 +72,6 @@ export class FriendsWriter {
 
   async reject(senderId: string, receiverId: string) {
     await this.friendsRepository.delete(senderId, receiverId);
-  }
-
-  async checkExistRequest(senderId: string, receiverId: string) {
-    const friendRequest =
-      await this.friendsRepository.findOneBySenderAndReceiverId(
-        senderId,
-        receiverId,
-      );
-    if (!friendRequest) {
-      throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
-    }
-
-    return friendRequest;
   }
 
   async update(

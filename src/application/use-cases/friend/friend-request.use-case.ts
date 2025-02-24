@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { APP_NAME } from 'src/common/constant';
-import { FriendsWriter } from 'src/domain/components/friend/friends-writer';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
 import { UsersReader } from 'src/domain/components/user/users-reader';
+import { FriendsService } from 'src/domain/services/friends/friends.service';
 import { FriendPrototype } from 'src/domain/types/friend.types';
 
 @Injectable()
@@ -10,17 +10,15 @@ export class FriendRequestUseCase {
   private readonly logger = new Logger('FriendRequestUseCase');
 
   constructor(
-    private readonly friendWriteService: FriendsWriter,
-    private readonly notificationService: NotificationsService,
+    private readonly friendsService: FriendsService,
     private readonly usersReader: UsersReader,
+    private readonly notificationService: NotificationsService,
   ) {}
 
   async execute(input: FriendPrototype) {
     const { receiverId, senderId } = input;
 
-    await this.friendWriteService.checkExistFriend(senderId, receiverId);
-    await this.friendWriteService.request(input);
-
+    await this.friendsService.request(input);
     this.notify(senderId, receiverId);
   }
 

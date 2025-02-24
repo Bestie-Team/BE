@@ -1,6 +1,19 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { FORBIDDEN_MESSAGE } from '@nestjs/core/guards';
 import { FriendsReader } from 'src/domain/components/friend/friends-reader';
-import { IS_NOT_FRIEND_RELATION_MESSAGE } from 'src/domain/error/messages';
+import {
+  CANT_REQUEST_REPORTED_FRIEND_MESSAGE,
+  FRIEND_ALREADY_EXIST_MESSAGE,
+  FRIEND_REQUEST_ALREADY_EXIST_MESSAGE,
+  IS_NOT_FRIEND_RELATION_MESSAGE,
+  NOT_FOUND_FRIEND_MESSAGE,
+} from 'src/domain/error/messages';
 
 @Injectable()
 export class FriendsChecker {
@@ -19,5 +32,39 @@ export class FriendsChecker {
     });
 
     await Promise.all(friendChecks);
+  }
+
+  async checkExistFriend(senderId: string, receiverId: string) {
+    const existFriend = await this.friendsReader.readOne(senderId, receiverId);
+
+    if (existFriend) {
+      if (existFriend.status === 'ACCEPTED') {
+        throw new ConflictException(FRIEND_ALREADY_EXIST_MESSAGE);
+      }
+      if (existFriend.status === 'PENDING') {
+        throw new ConflictException(FRIEND_REQUEST_ALREADY_EXIST_MESSAGE);
+      }
+      // TODO 요구사항 변경에 따라 수정 가능성 있음.
+      if (existFriend.status === 'REPORTED') {
+        throw new BadRequestException(CANT_REQUEST_REPORTED_FRIEND_MESSAGE);
+      }
+    }
+
+    return existFriend;
+  }
+
+  async checkExistRequest(senderId: string, receiverId: string) {
+    const friendRequest = await this.friendsReader.readOne(
+      senderId,
+      receiverId,
+    );
+    if (!friendRequest) {
+      throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
+    }
+    if (friendRequest.receiverId !== receiverId) {
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    }
+
+    return friendRequest;
   }
 }

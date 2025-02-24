@@ -46,10 +46,6 @@ export class FriendsWriter {
     }
   }
 
-  async reject(senderId: string, receiverId: string) {
-    await this.friendsRepository.delete(senderId, receiverId);
-  }
-
   async update(
     senderId: string,
     receiverId: string,

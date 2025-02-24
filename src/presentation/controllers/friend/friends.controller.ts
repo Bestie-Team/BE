@@ -87,7 +87,7 @@ export class FriendsController {
   })
   @Post('reject')
   async reject(@Body() dto: AccepFriendRequest, @CurrentUser() userId: string) {
-    await this.friendsWriter.reject(dto.senderId, userId);
+    await this.friendsService.reject(dto.senderId, userId);
   }
 
   @ApiOperation({ summary: '친구 목록 조회' })

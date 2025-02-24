@@ -7,10 +7,12 @@ import { UsersModule } from 'src/modules/user/users.module';
 import { FriendsController } from 'src/presentation/controllers/friend/friends.controller';
 import { FriendsService } from 'src/domain/services/friends/friends.service';
 import { FriendsComponentModule } from 'src/modules/friend/friends-componenet.module';
+import { FriendsCheckerModule } from 'src/modules/friend/friends-chcker.module';
 
 @Module({
   imports: [
     FriendsComponentModule,
+    FriendsCheckerModule,
     UsersModule,
     GatheringParticipationModules,
     NotificationsModule,

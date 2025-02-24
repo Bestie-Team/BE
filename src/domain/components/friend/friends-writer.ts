@@ -83,6 +83,10 @@ export class FriendsWriter {
     return friendRequest;
   }
 
+  async update(id: string, data: Partial<FriendEntity>) {
+    await this.friendsRepository.update(id, data);
+  }
+
   async delete(friendUserId: string, userId: string) {
     await this.friendsRepository.deleteByUserIds(friendUserId, userId);
   }

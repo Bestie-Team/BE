@@ -22,6 +22,6 @@ import { FriendsService } from 'src/domain/services/friends/friends.service';
     FriendsService,
     { provide: FriendsRepository, useClass: FriendsPrismaRepository },
   ],
-  exports: [{ provide: FriendsRepository, useClass: FriendsPrismaRepository }],
+  exports: [FriendsWriter, FriendsReader],
 })
 export class FriendsModule {}

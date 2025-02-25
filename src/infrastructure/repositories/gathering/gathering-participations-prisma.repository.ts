@@ -56,40 +56,48 @@ export class GatheringParticipationsPrismaRepository
       .leftJoin('group as gr', 'g.group_id', 'gr.id')
       .select([
         'gp.id',
+        'gp.created_at',
         'g.id as gathering_id',
         'g.name',
         'g.description',
-        'gp.created_at',
         'g.gathering_date',
         'g.address',
         'g.invitation_image_url',
         'hu.account_id as sender',
         'gr.name as group_name',
       ])
-      .where('gp.participant_id', '=', participantId)
-      .where('gp.created_at', '>=', new Date(minDate))
-      .where('gp.created_at', '<=', new Date(maxDate))
-      .where((eb) =>
-        eb.or([
-          eb(
-            'gp.created_at',
-            maxDate === cursor.createdAt ? '<=' : '<',
-            new Date(cursor.createdAt),
-          ),
-          eb.and([
-            eb('gp.created_at', '=', new Date(cursor.createdAt)),
-            eb('g.id', '>', cursor.id),
-          ]),
-        ]),
-      )
-      .where(
-        'gp.status',
-        '=',
-        sql<GatheringParticipationStatus>`${GatheringParticipationStatus.PENDING}::"GatheringParticipationStatus"`,
+      .where('gp.id', 'in', (qb) =>
+        qb
+          .selectFrom('gathering_participation as gp')
+          .select('gp.id')
+          .where('gp.participant_id', '=', participantId)
+          .where(
+            'gp.status',
+            '=',
+            sql<GatheringParticipationStatus>`${GatheringParticipationStatus.PENDING}::"GatheringParticipationStatus"`,
+          )
+          .where('gp.created_at', '>=', new Date(minDate))
+          .where('gp.created_at', '<=', new Date(maxDate))
+          .where((eb) =>
+            eb.or([
+              eb(
+                'gp.created_at',
+                maxDate === cursor.createdAt ? '<=' : '<',
+                new Date(cursor.createdAt),
+              ),
+              eb.and([
+                eb('gp.created_at', '=', new Date(cursor.createdAt)),
+                eb('g.id', '>', cursor.id),
+              ]),
+            ]),
+          )
+          .groupBy('gp.id')
+          .orderBy('gp.created_at', 'desc')
+          .orderBy('gp.id', 'asc')
+          .limit(limit),
       )
       .orderBy('gp.created_at', 'desc')
       .orderBy('gp.id', 'asc')
-      .limit(limit)
       .execute();
 
     const result: { [key: string]: ReceivedGatheringInvitation } = {};
@@ -135,38 +143,34 @@ export class GatheringParticipationsPrismaRepository
       ])
       .where('g.id', 'in', (qb) =>
         qb
-          .selectFrom('gathering as gs')
-          .innerJoin(
-            'gathering_participation as gps',
-            'gs.id',
-            'gps.gathering_id',
-          )
-          .select('gs.id')
-          .where('gs.host_user_id', '=', senderId)
-          .where('gs.created_at', '>=', new Date(minDate))
-          .where('gs.created_at', '<=', new Date(maxDate))
-          .where((eb) =>
-            eb.or([
-              eb(
-                'gs.created_at',
-                cursor.createdAt === maxDate ? '<=' : '<',
-                new Date(cursor.createdAt),
-              ),
-              eb.and([
-                eb('gs.created_at', '=', new Date(cursor.createdAt)),
-                eb('gs.id', '>', cursor.id),
-              ]),
-            ]),
-          )
-          .where('gs.deleted_at', 'is', null)
+          .selectFrom('active_gathering as g')
+          .innerJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
+          .select('g.id')
+          .where('g.host_user_id', '=', senderId)
+          .where('gp.participant_id', '!=', senderId)
           .where(
             'gp.status',
             '=',
             sql<GatheringParticipationStatus>`${GatheringParticipationStatus.PENDING}::"GatheringParticipationStatus"`,
           )
-          .orderBy('gs.created_at', 'desc')
-          .orderBy('gs.id', 'asc')
-          .groupBy('gs.id')
+          .where('g.created_at', '>=', new Date(minDate))
+          .where('g.created_at', '<=', new Date(maxDate))
+          .where((eb) =>
+            eb.or([
+              eb(
+                'g.created_at',
+                cursor.createdAt === maxDate ? '<=' : '<',
+                new Date(cursor.createdAt),
+              ),
+              eb.and([
+                eb('g.created_at', '=', new Date(cursor.createdAt)),
+                eb('g.id', '>', cursor.id),
+              ]),
+            ]),
+          )
+          .groupBy(['g.id', 'g.created_at'])
+          .orderBy('g.created_at', 'desc')
+          .orderBy('g.id', 'asc')
           .limit(limit),
       )
       .orderBy('g.created_at', 'desc')

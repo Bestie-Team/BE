@@ -36,24 +36,23 @@ export class GroupCreationUseCase {
     const invitees = await this.usersReader.readMulti(inviteeIds);
 
     const notificationPromises = invitees.map(async (invitee) => {
-      if (invitee.notificationToken && invitee.serviceNotificationConsent) {
-        return this.notificationsService
-          .createV2({
-            message: `${sender.name}님이 ${groupName} 그룹에 초대했어요!`,
-            type: 'GROUP_INVITATION',
-            title: APP_NAME,
-            userId: invitee.id,
-            token: invitee.notificationToken,
-            relatedId: null,
-          })
-          .catch((e: Error) =>
-            this.logger.log({
-              message: `알림 에러: ${e.message}`,
-              stack: e.stack,
-              timestamp: new Date().toISOString(),
-            }),
-          );
-      }
+      return this.notificationsService
+        .createV2({
+          message: `${sender.name}님이 ${groupName} 그룹에 초대했어요!`,
+          type: 'GROUP_INVITATION',
+          title: APP_NAME,
+          userId: invitee.id,
+          token: invitee.notificationToken,
+          serviceNotificationConsent: invitee.serviceNotificationConsent,
+          relatedId: null,
+        })
+        .catch((e: Error) =>
+          this.logger.log({
+            message: `알림 에러: ${e.message}`,
+            stack: e.stack,
+            timestamp: new Date().toISOString(),
+          }),
+        );
     });
 
     Promise.all(notificationPromises);

@@ -18,21 +18,23 @@ export class NotificationsService {
     private readonly eventPublisher: EventPublisher,
   ) {}
 
-  async createV2(input: NotificationPrototype & { token: string }) {
+  async createV2(
+    input: NotificationPrototype & {
+      token: string | null;
+      serviceNotificationConsent: boolean;
+    },
+  ) {
     const stdDate = new Date();
     const notification = NotificationEntity.create(input, v4, stdDate);
     this.notificationRepository.save(notification);
-    this.eventPublisher.publish('notify', {
-      body: input.message,
-      title: input.title,
-      token: input.token,
-    });
-  }
 
-  async create(prototype: NotificationPrototype) {
-    const stdDate = new Date();
-    const notification = NotificationEntity.create(prototype, v4, stdDate);
-    await this.notificationRepository.save(notification);
+    if (input.token && input.serviceNotificationConsent) {
+      this.eventPublisher.publish('notify', {
+        body: input.message,
+        title: input.title,
+        token: input.token,
+      });
+    }
   }
 
   async createNotifications(prototypes: NotificationPrototype[]) {

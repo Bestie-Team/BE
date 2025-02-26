@@ -24,27 +24,25 @@ export class FriendAcceptanceUseCase {
 
   async notify(senderId: string, receiverId: string) {
     const sender = await this.usersReader.readOne(senderId);
+    const receiver = await this.usersReader.readOne(receiverId);
+    const message = `${receiver.name}님이 친구 요청을 수락했어요!`;
 
-    if (sender.notificationToken && sender.serviceNotificationConsent) {
-      const receiver = await this.usersReader.readOne(receiverId);
-      const message = `${receiver.name}님이 친구 요청을 수락했어요!`;
-
-      this.notificationsService
-        .createV2({
-          message,
-          relatedId: null,
-          title: APP_NAME,
-          token: sender.notificationToken,
-          type: 'FRIEND_REQUEST_ACCEPTED',
-          userId: sender.id,
-        })
-        .catch((e: Error) =>
-          this.logger.log({
-            message: `알림 에러: ${e.message}`,
-            stack: e.stack,
-            timestamp: new Date().toISOString(),
-          }),
-        );
-    }
+    this.notificationsService
+      .createV2({
+        message,
+        relatedId: null,
+        title: APP_NAME,
+        token: sender.notificationToken,
+        serviceNotificationConsent: sender.serviceNotificationConsent,
+        type: 'FRIEND_REQUEST_ACCEPTED',
+        userId: sender.id,
+      })
+      .catch((e: Error) =>
+        this.logger.log({
+          message: `알림 에러: ${e.message}`,
+          stack: e.stack,
+          timestamp: new Date().toISOString(),
+        }),
+      );
   }
 }

@@ -28,26 +28,25 @@ export class GatheringInvitationAcceptanceUseCase {
     const gathering = await this.gatheringsReadService.readOne(gatheringId);
     const hostUser = await this.usersReader.readOne(gathering.hostUserId);
 
-    if (hostUser.notificationToken && hostUser.serviceNotificationConsent) {
-      const invitee = await this.usersReader.readOne(inviteeId);
-      const message = `${invitee.name}님이 약속 초대를 수락했어요!`;
+    const invitee = await this.usersReader.readOne(inviteeId);
+    const message = `${invitee.name}님이 약속 초대를 수락했어요!`;
 
-      this.notificationsService
-        .createV2({
-          message,
-          type: 'GATHERING_INVITATION_ACCEPTED',
-          title: APP_NAME,
-          userId: hostUser.id,
-          token: hostUser.notificationToken,
-          relatedId: gathering.id,
-        })
-        .catch((e: Error) =>
-          this.logger.log({
-            message: `알림 에러: ${e.message}`,
-            stack: e.stack,
-            timestamp: new Date().toISOString(),
-          }),
-        );
-    }
+    this.notificationsService
+      .createV2({
+        message,
+        type: 'GATHERING_INVITATION_ACCEPTED',
+        title: APP_NAME,
+        userId: hostUser.id,
+        token: hostUser.notificationToken,
+        serviceNotificationConsent: hostUser.serviceNotificationConsent,
+        relatedId: gathering.id,
+      })
+      .catch((e: Error) =>
+        this.logger.log({
+          message: `알림 에러: ${e.message}`,
+          stack: e.stack,
+          timestamp: new Date().toISOString(),
+        }),
+      );
   }
 }

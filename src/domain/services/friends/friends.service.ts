@@ -6,18 +6,21 @@ import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gath
 import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendPrototype } from 'src/domain/types/friend.types';
 import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
+import { UsersReader } from 'src/domain/components/user/users-reader';
 
 @Injectable()
 export class FriendsService {
   constructor(
     private readonly friendsChecker: FriendsChecker,
     private readonly friendsWriter: FriendsWriter,
+    private readonly usersReader: UsersReader,
     private readonly gatheringParticipationWriter: GatheringInvitationsWriter,
   ) {}
 
   async request(prototype: FriendPrototype) {
     const { senderId, receiverId } = prototype;
     await this.friendsChecker.checkExistFriend(senderId, receiverId);
+    await this.usersReader.readOne(receiverId);
 
     const stdDate = new Date();
     const friend = FriendEntity.create(prototype, v4, stdDate);
@@ -25,7 +28,7 @@ export class FriendsService {
   }
 
   async accept(senderId: string, receiverId: string) {
-    const friendRequest = await this.friendsChecker.checkExistRequest(
+    const friendRequest = await this.friendsChecker.checkExistPendingRequest(
       senderId,
       receiverId,
     );
@@ -37,6 +40,10 @@ export class FriendsService {
   }
 
   async reject(senderId: string, receiverId: string) {
+    await this.usersReader.readOne(senderId);
+    await this.usersReader.readOne(receiverId);
+    await this.friendsChecker.checkExistPendingRequest(senderId, receiverId);
+
     await this.friendsWriter.delete(senderId, receiverId);
   }
 

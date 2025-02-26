@@ -5,7 +5,7 @@ import { AuthService } from 'src/domain/components/auth/auth.service';
 import { OauthContext } from 'src/infrastructure/auth/context/oauth-context';
 import { GoogleStrategy } from 'src/infrastructure/auth/strategies/google-strategy';
 import { KakaoStrategy } from 'src/infrastructure/auth/strategies/kakao-strategy';
-import { UsersModule } from 'src/modules/user/users.module';
+import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
 import { AuthController } from 'src/presentation/controllers/auth/auth.controller';
 
 @Module({
@@ -19,7 +19,7 @@ import { AuthController } from 'src/presentation/controllers/auth/auth.controlle
         };
       },
     }),
-    UsersModule,
+    UsersComponentModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, OauthContext, GoogleStrategy, KakaoStrategy],

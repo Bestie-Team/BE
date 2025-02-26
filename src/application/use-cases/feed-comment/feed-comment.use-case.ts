@@ -32,26 +32,24 @@ export class FeedCommentCreationUseCase {
     }
 
     const feedWriter = await this.usersReader.readOne(feed.writerId);
+    const commentWriter = await this.usersReader.readOne(writerId);
 
-    if (feedWriter.notificationToken && feedWriter.serviceNotificationConsent) {
-      const commentWriter = await this.usersReader.readOne(writerId);
-
-      this.notificationsService
-        .createV2({
-          message: `${commentWriter.name}님이 회원님의 피드에 댓글을 달았어요!`,
-          type: 'FEED_COMMENT',
-          title: APP_NAME,
-          userId: feedWriter.id,
-          token: feedWriter.notificationToken,
-          relatedId: feedId,
-        })
-        .catch((e: Error) =>
-          this.logger.log({
-            message: `알림 에러: ${e.message}`,
-            stack: e.stack,
-            timestamp: new Date().toISOString(),
-          }),
-        );
-    }
+    this.notificationsService
+      .createV2({
+        message: `${commentWriter.name}님이 회원님의 피드에 댓글을 달았어요!`,
+        type: 'FEED_COMMENT',
+        title: APP_NAME,
+        userId: feedWriter.id,
+        token: feedWriter.notificationToken,
+        serviceNotificationConsent: feedWriter.serviceNotificationConsent,
+        relatedId: feedId,
+      })
+      .catch((e: Error) =>
+        this.logger.log({
+          message: `알림 에러: ${e.message}`,
+          stack: e.stack,
+          timestamp: new Date().toISOString(),
+        }),
+      );
   }
 }

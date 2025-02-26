@@ -17,13 +17,13 @@ import { NotificationsManager } from 'src/domain/components/notification/notific
 import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
 import {
   CONFLICT_GROUP_AND_FRIEND_MESSAGE,
+  FORBIDDEN_MESSAGE,
   GATHERING_CREATION_PAST_DATE_MESSAGE,
   REQUIRED_GROUP_OR_FRIEND_MESSAGE,
 } from 'src/domain/error/messages';
 import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { GatheringType } from 'src/shared/types';
 import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
-import { FORBIDDEN_MESSAGE } from '@nestjs/core/guards';
 
 @Injectable()
 export class GatheringsService {

@@ -69,6 +69,8 @@ export class GatheringParticipationsPrismaRepository
       .where('gp.id', 'in', (qb) =>
         qb
           .selectFrom('gathering_participation as gp')
+          .innerJoin('active_gathering as g', 'g.id', 'gp.gathering_id')
+          .innerJoin('active_user as u', 'u.id', 'g.host_user_id')
           .select('gp.id')
           .where('gp.participant_id', '=', participantId)
           .where(
@@ -145,6 +147,7 @@ export class GatheringParticipationsPrismaRepository
         qb
           .selectFrom('active_gathering as g')
           .innerJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
+          .innerJoin('active_user as m', 'm.id', 'gp.participant_id')
           .select('g.id')
           .where('g.host_user_id', '=', senderId)
           .where('gp.participant_id', '!=', senderId)

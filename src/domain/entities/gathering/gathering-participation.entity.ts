@@ -30,13 +30,21 @@ export class GatheringParticipationEntity {
   }
 
   static createBulk(
-    input: { gatheringId: string; participantIds: string[] },
+    input: {
+      gatheringId: string;
+      participantIds: string[];
+      status: GatheringParticipationStatus[];
+    },
     idGen: () => string,
     stdDate: Date,
   ) {
-    return input.participantIds.map((participantId) =>
+    return input.participantIds.map((participantId, i) =>
       this.create(
-        { gatheringId: input.gatheringId, participantId },
+        {
+          gatheringId: input.gatheringId,
+          participantId,
+          status: input.status[i],
+        },
         idGen,
         stdDate,
       ),

@@ -40,6 +40,9 @@ export class GatheringsService {
       {
         gatheringId: gathering.id,
         participantIds: inviteeIds,
+        status: inviteeIds.map((inviteeId) =>
+          inviteeId === hostUserId ? 'ACCEPTED' : 'PENDING',
+        ),
       },
       v4,
       stdDate,

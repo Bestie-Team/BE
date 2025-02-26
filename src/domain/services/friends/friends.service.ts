@@ -28,7 +28,7 @@ export class FriendsService {
   }
 
   async accept(senderId: string, receiverId: string) {
-    const friendRequest = await this.friendsChecker.checkExistRequest(
+    const friendRequest = await this.friendsChecker.checkExistPendingRequest(
       senderId,
       receiverId,
     );
@@ -40,6 +40,10 @@ export class FriendsService {
   }
 
   async reject(senderId: string, receiverId: string) {
+    await this.usersReader.readOne(senderId);
+    await this.usersReader.readOne(receiverId);
+    await this.friendsChecker.checkExistPendingRequest(senderId, receiverId);
+
     await this.friendsWriter.delete(senderId, receiverId);
   }
 

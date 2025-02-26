@@ -6,12 +6,12 @@ import { FeedCommentPrismaRepository } from 'src/infrastructure/repositories/fee
 import { FeedsComponentModule } from 'src/modules/feed/feeds.component.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { ReportsModule } from 'src/modules/report/reports.module';
-import { UsersModule } from 'src/modules/user/users.module';
+import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
 import { FeedCommentController } from 'src/presentation/controllers/feed-comment/feed-comment.controller';
 
 @Module({
   imports: [
-    UsersModule,
+    UsersComponentModule,
     NotificationsModule,
     FeedsComponentModule,
     ReportsModule,

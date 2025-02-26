@@ -253,6 +253,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
                 accountId: true,
                 profileImageUrl: true,
                 name: true,
+                deletedAt: true,
               },
             },
           },
@@ -282,9 +283,21 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
             : result.user,
           members: result.participations
             .filter((p) => p.participant.id !== result.user.id)
-            .map((participant) => ({
-              ...participant.participant,
-            })),
+            .map((participant) => {
+              return participant.participant.deletedAt
+                ? {
+                    id: '',
+                    accountId: '탈퇴한 사용자',
+                    name: '',
+                    profileImageUrl: '',
+                  }
+                : {
+                    id: participant.participant.id,
+                    accountId: participant.participant.accountId,
+                    name: participant.participant.name,
+                    profileImageUrl: participant.participant.profileImageUrl,
+                  };
+            }),
         }
       : null;
   }

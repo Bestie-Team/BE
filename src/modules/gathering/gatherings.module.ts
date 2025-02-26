@@ -7,6 +7,7 @@ import { GatheringParticipationModules } from 'src/modules/gathering/gathering-p
 import { GroupParticipationsModule } from 'src/modules/group/group-participations.module';
 import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
 import { NotificationsManagerModule } from 'src/modules/notification/notifications-manager.module';
+import { NotificationsModule } from 'src/modules/notification/notifications.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { NotificationsManagerModule } from 'src/modules/notification/notificatio
     GatheringsComponentModule,
     GatheringParticipationModules,
     UsersComponentModule,
+    NotificationsModule,
     NotificationsManagerModule,
   ],
   controllers: [GatheringsController],

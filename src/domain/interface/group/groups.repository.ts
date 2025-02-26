@@ -8,6 +8,7 @@ export interface GroupsRepository {
     userId: string,
     paginationInput: PaginationInput,
   ): Promise<Group[]>;
+  findOneById(id: string): Promise<{ id: string } | null>;
   findOneByGroupAndOwnerId(
     groupId: string,
     ownerId: string,

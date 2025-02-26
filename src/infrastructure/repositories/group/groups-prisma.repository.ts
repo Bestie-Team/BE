@@ -18,6 +18,13 @@ export class GroupsPrismaRepository implements GroupsRepository {
     });
   }
 
+  async findOneById(id: string): Promise<{ id: string } | null> {
+    return await this.txHost.tx.group.findUnique({
+      select: { id: true },
+      where: { id },
+    });
+  }
+
   async findGroupsByUserId(
     userId: string,
     paginationInput: PaginationInput,

@@ -6,9 +6,10 @@ import { NotificationsPrismaRepository } from 'src/infrastructure/repositories/n
 import { NotificationsController } from 'src/presentation/controllers/notification/notifications.controller';
 import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
 import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
+import { NotificationsComponentModule } from 'src/modules/notification/notifications-component.module';
 
 @Module({
-  imports: [EventModule, UsersComponentModule],
+  imports: [EventModule, UsersComponentModule, NotificationsComponentModule],
   controllers: [NotificationsController],
   providers: [
     NotificationsService,

@@ -41,16 +41,7 @@ export class GatheringsWriter {
     return GatheringEntity.create(prototype, v4, stdDate);
   }
 
-  async update(id: string, input: UpdateInput, ownerId: string) {
-    const gathering = await this.gatheringsRepository.findOneByIdAndHostId(
-      id,
-      ownerId,
-    );
-
-    if (!gathering) {
-      throw new ForbiddenException(FORBIDDEN_MESSAGE);
-    }
-
+  async update(id: string, input: UpdateInput) {
     const stdDate = new Date();
     const gatheringDate = new Date(input.gatheringDate);
     await this.gatheringsRepository.update(id, {

@@ -1,11 +1,18 @@
 import { Transactional } from '@nestjs-cls/transactional';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { v4 } from 'uuid';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { GatheringsWriter } from 'src/domain/components/gathering/gatherings-writer';
 import { GatheringParticipationEntity } from 'src/domain/entities/gathering/gathering-participation.entity';
 import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity';
-import { GatheringPrototype } from 'src/domain/types/gathering.types';
+import {
+  GatheringPrototype,
+  UpdateInput,
+} from 'src/domain/types/gathering.types';
 import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
 import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
 import {
@@ -15,6 +22,8 @@ import {
 } from 'src/domain/error/messages';
 import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { GatheringType } from 'src/shared/types';
+import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
+import { FORBIDDEN_MESSAGE } from '@nestjs/core/guards';
 
 @Injectable()
 export class GatheringsService {
@@ -22,6 +31,7 @@ export class GatheringsService {
     private readonly groupsReader: GroupsReader,
     private readonly groupParticipationsReader: GroupParticipationsReader,
     private readonly gatheringsWriter: GatheringsWriter,
+    private readonly gatheringsReader: GatheringsReader,
     private readonly gatheringsParticipationsWriter: GatheringInvitationsWriter,
     private readonly notificationsManager: NotificationsManager,
   ) {}
@@ -72,6 +82,17 @@ export class GatheringsService {
     );
   }
 
+  async update(id: string, hostUserId: string, input: UpdateInput) {
+    const gathering = await this.gatheringsReader.readOne(id);
+    this.validateGatheringDate(input.gatheringDate);
+
+    if (gathering.hostUserId !== hostUserId) {
+      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    }
+
+    await this.gatheringsWriter.update(id, input);
+  }
+
   // TODO 나중에 Checker로 분리도 가능.
   private validate(
     type: GatheringType,
@@ -95,6 +116,10 @@ export class GatheringsService {
     if (groupId && friendUserIds) {
       throw new BadRequestException(CONFLICT_GROUP_AND_FRIEND_MESSAGE);
     }
+    this.validateGatheringDate(gatheringDate);
+  }
+
+  private validateGatheringDate(gatheringDate: string) {
     if (Date.now() > new Date(gatheringDate).getTime()) {
       throw new BadRequestException(GATHERING_CREATION_PAST_DATE_MESSAGE);
     }

@@ -254,7 +254,7 @@ export class GatheringsController {
     @Body() dto: UpdateGatheringRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.gatheringsWriteService.update(gatheringId, dto, userId);
+    await this.gatheringsService.update(gatheringId, userId, dto);
   }
 
   @ApiOperation({ summary: '모임 삭제' })

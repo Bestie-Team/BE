@@ -8,10 +8,12 @@ import { GroupParticipationsModule } from 'src/modules/group/group-participation
 import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
 import { NotificationsManagerModule } from 'src/modules/notification/notifications-manager.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
+import { GroupsComponentModule } from 'src/modules/group/groups-component.module';
 
 @Module({
   imports: [
     GroupParticipationsModule,
+    GroupsComponentModule,
     GatheringsComponentModule,
     GatheringParticipationModules,
     UsersComponentModule,

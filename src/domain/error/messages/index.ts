@@ -1,7 +1,7 @@
 export const NOT_FOUND_USER_MESSAGE = '존재하지 않는 회원 정보입니다.';
 export const NOT_FOUND_FRIEND_MESSAGE = '존재하지 않는 친구 혹은 요청입니다.';
 export const NOT_FOUND_GATHERING_MESSAGE = '존재하지 않는 모임입니다.';
-export const NOT_FOUND_GROUP = '존재하지 않는 그룹입니다.';
+export const NOT_FOUND_GROUP_MESSAGE = '존재하지 않는 그룹입니다.';
 export const NOT_FOUND_COMMENT_MESSAGE = '존재하지 않는 댓글입니다.';
 export const NOT_FOUND_FEED_MESSAGE = '존재하지 않는 피드입니다.';
 export const FRIEND_REQUEST_ALREADY_EXIST_MESSAGE = `이미 존재하는 요청입니다.`;
@@ -29,3 +29,10 @@ export const CANT_INVITE_REPORTED_USER =
 export const GROUP_MEMBER_ALREADY_EXIST_MESSAGE =
   '이미 존재하는 그룹 멤버입니다.';
 export const CANT_DELETE_END_GATHERING = '완료된 모임은 삭제할 수 없습니다.';
+
+export const REQUIRED_GROUP_OR_FRIEND_MESSAGE =
+  '그룹 번호 또는 친구 번호는 필수로 제공되어야 합니다.';
+export const CONFLICT_GROUP_AND_FRIEND_MESSAGE =
+  '그룹 번호와 친구 번호는 동시에 제공될 수 없습니다.';
+export const GATHERING_CREATION_PAST_DATE_MESSAGE =
+  '현재보다 이전의 모임은 생성할 수 없습니다.';

@@ -8,10 +8,18 @@ import { GatheringEntity } from 'src/domain/entities/gathering/gathering.entity'
 import { GatheringPrototype } from 'src/domain/types/gathering.types';
 import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
 import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
+import {
+  CONFLICT_GROUP_AND_FRIEND_MESSAGE,
+  GATHERING_CREATION_PAST_DATE_MESSAGE,
+  REQUIRED_GROUP_OR_FRIEND_MESSAGE,
+} from 'src/domain/error/messages';
+import { GroupsReader } from 'src/domain/components/group/groups-reader';
+import { GatheringType } from 'src/shared/types';
 
 @Injectable()
 export class GatheringsService {
   constructor(
+    private readonly groupsReader: GroupsReader,
     private readonly groupParticipationsReader: GroupParticipationsReader,
     private readonly gatheringsWriter: GatheringsWriter,
     private readonly gatheringsParticipationsWriter: GatheringInvitationsWriter,
@@ -19,17 +27,18 @@ export class GatheringsService {
   ) {}
 
   async create(input: GatheringPrototype, friendUserIds: string[] | null) {
-    const { groupId, hostUserId } = input;
-    this.validate(groupId, friendUserIds);
+    const { groupId, hostUserId, gatheringDate, type } = input;
+    this.validate(type, groupId, friendUserIds, gatheringDate);
 
     let inviteeIds: string[] = [];
 
-    if (groupId) {
+    if (type === 'GROUP' && groupId) {
+      await this.groupsReader.readOneById(groupId);
       inviteeIds = await this.groupParticipationsReader.readParticipants(
         groupId,
       );
     }
-    if (friendUserIds) {
+    if (type === 'FRIEND' && friendUserIds) {
       inviteeIds = [...friendUserIds, hostUserId];
       await this.gatheringsWriter.checkIsFriend(hostUserId, friendUserIds);
     }
@@ -63,16 +72,31 @@ export class GatheringsService {
     );
   }
 
-  private validate(groupId: string | null, friendUserIds: string[] | null) {
+  // TODO 나중에 Checker로 분리도 가능.
+  private validate(
+    type: GatheringType,
+    groupId: string | null,
+    friendUserIds: string[] | null,
+    gatheringDate: string,
+  ) {
     if (!groupId && !friendUserIds) {
-      throw new BadRequestException(
-        '그룹 번호 또는 친구 번호는 필수로 제공되어야 합니다.',
-      );
+      throw new BadRequestException(REQUIRED_GROUP_OR_FRIEND_MESSAGE);
+    }
+    if (type === 'GROUP') {
+      if (!groupId) {
+        throw new BadRequestException();
+      }
+    }
+    if (type === 'FRIEND') {
+      if (!friendUserIds) {
+        throw new BadRequestException();
+      }
     }
     if (groupId && friendUserIds) {
-      throw new BadRequestException(
-        '그룹 번호와 친구 번호는 동시에 제공될 수 없습니다.',
-      );
+      throw new BadRequestException(CONFLICT_GROUP_AND_FRIEND_MESSAGE);
+    }
+    if (Date.now() > new Date(gatheringDate).getTime()) {
+      throw new BadRequestException(GATHERING_CREATION_PAST_DATE_MESSAGE);
     }
   }
 }

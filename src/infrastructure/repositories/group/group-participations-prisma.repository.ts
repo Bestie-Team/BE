@@ -3,7 +3,7 @@ import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-pr
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
-import { NOT_FOUND_GROUP } from 'src/domain/error/messages';
+import { NOT_FOUND_GROUP_MESSAGE } from 'src/domain/error/messages';
 import { GroupParticipationsRepository } from 'src/domain/interface/group/group-participations.repository';
 import { GroupParticipationStatus } from 'src/shared/types';
 
@@ -84,7 +84,7 @@ export class GroupParticipationsPrismaRepository
       });
     } catch (e: unknown) {
       if (e instanceof PrismaClientKnownRequestError && e.code === 'P2025') {
-        throw new NotFoundException(NOT_FOUND_GROUP);
+        throw new NotFoundException(NOT_FOUND_GROUP_MESSAGE);
       }
       throw e;
     }

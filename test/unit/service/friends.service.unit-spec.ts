@@ -121,9 +121,16 @@ describe('FriendsService', () => {
   describe('친구 요청 수락', () => {
     const sender = generateUserEntity('sender@test.com', 'sender_id');
     const receiver = generateUserEntity('receiver@test.com', 'receiver_id');
+    const otherUser = generateUserEntity('other@test.com', 'other_id');
 
     beforeEach(async () => {
-      await db.user.createMany({ data: [sender, receiver] });
+      await db.user.createMany({ data: [sender, receiver, otherUser] });
+    });
+
+    it('대기 상태인 요청이 없는 경우 예외가 발생한다.', async () => {
+      await expect(async () =>
+        friendsService.accept(otherUser.id, receiver.id),
+      ).rejects.toThrow(new NotFoundException(NOT_FOUND_FRIEND_MESSAGE));
     });
 
     it('이미 친구 관계인 회원인 경우 예외가 발생한다.', async () => {
@@ -141,6 +148,42 @@ describe('FriendsService', () => {
       await expect(async () =>
         friendsService.accept(sender.id, nonExistId),
       ).rejects.toThrow(new NotFoundException(NOT_FOUND_FRIEND_MESSAGE));
+    });
+  });
+
+  describe('친구 요청 거절', () => {
+    const sender = generateUserEntity('sender@test.com', 'sender_id');
+    const receiver = generateUserEntity('receiver@test.com', 'receiver_id');
+    const otherUser = generateUserEntity('other@test.com', 'other_id');
+
+    beforeEach(async () => {
+      await db.user.createMany({ data: [sender, receiver, otherUser] });
+    });
+
+    it('보낸 요청을 취소할 때도 정상 동작한다.', async () => {
+      const friend = generateFriendEntity(receiver.id, sender.id);
+      await db.friend.create({ data: friend });
+
+      await friendsService.reject(receiver.id, sender.id);
+      const rejectedRequest = await db.friend.findUnique({
+        where: { id: friend.id },
+      });
+
+      expect(rejectedRequest).toBeNull();
+    });
+
+    it('대기 상태인 요청이 없는 경우 예외가 발생한다.', async () => {
+      await expect(async () =>
+        friendsService.reject(otherUser.id, receiver.id),
+      ).rejects.toThrow(new NotFoundException(NOT_FOUND_FRIEND_MESSAGE));
+    });
+
+    it('대상이 존재하지 않는 회원이면 예외가 발생한다.', async () => {
+      const nonExistId = '0890d33b-543b-4fc7-88dc-c5eb4acf57eb';
+
+      await expect(async () =>
+        friendsService.reject(sender.id, nonExistId),
+      ).rejects.toThrow(new NotFoundException(NOT_FOUND_USER_MESSAGE));
     });
   });
 });

@@ -41,21 +41,24 @@ export class NotificationsManager {
     }
   }
 
-  async sendGatheringCreation(senderId: string, receiverIds: string[]) {
+  async sendGatheringCreation(hostUserId: string, inviteeIds: string[]) {
     if (process.env.NODE_ENV === 'test') {
       return;
     }
-    const sender = await this.usersReader.readOne(senderId);
-    const receivers = await this.usersReader.readMulti(receiverIds);
+    const inviteeWithoutHost = inviteeIds.filter(
+      (inviteeId) => inviteeId !== hostUserId,
+    );
+    const hostUser = await this.usersReader.readOne(hostUserId);
+    const invitees = await this.usersReader.readMulti(inviteeWithoutHost);
 
-    const notificationPromises = receivers.map(async (receiver) => {
+    const notificationPromises = invitees.map(async (invitee) => {
       return this.create({
-        message: `${sender.name}님이 약속 초대장을 보냈어요!`,
+        message: `${hostUser.name}님이 약속 초대장을 보냈어요!`,
         type: 'GATHERING_INVITATION_RECEIVED',
         title: APP_NAME,
-        userId: receiver.id,
-        token: receiver.notificationToken,
-        serviceNotificationConsent: receiver.serviceNotificationConsent,
+        userId: invitee.id,
+        token: invitee.notificationToken,
+        serviceNotificationConsent: invitee.serviceNotificationConsent,
         relatedId: null,
       }).catch((e: Error) =>
         this.logger.log({

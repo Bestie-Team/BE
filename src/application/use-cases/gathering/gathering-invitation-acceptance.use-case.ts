@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InvitationAcceptanceInput } from 'src/application/types/gathering.types';
-import { APP_NAME } from 'src/common/constant';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
@@ -35,7 +34,7 @@ export class GatheringInvitationAcceptanceUseCase {
       .createV2({
         message,
         type: 'GATHERING_INVITATION_ACCEPTED',
-        title: APP_NAME,
+        title: '초대장 수락',
         userId: hostUser.id,
         token: hostUser.notificationToken,
         serviceNotificationConsent: hostUser.serviceNotificationConsent,

@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { APP_NAME } from 'src/common/constant';
 import { FeedCommentsService } from 'src/domain/services/feed-comments/feed-comments.service';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
@@ -38,7 +37,7 @@ export class FeedCommentCreationUseCase {
       .createV2({
         message: `${commentWriter.name}님이 회원님의 피드에 댓글을 달았어요!`,
         type: 'FEED_COMMENT',
-        title: APP_NAME,
+        title: '댓글',
         userId: feedWriter.id,
         token: feedWriter.notificationToken,
         serviceNotificationConsent: feedWriter.serviceNotificationConsent,

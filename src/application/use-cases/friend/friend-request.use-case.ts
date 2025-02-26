@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { APP_NAME } from 'src/common/constant';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
 import { UsersReader } from 'src/domain/components/user/users-reader';
 import { FriendsService } from 'src/domain/services/friends/friends.service';
@@ -31,7 +30,7 @@ export class FriendRequestUseCase {
       .createV2({
         message,
         type: 'FRIEND_REQUEST',
-        title: APP_NAME,
+        title: '친구 요청',
         userId: receiver.id,
         token: receiver.notificationToken,
         serviceNotificationConsent: receiver.serviceNotificationConsent,

@@ -4,7 +4,6 @@ import { NotificationEntity } from 'src/domain/entities/notification/notificatio
 import { NotificationPrototype } from 'src/domain/types/notification.types';
 import { EventPublisher } from 'src/infrastructure/event/publishers/interface/event-publisher';
 import { UsersReader } from 'src/domain/components/user/users-reader';
-import { APP_NAME } from 'src/common/constant';
 import { NotificationsWriter } from 'src/domain/components/notification/notifications-writer';
 
 @Injectable()
@@ -55,7 +54,7 @@ export class NotificationsManager {
       return this.create({
         message: `${hostUser.name}님이 약속 초대장을 보냈어요!`,
         type: 'GATHERING_INVITATION_RECEIVED',
-        title: APP_NAME,
+        title: '약속 초대장',
         userId: invitee.id,
         token: invitee.notificationToken,
         serviceNotificationConsent: invitee.serviceNotificationConsent,

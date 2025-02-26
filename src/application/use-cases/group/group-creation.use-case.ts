@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { APP_NAME } from 'src/common/constant';
 import { GroupsWriter } from 'src/domain/components/group/groups-writer';
 import { NotificationsService } from 'src/domain/components/notification/notifications.service';
 import { UsersReader } from 'src/domain/components/user/users-reader';
@@ -40,7 +39,7 @@ export class GroupCreationUseCase {
         .createV2({
           message: `${sender.name}님이 ${groupName} 그룹에 초대했어요!`,
           type: 'GROUP_INVITATION',
-          title: APP_NAME,
+          title: '그룹 초대',
           userId: invitee.id,
           token: invitee.notificationToken,
           serviceNotificationConsent: invitee.serviceNotificationConsent,

@@ -1,11 +1,9 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { FORBIDDEN_MESSAGE } from '@nestjs/core/guards';
 import { FriendsReader } from 'src/domain/components/friend/friends-reader';
 import {
   CANT_REQUEST_REPORTED_FRIEND_MESSAGE,
@@ -53,16 +51,18 @@ export class FriendsChecker {
     return existFriend;
   }
 
-  async checkExistRequest(senderId: string, receiverId: string) {
+  async checkExistPendingRequest(senderId: string, receiverId: string) {
     const friendRequest = await this.friendsReader.readOne(
       senderId,
       receiverId,
     );
+
     if (!friendRequest) {
       throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
     }
-    if (friendRequest.receiverId !== receiverId) {
-      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+
+    if (friendRequest.status === 'ACCEPTED') {
+      throw new ConflictException(FRIEND_ALREADY_EXIST_MESSAGE);
     }
 
     return friendRequest;

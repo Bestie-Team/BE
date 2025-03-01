@@ -16,7 +16,10 @@ import {
   generateUserEntity,
 } from 'test/helpers/generators';
 import { ResponseResult } from 'test/helpers/types';
-import { ChangeAccountIdRequest } from 'src/presentation/dto';
+import {
+  ChangeAccountIdRequest,
+  UserProfileResponse,
+} from 'src/presentation/dto';
 import { UserDetailResponse } from 'src/presentation/dto/user/response/user-detail.response';
 
 describe('UsersController (e2e)', () => {
@@ -349,5 +352,33 @@ describe('UsersController (e2e)', () => {
 
     expect(status).toEqual(200);
     expect(body.groupCount).toEqual(8);
+  });
+
+  describe('(GET) /users/profile - 회원 프로필 조회', () => {
+    it('프로필 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/users/profile`)
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<UserProfileResponse> = response;
+
+      expect(status).toEqual(200);
+      expect(body.id).toEqual(loginedUser!.id);
+      expect(body.accountId).toEqual(loginedUser!.accountId);
+      expect(body.email).toEqual(loginedUser!.email);
+      expect(body.provider).toEqual(loginedUser!.provider);
+      expect(body.name).toEqual(loginedUser!.name);
+      expect(body.profileImageUrl).toEqual(loginedUser!.profileImageUrl);
+      expect(body.newNotificationCount).toEqual(0);
+      expect(body.newInvitationCount).toEqual(0);
+      expect(body.hasFeed).toBeFalsy();
+    });
   });
 });

@@ -42,6 +42,8 @@ export interface UserDetail extends User {
 export interface Profile {
   readonly id: string;
   readonly accountId: string;
+  readonly email: string;
+  readonly provider: Provider;
   readonly name: string;
   readonly profileImageUrl: string | null;
   readonly newNotificationCount: number;

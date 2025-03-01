@@ -255,7 +255,14 @@ export class UsersPrismaRepository implements UsersRepository {
   async findProfileById(id: string): Promise<Profile | null> {
     const row = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
-      .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
+      .select([
+        'u.id',
+        'u.account_id',
+        'u.email',
+        'u.provider',
+        'u.name',
+        'u.profile_image_url',
+      ])
       .select((qb) =>
         qb
           .selectFrom('gathering_participation as gp')
@@ -291,6 +298,8 @@ export class UsersPrismaRepository implements UsersRepository {
       ? {
           id: row.id,
           accountId: row.account_id,
+          email: row.email,
+          provider: row.provider,
           name: row.name,
           profileImageUrl: row.profile_image_url,
           newNotificationCount: Number(row.new_notification_count || 0),

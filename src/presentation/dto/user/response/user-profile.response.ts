@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Provider } from '../../shared';
 
 export class UserProfileResponse {
   @ApiProperty({ example: 'uuid' })
@@ -6,6 +7,15 @@ export class UserProfileResponse {
 
   @ApiProperty({ example: '최은제' })
   readonly name: string;
+
+  @ApiProperty({ example: 'lighty@gmail.com' })
+  readonly email: string;
+
+  @ApiProperty({
+    example: 'GOOGLE',
+    enum: ['GOOGLE', 'KAKAO', 'APPLE'],
+  })
+  readonly provider: Provider;
 
   @ApiProperty({ example: 'bad_orange' })
   readonly accountId: string;

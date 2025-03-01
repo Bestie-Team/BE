@@ -16,6 +16,7 @@ generator markdown {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 enum OAuthProvider {
@@ -78,6 +79,21 @@ model User {
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+
+  gatherings Gathering[]
+  gatheringParticipant GatheringParticipation[]
+  feeds Feed[]
+  ownedGroups Group[]
+  groupParticipation GroupParticipation[]
+  feedComments FeedComment[]
+  blockedFeeds BlockedFeed[]
+  sentFriendRequest Friend[] @relation("SenderUser")
+  receivedFriendRequests Friend[] @relation("ReceiverUser")
+  friendFeedVisibilities FriendFeedVisibility[]
+  notifications Notification[]
+  reports Report[]
+
+
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
   @@map("user")
@@ -119,6 +135,13 @@ model Gathering {
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  group Group? @relation(fields: [groupId], references: [id])
+  user User @relation(fields: [hostUserId], references: [id])
+  participations GatheringParticipation[]
+  feeds Feed[]
+
+  @@index([hostUserId])
+  @@index([groupId])
   @@map("gathering")
 }
 
@@ -149,6 +172,11 @@ model GatheringParticipation {
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
 
+  gathering Gathering @relation(fields: [gatheringId], references: [id], onDelete: Cascade)
+  participant User @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([gatheringId])
+  @@index([participantId])
   @@map("gathering_participation")
 }
 
@@ -161,6 +189,15 @@ model Feed {
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  writer User @relation(fields: [writerId], references: [id])
+  gathering Gathering? @relation(fields: [gatheringId], references: [id])
+  images FeedImage[]
+  comments FeedComment[]
+  blockedFeeds BlockedFeed[]
+  friendFeedVisibilities FriendFeedVisibility[]
+
+  @@index([writerId])
+  @@index([gatheringId])
   @@map("feed")
 }
 
@@ -183,6 +220,9 @@ model FeedImage {
   url String
   createdAt DateTime @map("created_at")
 
+  feed Feed @relation(fields: [feedId], references: [id])
+
+  @@index([feedId])
   @@map("feed_image")
 }
 
@@ -194,6 +234,11 @@ model FeedComment {
   createdAt DateTime @map("created_at")
   deletedAt DateTime? @map("deleted_at")
 
+  feed Feed @relation(fields: [feedId], references: [id])
+  writer User @relation(fields: [writerId], references: [id])
+
+  @@index([feedId])
+  @@index([writerId])
   @@map("feed_comment")
 }
 
@@ -212,7 +257,11 @@ model FriendFeedVisibility {
   feedId String @db.Uuid @map("feed_id")
   userId String @db.Uuid @map("user_id")
   createdAt DateTime
+  
+  feed Feed @relation(fields: [feedId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
+  @@index([userId])
   @@id([feedId, userId])
   @@map("friend_feed_visibility")
 }
@@ -222,6 +271,10 @@ model BlockedFeed {
   feedId    String @db.Uuid @map("feed_id")
   createdAt DateTime @map("created_at")
 
+  user User @relation(fields: [userId], references: [id])
+  feed Feed @relation(fields: [feedId], references: [id])
+
+  @@index([feedId])
   @@unique([userId, feedId])
   @@map("blocked_feed")
 }
@@ -234,6 +287,10 @@ model Friend {
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
 
+  sender User @relation(name: "SenderUser", fields: [senderId], references: [id])
+  receiver User @relation(name: "ReceiverUser", fields: [receiverId], references: [id])
+
+  @@index([receiverId])
   @@unique([senderId, receiverId])
   @@map("friend")
 }
@@ -248,6 +305,11 @@ model Group {
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
 
+  owner User @relation(fields: [ownerId], references: [id])
+  groupParticipation GroupParticipation[]
+  gatherings Gathering[]
+
+  @@index([ownerId])
   @@map("group")
 }
 
@@ -258,6 +320,10 @@ model GroupParticipation {
   status GroupParticipationStatus @default(ACCEPTED)
   createdAt DateTime @map("created_at")
 
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  participant User @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
   @@unique([groupId, participantId])
   @@map("group_participation")
 }
@@ -272,6 +338,9 @@ model Notification {
   createdAt DateTime @map("created_at")
   readAt DateTime? @map("read_at")
 
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
   @@map("notification")
 }
 
@@ -284,5 +353,8 @@ model Report {
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
 
+  reporter User @relation(fields: [reporterId], references: [id])
+
+  @@index([reporterId])
   @@map("report")
 }

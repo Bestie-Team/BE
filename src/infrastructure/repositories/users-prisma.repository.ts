@@ -298,7 +298,7 @@ export class UsersPrismaRepository implements UsersRepository {
         sql<boolean>`EXISTS (
           SELECT 1
           FROM active_feed as f
-          WHERE f.writer_id = ${id}
+          WHERE f.writer_id = ${getKyselyUuid(id)}
         )`.as('has_feed'),
       )
       .where('u.id', '=', idUuid)

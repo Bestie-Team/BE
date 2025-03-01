@@ -213,6 +213,15 @@ export class GatheringParticipationsPrismaRepository
     });
   }
 
+  async updateReadAt(userId: string): Promise<void> {
+    await this.txHost.tx.gatheringParticipation.updateMany({
+      data: { readAt: new Date() },
+      where: {
+        participantId: userId,
+      },
+    });
+  }
+
   async delete(invitationId: string): Promise<void> {
     await this.txHost.tx.gatheringParticipation.delete({
       where: {

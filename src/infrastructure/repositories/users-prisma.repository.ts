@@ -28,7 +28,7 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findOneByEmail(email: string): Promise<UserBasicInfo | null> {
-    return await this.txHost.tx.user.findUnique({
+    return await this.txHost.tx.user.findFirst({
       select: {
         id: true,
         email: true,
@@ -44,11 +44,14 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findOneByAccountId(accountId: string): Promise<{ id: string } | null> {
-    return await this.txHost.tx.user.findUnique({
+    return await this.txHost.tx.user.findFirst({
       select: {
         id: true,
       },
-      where: { accountId, deletedAt: null },
+      where: {
+        accountId,
+        deletedAt: null,
+      },
     });
   }
 

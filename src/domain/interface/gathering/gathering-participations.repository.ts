@@ -27,6 +27,7 @@ export interface GatheringParticipationsRepository {
     invitationId: string,
     status: GatheringParticipationStatus,
   ): Promise<void>;
+  updateReadAt(userId: string): Promise<void>;
   delete(invitationId: string): Promise<void>;
   /**
    * 초대장 송신자와 수신자 순서 상관 없이 입력.

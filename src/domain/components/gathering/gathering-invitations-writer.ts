@@ -64,6 +64,10 @@ export class GatheringInvitationsWriter {
     );
   }
 
+  async updateReadAt(userId: string) {
+    await this.gatheringParticipationsRepository.updateReadAt(userId);
+  }
+
   private async checkIsParticipant(invitationId: string, userId: string) {
     const participation =
       await this.gatheringParticipationsRepository.findOneByIdAndParticipantId(

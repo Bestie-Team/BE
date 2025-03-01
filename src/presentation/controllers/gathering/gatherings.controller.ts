@@ -56,9 +56,9 @@ import { GatheringsService } from 'src/domain/services/gatherings/gatherings.ser
 @Controller('gatherings')
 export class GatheringsController {
   constructor(
-    private readonly gatheringsWriteService: GatheringsWriter,
+    private readonly gatheringsWriter: GatheringsWriter,
     private readonly gatheringsReadService: GatheringsReader,
-    private readonly gatheringInvitationsWriteService: GatheringInvitationsWriter,
+    private readonly gatheringInvitationsWriter: GatheringInvitationsWriter,
     private readonly gatheringInvitationsReadService: GatheringInvitationsReader,
     private readonly gatheringsService: GatheringsService,
     private readonly gatheringInvitationAcceptanceUseCase: GatheringInvitationAcceptanceUseCase,
@@ -196,10 +196,7 @@ export class GatheringsController {
     @Body() dto: RejectGatheringInvitationRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.gatheringInvitationsWriteService.reject(
-      dto.invitationId,
-      userId,
-    );
+    await this.gatheringInvitationsWriter.reject(dto.invitationId, userId);
   }
 
   @ApiOperation({ summary: '받은 모임 초대 목록 조회' })
@@ -276,6 +273,17 @@ export class GatheringsController {
     @Param('gatheringId', ParseUUIDPipe) gatheringId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.gatheringsWriteService.delete(gatheringId, userId);
+    await this.gatheringsWriter.delete(gatheringId, userId);
+  }
+
+  @ApiOperation({ summary: '초대장 전체 읽음 처리' })
+  @ApiResponse({
+    status: 204,
+    description: '읽음 처리 완료',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('invitations/read')
+  async readAll(@CurrentUser() userId: string) {
+    await this.gatheringInvitationsWriter.updateReadAt(userId);
   }
 }

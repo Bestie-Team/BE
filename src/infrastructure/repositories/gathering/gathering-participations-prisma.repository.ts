@@ -9,6 +9,7 @@ import {
   ReceivedGatheringInvitation,
   SentGatheringInvitation,
 } from 'src/domain/types/gathering.types';
+import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 import {
   GatheringParticipationStatus as SharedGatheringParticipationStatus,
   PaginatedDateRangeInput,
@@ -49,6 +50,8 @@ export class GatheringParticipationsPrismaRepository
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<ReceivedGatheringInvitation[]> {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
+    const participantIdUuid = getKyselyUuid(participantId);
+
     const participationRows = await this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('active_gathering as g', 'gp.gathering_id', 'g.id')
@@ -72,7 +75,7 @@ export class GatheringParticipationsPrismaRepository
           .innerJoin('active_gathering as g', 'g.id', 'gp.gathering_id')
           .innerJoin('active_user as u', 'u.id', 'g.host_user_id')
           .select('gp.id')
-          .where('gp.participant_id', '=', participantId)
+          .where('gp.participant_id', '=', participantIdUuid)
           .where(
             'gp.status',
             '=',
@@ -89,7 +92,7 @@ export class GatheringParticipationsPrismaRepository
               ),
               eb.and([
                 eb('gp.created_at', '=', new Date(cursor.createdAt)),
-                eb('g.id', '>', cursor.id),
+                eb('g.id', '>', getKyselyUuid(cursor.id)),
               ]),
             ]),
           )
@@ -127,6 +130,8 @@ export class GatheringParticipationsPrismaRepository
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<SentGatheringInvitation[]> {
     const { cursor, limit, maxDate, minDate } = paginatedDateRangeInput;
+    const senderIdUuid = getKyselyUuid(senderId);
+
     const rows = await this.txHost.tx.$kysely
       .selectFrom('active_gathering as g')
       .innerJoin('active_user as hu', 'g.host_user_id', 'hu.id')
@@ -149,8 +154,8 @@ export class GatheringParticipationsPrismaRepository
           .innerJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
           .innerJoin('active_user as m', 'm.id', 'gp.participant_id')
           .select('g.id')
-          .where('g.host_user_id', '=', senderId)
-          .where('gp.participant_id', '!=', senderId)
+          .where('g.host_user_id', '=', senderIdUuid)
+          .where('gp.participant_id', '!=', senderIdUuid)
           .where(
             'gp.status',
             '=',
@@ -167,7 +172,7 @@ export class GatheringParticipationsPrismaRepository
               ),
               eb.and([
                 eb('g.created_at', '=', new Date(cursor.createdAt)),
-                eb('g.id', '>', cursor.id),
+                eb('g.id', '>', getKyselyUuid(cursor.id)),
               ]),
             ]),
           )

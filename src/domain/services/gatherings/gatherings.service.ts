@@ -30,8 +30,8 @@ export class GatheringsService {
   constructor(
     private readonly groupsReader: GroupsReader,
     private readonly groupParticipationsReader: GroupParticipationsReader,
-    private readonly gatheringsWriter: GatheringsWriter,
     private readonly gatheringsReader: GatheringsReader,
+    private readonly gatheringsWriter: GatheringsWriter,
     private readonly gatheringsParticipationsWriter: GatheringInvitationsWriter,
     private readonly notificationsManager: NotificationsManager,
   ) {}
@@ -103,15 +103,11 @@ export class GatheringsService {
     if (!groupId && !friendUserIds) {
       throw new BadRequestException(REQUIRED_GROUP_OR_FRIEND_MESSAGE);
     }
-    if (type === 'GROUP') {
-      if (!groupId) {
-        throw new BadRequestException();
-      }
+    if (type === 'GROUP' && !groupId) {
+      throw new BadRequestException();
     }
-    if (type === 'FRIEND') {
-      if (!friendUserIds) {
-        throw new BadRequestException();
-      }
+    if (type === 'FRIEND' && !friendUserIds) {
+      throw new BadRequestException();
     }
     if (groupId && friendUserIds) {
       throw new BadRequestException(CONFLICT_GROUP_AND_FRIEND_MESSAGE);

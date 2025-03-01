@@ -176,13 +176,13 @@ describe('FriendsController (e2e)', () => {
       const sender = await prisma.user.create({
         data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'),
       });
-      const receiver = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId: receiverAccountId,
         },
       });
       const friendRequest = await prisma.friend.create({
-        data: generateFriendEntity(sender.id, receiver!.id),
+        data: generateFriendEntity(sender.id, loginedUser!.id),
       });
 
       const dto: AccepFriendRequest = {
@@ -208,13 +208,13 @@ describe('FriendsController (e2e)', () => {
       const sender = await prisma.user.create({
         data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'),
       });
-      const receiver = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId: receiverAccountId,
         },
       });
       const friendRequest = await prisma.friend.create({
-        data: generateFriendEntity(sender.id, receiver!.id),
+        data: generateFriendEntity(sender.id, loginedUser!.id),
       });
 
       const dto: AccepFriendRequest = {
@@ -236,7 +236,7 @@ describe('FriendsController (e2e)', () => {
     it('친구 목록 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -302,7 +302,7 @@ describe('FriendsController (e2e)', () => {
     it('검색 정상 동작 (이름, 계정 아이디)', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -405,7 +405,7 @@ describe('FriendsController (e2e)', () => {
     it('친구 요청 목록 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -475,7 +475,7 @@ describe('FriendsController (e2e)', () => {
     it('친구 요청 목록 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },

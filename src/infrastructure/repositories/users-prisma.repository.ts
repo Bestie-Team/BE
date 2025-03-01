@@ -14,6 +14,7 @@ import { FriendStatus, GatheringParticipationStatus } from '@prisma/client';
 import { FriendRequestStatus } from 'src/shared/types';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { TransactionHost } from '@nestjs-cls/transactional';
+import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 
 @Injectable()
 export class UsersPrismaRepository implements UsersRepository {
@@ -120,6 +121,8 @@ export class UsersPrismaRepository implements UsersRepository {
   ): Promise<SearchedUser[]> {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const rows = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .leftJoin('friend as f', (join) =>
@@ -127,11 +130,11 @@ export class UsersPrismaRepository implements UsersRepository {
           .on((eb) =>
             eb.or([
               eb.and([
-                eb('f.sender_id', '=', userId),
+                eb('f.sender_id', '=', userIdUuid),
                 eb('f.receiver_id', '=', eb.ref('u.id')),
               ]),
               eb.and([
-                eb('f.receiver_id', '=', userId),
+                eb('f.receiver_id', '=', userIdUuid),
                 eb('f.sender_id', '=', eb.ref('u.id')),
               ]),
             ]),
@@ -148,13 +151,13 @@ export class UsersPrismaRepository implements UsersRepository {
         'u.name',
         'u.profile_image_url',
         sql<string>`CASE
-        WHEN f.sender_id = ${userId} THEN 'SENT'
-        WHEN f.receiver_id = ${userId} THEN 'RECEIVED'
+        WHEN f.sender_id = ${getKyselyUuid(userId)} THEN 'SENT'
+        WHEN f.receiver_id = ${getKyselyUuid(userId)} THEN 'RECEIVED'
         ELSE 'NONE'
       END`.as('status'), // 요청 상태 추가
       ])
       .where('u.account_id', 'like', `%${search}%`)
-      .where('u.id', '!=', userId)
+      .where('u.id', '!=', userIdUuid)
       .where(({ eb, or, and }) =>
         or([
           eb('u.name', '>', cursor.name),
@@ -168,7 +171,7 @@ export class UsersPrismaRepository implements UsersRepository {
         qb
           .selectFrom('friend as f')
           .select('f.sender_id as friend_id')
-          .where('f.receiver_id', '=', userId)
+          .where('f.receiver_id', '=', userIdUuid)
           .where(
             'f.status',
             '=',
@@ -178,7 +181,7 @@ export class UsersPrismaRepository implements UsersRepository {
             qb
               .selectFrom('friend as f')
               .select('f.receiver_id as friend_id')
-              .where('f.sender_id', '=', userId)
+              .where('f.sender_id', '=', userIdUuid)
               .where(
                 'f.status',
                 '=',
@@ -201,6 +204,8 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findDetailById(id: string): Promise<UserDetail | null> {
+    const idUuid = getKyselyUuid(id);
+
     const row = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
@@ -210,7 +215,10 @@ export class UsersPrismaRepository implements UsersRepository {
           .innerJoin('active_user as sender', 'f.sender_id', 'sender.id')
           .innerJoin('active_user as receiver', 'f.receiver_id', 'receiver.id')
           .where((eb) =>
-            eb.or([eb('f.sender_id', '=', id), eb('f.receiver_id', '=', id)]),
+            eb.or([
+              eb('f.sender_id', '=', idUuid),
+              eb('f.receiver_id', '=', idUuid),
+            ]),
           )
           .where(
             'f.status',
@@ -223,7 +231,7 @@ export class UsersPrismaRepository implements UsersRepository {
       .select((qb) =>
         qb
           .selectFrom('active_feed as f')
-          .where('f.writer_id', '=', id)
+          .where('f.writer_id', '=', idUuid)
           .select(({ fn }) => fn.countAll().as('feed_count'))
           .as('feed_count'),
       )
@@ -232,11 +240,11 @@ export class UsersPrismaRepository implements UsersRepository {
           .selectFrom('group_participation as gp')
           .innerJoin('group as g', 'gp.group_id', 'g.id')
           .innerJoin('active_user as u', 'g.owner_id', 'u.id')
-          .where('gp.participant_id', '=', id)
+          .where('gp.participant_id', '=', idUuid)
           .select(({ fn }) => fn.countAll().as('group_count'))
           .as('group_count'),
       )
-      .where('u.id', '=', id)
+      .where('u.id', '=', idUuid)
       .executeTakeFirst();
 
     return row
@@ -253,6 +261,8 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async findProfileById(id: string): Promise<Profile | null> {
+    const idUuid = getKyselyUuid(id);
+
     const row = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .select([
@@ -266,7 +276,7 @@ export class UsersPrismaRepository implements UsersRepository {
       .select((qb) =>
         qb
           .selectFrom('gathering_participation as gp')
-          .where('gp.participant_id', '=', id)
+          .where('gp.participant_id', '=', idUuid)
           .where('gp.read_at', 'is', null)
           .where(
             'gp.status',
@@ -279,7 +289,7 @@ export class UsersPrismaRepository implements UsersRepository {
       .select((qb) =>
         qb
           .selectFrom('notification as n')
-          .where('n.user_id', '=', id)
+          .where('n.user_id', '=', idUuid)
           .where('n.read_at', 'is', null)
           .select(({ fn }) => fn.countAll().as('new_notification_count'))
           .as('new_notification_count'),
@@ -291,7 +301,7 @@ export class UsersPrismaRepository implements UsersRepository {
           WHERE f.writer_id = ${id}
         )`.as('has_feed'),
       )
-      .where('u.id', '=', id)
+      .where('u.id', '=', idUuid)
       .executeTakeFirst();
 
     return row

@@ -7,6 +7,7 @@ import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
 import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
+import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 import { DateIdPaginationInput, Order } from 'src/shared/types';
 
 @Injectable()
@@ -174,6 +175,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const { cursor, limit, minDate, maxDate, order } = feedPaginationInput;
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const cursorComparison = order === 'ASC' ? '>' : '<';
+    const userIdUuid = getKyselyUuid(userId);
 
     const query = this.txHost.tx.$kysely
       .selectFrom('active_feed as f')
@@ -185,23 +187,23 @@ export class FeedsPrismaRepository implements FeedsRepository {
         qb
           .selectFrom('blocked_feed as bf')
           .select('bf.feed_id as id')
-          .where('bf.user_id', '=', userId),
+          .where('bf.user_id', '=', userIdUuid),
       )
       .where((eb) =>
         eb.or([
           eb.and([
-            eb('gp.participant_id', '=', userId),
+            eb('gp.participant_id', '=', userIdUuid),
             eb(
               'gp.status',
               '=',
               sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
             ),
           ]),
-          eb('g.host_user_id', '=', userId),
-          eb('fv.user_id', '=', userId),
+          eb('g.host_user_id', '=', userIdUuid),
+          eb('fv.user_id', '=', userIdUuid),
         ]),
       )
-      .where('f.writer_id', '!=', userId)
+      .where('f.writer_id', '!=', userIdUuid)
       .where('f.created_at', '>=', new Date(minDate))
       .where('f.created_at', '<=', new Date(maxDate))
       .where((eb) =>
@@ -209,7 +211,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
           eb('f.created_at', cursorComparison, new Date(cursor.createdAt)),
           eb.and([
             eb('f.created_at', '=', new Date(cursor.createdAt)),
-            eb('f.id', '>', cursor.id),
+            eb('f.id', '>', getKyselyUuid(cursor.id)),
           ]),
         ]),
       )
@@ -227,6 +229,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
     const { cursor, limit, minDate, maxDate, order } = feedPaginationInput;
     const feedCreatedAtOrder = order === 'DESC' ? 'desc' : 'asc';
     const cursorComparison = order === 'ASC' ? '>' : '<';
+    const userIdUuid = getKyselyUuid(userId);
 
     const query = this.txHost.tx.$kysely
       .selectFrom('active_feed as f')
@@ -236,9 +239,9 @@ export class FeedsPrismaRepository implements FeedsRepository {
         qb
           .selectFrom('blocked_feed as bf')
           .select('bf.feed_id as id')
-          .where('bf.user_id', '=', userId),
+          .where('bf.user_id', '=', userIdUuid),
       )
-      .where('f.writer_id', '=', userId)
+      .where('f.writer_id', '=', userIdUuid)
       .where('f.created_at', '>=', new Date(minDate))
       .where('f.created_at', '<=', new Date(maxDate))
       .where((eb) =>
@@ -246,7 +249,7 @@ export class FeedsPrismaRepository implements FeedsRepository {
           eb('f.created_at', cursorComparison, new Date(cursor.createdAt)),
           eb.and([
             eb('f.created_at', '=', new Date(cursor.createdAt)),
-            eb('f.id', '>', cursor.id),
+            eb('f.id', '>', getKyselyUuid(cursor.id)),
           ]),
         ]),
       )
@@ -262,18 +265,19 @@ export class FeedsPrismaRepository implements FeedsRepository {
     paginationInput: DateIdPaginationInput,
   ): Promise<Feed[]> {
     const { cursor, limit } = paginationInput;
+    const userIdUuid = getKyselyUuid(userId);
 
     const query = this.txHost.tx.$kysely
       .selectFrom('blocked_feed as bf')
       .innerJoin('active_feed as f', 'bf.feed_id', 'f.id')
       .select('f.id')
-      .where('bf.user_id', '=', userId)
+      .where('bf.user_id', '=', userIdUuid)
       .where((eb) =>
         eb.or([
           eb('f.created_at', '<', new Date(cursor.createdAt)),
           eb.and([
             eb('f.created_at', '=', new Date(cursor.createdAt)),
-            eb('f.id', '>', cursor.id),
+            eb('f.id', '>', getKyselyUuid(cursor.id)),
           ]),
         ]),
       )

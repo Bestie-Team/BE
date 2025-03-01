@@ -7,6 +7,7 @@ import { FriendEntity } from 'src/domain/entities/friend/friend.entity';
 import { FriendsRepository } from 'src/domain/interface/friend/friends.repository';
 import { FriendRequest } from 'src/domain/types/friend.types';
 import { User } from 'src/domain/types/user.types';
+import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 import { SearchInput } from 'src/infrastructure/types/user.types';
 import { FriendStatus, UserPaginationInput } from 'src/shared/types';
 
@@ -42,10 +43,12 @@ export class FriendsPrismaRepository implements FriendsRepository {
     paginationInput: UserPaginationInput,
   ): Promise<User[]> {
     const { cursor, limit } = paginationInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const rows = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
-      .where('u.id', '!=', userId)
+      .where('u.id', '!=', userIdUuid)
       .where(({ eb, or, and }) =>
         or([
           eb('u.name', '>', cursor.name),
@@ -59,7 +62,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
         qb
           .selectFrom('friend as f')
           .select('f.receiver_id as user_id')
-          .where('f.sender_id', '=', userId)
+          .where('f.sender_id', '=', userIdUuid)
           .where(
             'f.status',
             '=',
@@ -69,7 +72,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
             qb
               .selectFrom('friend as f')
               .select('f.sender_id as user_id')
-              .where('f.receiver_id', '=', userId)
+              .where('f.receiver_id', '=', userIdUuid)
               .where(
                 'f.status',
                 '=',
@@ -96,10 +99,12 @@ export class FriendsPrismaRepository implements FriendsRepository {
   ): Promise<User[]> {
     const { search, paginationInput } = searchInput;
     const { cursor, limit } = paginationInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const rows = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
       .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
-      .where('u.id', '!=', userId)
+      .where('u.id', '!=', userIdUuid)
       .where(({ eb, or, and }) =>
         or([
           eb('u.name', '>', cursor.name),
@@ -113,7 +118,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
         qb
           .selectFrom('friend as f')
           .select('f.receiver_id as user_id')
-          .where('f.sender_id', '=', userId)
+          .where('f.sender_id', '=', userIdUuid)
           .where(
             'f.status',
             '=',
@@ -123,7 +128,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
             qb
               .selectFrom('friend as f')
               .select('f.sender_id as user_id')
-              .where('f.receiver_id', '=', userId)
+              .where('f.receiver_id', '=', userIdUuid)
               .where(
                 'f.status',
                 '=',
@@ -155,6 +160,8 @@ export class FriendsPrismaRepository implements FriendsRepository {
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]> {
     const { cursor, limit } = paginationInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const rows = await this.txHost.tx.$kysely
       .selectFrom('friend as f')
       .innerJoin('active_user as u', 'f.sender_id', 'u.id')
@@ -165,7 +172,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
         'u.name',
         'u.profile_image_url',
       ])
-      .where('f.receiver_id', '=', userId)
+      .where('f.receiver_id', '=', userIdUuid)
       .where(
         'f.status',
         '=',
@@ -201,6 +208,8 @@ export class FriendsPrismaRepository implements FriendsRepository {
     paginationInput: UserPaginationInput,
   ): Promise<FriendRequest[]> {
     const { cursor, limit } = paginationInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const rows = await this.txHost.tx.$kysely
       .selectFrom('friend as f')
       .innerJoin('active_user as u', 'f.receiver_id', 'u.id')
@@ -211,7 +220,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
         'u.name',
         'u.profile_image_url',
       ])
-      .where('f.sender_id', '=', userId)
+      .where('f.sender_id', '=', userIdUuid)
       .where(
         'f.status',
         '=',

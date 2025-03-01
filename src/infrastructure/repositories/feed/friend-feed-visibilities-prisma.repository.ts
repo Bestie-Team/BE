@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
 import { User } from 'src/domain/types/user.types';
+import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 
 @Injectable()
 export class FriendFeedVisibilitiesPrismaRepository
@@ -32,7 +33,11 @@ export class FriendFeedVisibilitiesPrismaRepository
         'au.name',
         'au.profile_image_url',
       ])
-      .where('fv.feed_id', 'in', feedIds)
+      .where(
+        'fv.feed_id',
+        'in',
+        feedIds.map((feedId) => getKyselyUuid(feedId)),
+      )
       .execute();
 
     const result: { [feedId: string]: User[] } = {};

@@ -10,6 +10,7 @@ import {
   Gathering,
   GatheringDetail,
 } from 'src/domain/types/gathering.types';
+import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 import {
   DateIdPaginationInput,
   PaginatedDateRangeInput,
@@ -32,13 +33,15 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<Gathering[]> {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('active_gathering as g', 'g.id', 'gp.gathering_id')
       .select(['g.id'])
       .where((eb) =>
         eb.and([
-          eb('gp.participant_id', '=', userId),
+          eb('gp.participant_id', '=', userIdUuid),
           eb(
             'gp.status',
             '=',
@@ -57,7 +60,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
           ),
           eb.and([
             eb('g.gathering_date', '=', new Date(cursor.createdAt)),
-            eb('g.id', '>', cursor.id),
+            eb('g.id', '>', getKyselyUuid(cursor.id)),
           ]),
         ]),
       )
@@ -74,13 +77,15 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<EndedGathering[]> {
     const { cursor, limit, minDate, maxDate } = paginatedDateRangeInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('active_gathering as g', 'g.id', 'gp.gathering_id')
       .select(['g.id'])
       .where((eb) =>
         eb.and([
-          eb('gp.participant_id', '=', userId),
+          eb('gp.participant_id', '=', userIdUuid),
           eb(
             'gp.status',
             '=',
@@ -99,7 +104,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
           ),
           eb.and([
             eb('g.gathering_date', '=', new Date(cursor.createdAt)),
-            eb('g.id', '>', cursor.id),
+            eb('g.id', '>', getKyselyUuid(cursor.id)),
           ]),
         ]),
       )
@@ -119,7 +124,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
         'g.invitation_image_url',
         'g.description',
         sql<string>`CASE
-        WHEN f.writer_id = ${userId} THEN TRUE
+        WHEN f.writer_id = ${getKyselyUuid(userId)} THEN TRUE
         ELSE FALSE
       END`.as('is_feed_posted'),
       ])
@@ -152,6 +157,8 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     paginationInput: DateIdPaginationInput,
   ): Promise<Gathering[]> {
     const { cursor, limit } = paginationInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const subquery = this.txHost.tx.$kysely
       .selectFrom('gathering_participation as gp')
       .innerJoin('active_gathering as g', 'g.id', 'gp.gathering_id')
@@ -164,11 +171,11 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
           .select(['gathering_id'])
           .where('f.deleted_at', 'is', null)
           .where('f.gathering_id', 'is not', null)
-          .where('f.writer_id', '=', userId),
+          .where('f.writer_id', '=', userIdUuid),
       )
       .where((eb) =>
         eb.and([
-          eb('gp.participant_id', '=', userId),
+          eb('gp.participant_id', '=', userIdUuid),
           eb(
             'gp.status',
             '=',
@@ -181,7 +188,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
           eb('g.gathering_date', '<', new Date(cursor.createdAt)),
           eb.and([
             eb('g.gathering_date', '=', new Date(cursor.createdAt)),
-            eb('g.id', '>', cursor.id),
+            eb('g.id', '>', getKyselyUuid(cursor.id)),
           ]),
         ]),
       )

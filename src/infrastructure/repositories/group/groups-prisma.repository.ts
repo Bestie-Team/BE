@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { GroupEntity } from 'src/domain/entities/group/group.entity';
 import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
 import { Group } from 'src/domain/types/group.types';
+import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 import { PaginationInput } from 'src/shared/types';
 
 @Injectable()
@@ -30,6 +31,8 @@ export class GroupsPrismaRepository implements GroupsRepository {
     paginationInput: PaginationInput,
   ): Promise<Group[]> {
     const { cursor, limit } = paginationInput;
+    const userIdUuid = getKyselyUuid(userId);
+
     const rows = await this.txHost.tx.$kysely
       .selectFrom('group as g')
       .innerJoin('group_participation as gp', 'g.id', 'gp.group_id')
@@ -60,7 +63,7 @@ export class GroupsPrismaRepository implements GroupsRepository {
             // TODO 탈퇴시키고 테스트 작성
             .innerJoin('active_user as ou', 'g.owner_id', 'ou.id')
             .select('gp.group_id as id')
-            .where('gp.participant_id', '=', userId)
+            .where('gp.participant_id', '=', userIdUuid)
             .where('gp.created_at', '<', new Date(cursor))
             .groupBy(['gp.group_id', 'gp.created_at', 'g.name'])
             .orderBy('gp.created_at', 'desc')

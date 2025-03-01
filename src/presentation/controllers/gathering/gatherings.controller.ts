@@ -273,7 +273,7 @@ export class GatheringsController {
     @Param('gatheringId', ParseUUIDPipe) gatheringId: string,
     @CurrentUser() userId: string,
   ) {
-    await this.gatheringsWriter.delete(gatheringId, userId);
+    await this.gatheringsService.delete(gatheringId, userId);
   }
 
   @ApiOperation({ summary: '초대장 전체 읽음 처리' })

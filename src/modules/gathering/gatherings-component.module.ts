@@ -7,7 +7,7 @@ import { FriendsCheckerModule } from 'src/modules/friend/friends-chcker.module';
 import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
 
 @Module({
-  imports: [GatheringParticipationModules, FriendsCheckerModule],
+  imports: [FriendsCheckerModule],
   providers: [
     GatheringsWriter,
     GatheringsReader,

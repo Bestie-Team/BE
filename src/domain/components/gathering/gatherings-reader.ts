@@ -78,7 +78,7 @@ export class GatheringsReader {
     };
   }
 
-  async getGatherings(
+  private async getGatherings(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
     type: 'WAITING' | 'ENDED',
@@ -116,6 +116,18 @@ export class GatheringsReader {
 
   async readOne(id: string) {
     const gathering = await this.gatheringsRepository.findOneById(id);
+
+    if (!gathering) {
+      throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);
+    }
+    return gathering;
+  }
+
+  async readOneByIdAndHostId(id: string, hostId: string) {
+    const gathering = await this.gatheringsRepository.findOneByIdAndHostId(
+      id,
+      hostId,
+    );
 
     if (!gathering) {
       throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);

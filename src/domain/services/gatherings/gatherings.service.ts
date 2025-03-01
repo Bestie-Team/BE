@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
@@ -16,6 +17,7 @@ import {
 import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
 import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
 import {
+  CANT_DELETE_END_GATHERING,
   CONFLICT_GROUP_AND_FRIEND_MESSAGE,
   FORBIDDEN_MESSAGE,
   GATHERING_CREATION_PAST_DATE_MESSAGE,
@@ -91,6 +93,25 @@ export class GatheringsService {
     }
 
     await this.gatheringsWriter.update(id, input);
+  }
+
+  async delete(id: string, userId: string) {
+    const gathering = await this.gatheringsReader.readOneByIdAndHostId(
+      id,
+      userId,
+    );
+
+    if (gathering.endedAt) {
+      throw new UnprocessableEntityException(CANT_DELETE_END_GATHERING);
+    }
+
+    await this.deleteTransaction(id);
+  }
+
+  @Transactional()
+  async deleteTransaction(gatheringId: string) {
+    await this.gatheringsWriter.delete(gatheringId);
+    await this.gatheringsParticipationsWriter.deleteMany(gatheringId);
   }
 
   // TODO 나중에 Checker로 분리도 가능.

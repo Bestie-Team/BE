@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
@@ -14,6 +14,8 @@ import { RegisterRequest } from 'src/presentation/dto/auth/request/register.requ
 import { LoginFailResponse } from 'src/presentation/dto/user/response/login-fail.response';
 import { Provider } from 'src/shared/types';
 import { RegisterResponse } from 'src/presentation/dto/auth/response/register.response';
+import { Request, Response } from 'express';
+import { RefreshAccessResponse } from 'src/presentation/dto/auth/response/refresh-access.response';
 
 @ApiTags('/auth')
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
@@ -48,9 +50,19 @@ export class AuthController {
   async login(
     @Param('provider', ValidateProviderPipe) provider: Provider,
     @Body() dto: LoginRequest,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<LoginResponse> {
     const { accessToken } = dto;
-    return await this.authService.login(provider, accessToken);
+    const data = await this.authService.login(provider, accessToken);
+    const { refreshToken, ...responseDto } = data;
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: process.env.NODE_ENV === 'dev' ? 'none' : 'strict',
+    });
+
+    return responseDto;
   }
 
   @ApiOperation({ summary: '회원가입' })
@@ -61,7 +73,46 @@ export class AuthController {
     type: RegisterResponse,
   })
   @Post('register')
-  async register(@Body() dto: RegisterRequest): Promise<RegisterResponse> {
-    return await this.authService.register(dto);
+  async register(
+    @Body() dto: RegisterRequest,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<RegisterResponse> {
+    const data = await this.authService.register(dto);
+    const { refreshToken, ...responseDto } = data;
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: process.env.NODE_ENV === 'dev' ? 'none' : 'strict',
+    });
+
+    return responseDto;
+  }
+
+  @ApiOperation({
+    summary: 'token 재발급',
+    description: 'access, refresh 모두 재발급됩니다. refresh는 쿠키에!',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '재발급 완료',
+    type: RefreshAccessResponse,
+  })
+  @Get('token')
+  async refreshAccessToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<RefreshAccessResponse> {
+    const refreshToken = req.cookies['refresh_token'];
+    const data = await this.authService.refreshAccessToken(refreshToken);
+    const { accessToken, refreshToken: newRefreshToken } = data;
+
+    res.cookie('refresh_token', newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: process.env.NODE_ENV === 'dev' ? 'none' : 'strict',
+    });
+
+    return { accessToken };
   }
 }

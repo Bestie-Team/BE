@@ -65,7 +65,7 @@ describe('GatheringsController (e2e)', () => {
     it('친구 모임 생성 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -94,7 +94,7 @@ describe('GatheringsController (e2e)', () => {
         address: '내집',
         description: '크리스마스 모임입니다~~',
         friendIds: [user1.id, user2.id, user3.id],
-        gatheringDate: '2025-12-25T00:00:00.000Z',
+        gatheringDate: new Date(Date.now() + 10000).toISOString(),
         groupId: null,
         invitationImageUrl: 'https://image.com',
         type: 'FRIEND',
@@ -116,7 +116,7 @@ describe('GatheringsController (e2e)', () => {
     it('그룹 모임 생성 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -177,7 +177,6 @@ describe('GatheringsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body }: ResponseResult<SearchUserResponse> = response;
       const invitations = await prisma.gatheringParticipation.findMany();
-      console.log(body);
 
       expect(status).toEqual(201);
       expect(invitations.length).toEqual(4);
@@ -188,7 +187,7 @@ describe('GatheringsController (e2e)', () => {
     it('모임 초대 수락 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -236,7 +235,7 @@ describe('GatheringsController (e2e)', () => {
     it('모임 초대 거절 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -283,7 +282,7 @@ describe('GatheringsController (e2e)', () => {
     it('받은 모임 초대 목록 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -378,7 +377,7 @@ describe('GatheringsController (e2e)', () => {
     it('보낸 모임 초대 목록 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -488,7 +487,7 @@ describe('GatheringsController (e2e)', () => {
     it('모임 목록 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -610,7 +609,7 @@ describe('GatheringsController (e2e)', () => {
     it('피드를 작성하지 않은 완료된 모임 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -743,7 +742,7 @@ describe('GatheringsController (e2e)', () => {
     it('완료된 모임 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -895,7 +894,7 @@ describe('GatheringsController (e2e)', () => {
     it('모임 상세 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -957,7 +956,7 @@ describe('GatheringsController (e2e)', () => {
     it('모임장이 탈퇴한 경우 탈퇴한 회원으로 노출되어야 한다.', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -1122,7 +1121,7 @@ describe('GatheringsController (e2e)', () => {
         name: '변경된 이름',
         address: '변경된 주소',
         description: '변경된 설명',
-        gatheringDate: new Date('2025-02-02T00:00:00.000Z').toISOString(),
+        gatheringDate: new Date(Date.now() + 10000).toISOString(),
       };
 
       const response = await request(app.getHttpServer())

@@ -47,7 +47,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹 생성 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -97,7 +97,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹 생성 시 친구가 아닌 회원 번호가 있는 경우 예외', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -134,7 +134,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹 목록 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -258,7 +258,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹원 추가 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -319,7 +319,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹을 신고한 회원을 초대하려는 경우 예외', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -377,7 +377,7 @@ describe('GroupsController (e2e)', () => {
     it('친구가 아닌 회원을 추가하려고 하는 경우 예외', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -427,7 +427,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹 나가기 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -478,7 +478,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹장이 그룹을 나가려는 경우 예외', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -521,7 +521,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹 삭제 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -568,7 +568,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹장이 아닌 회원이 삭제하려는 경우 예외', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },
@@ -615,7 +615,7 @@ describe('GroupsController (e2e)', () => {
     it('그룹 정보 수정 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);
 
-      const loginedUser = await prisma.user.findUnique({
+      const loginedUser = await prisma.user.findFirst({
         where: {
           accountId,
         },

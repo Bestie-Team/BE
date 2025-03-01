@@ -63,7 +63,7 @@ enum ReportTypes {
 }
 
 model User {
-  id String @id
+  id String @id @db.Uuid
   email String @db.VarChar(255)
   provider OAuthProvider
   name String @db.VarChar(20)
@@ -78,26 +78,13 @@ model User {
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  gatherings Gathering[]
-  gatheringParticipant GatheringParticipation[]
-  feeds Feed[]
-  ownedGroups Group[]
-  groupParticipation GroupParticipation[]
-  feedComments FeedComment[]
-  blockedFeeds BlockedFeed[]
-  sentFriendRequest Friend[] @relation("SenderUser")
-  receivedFriendRequests Friend[] @relation("ReceiverUser")
-  friendFeedVisibilities FriendFeedVisibility[]
-  notifications Notification[]
-  reports Report[]
-
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
   @@map("user")
 }
 
 view ActiveUser {
-  id String @id
+  id String @id @db.Uuid
   email String @db.VarChar(255) @unique
   provider OAuthProvider
   name String @db.VarChar(20)
@@ -118,10 +105,10 @@ view ActiveUser {
 }
 
 model Gathering {
-  id String @id
+  id String @id @db.Uuid
   type GatheringType
-  groupId String? @map("group_id")
-  hostUserId String @map("host_user_id")
+  groupId String? @db.Uuid @map("group_id")
+  hostUserId String @db.Uuid @map("host_user_id")
   name String @db.VarChar(20)
   description String @db.VarChar(40)
   gatheringDate DateTime @map("gathering_date")
@@ -132,19 +119,14 @@ model Gathering {
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  group Group? @relation(fields: [groupId], references: [id])
-  user User @relation(fields: [hostUserId], references: [id])
-  participations GatheringParticipation[]
-  feeds Feed[]
-
   @@map("gathering")
 }
 
 view ActiveGathering {
-  id String @id
+  id String @id @db.Uuid
   type GatheringType
-  groupId String? @map("group_id")
-  hostUserId String @map("host_user_id")
+  groupId String? @db.Uuid @map("group_id")
+  hostUserId String @db.Uuid @map("host_user_id")
   name String @db.VarChar(20)
   description String @db.VarChar(40)
   gatheringDate DateTime @map("gathering_date")
@@ -159,43 +141,33 @@ view ActiveGathering {
 }
 
 model GatheringParticipation {
-  id String @id
-  gatheringId String @map("gathering_id")
-  participantId String @map("participant_id")
+  id String @id @db.Uuid
+  gatheringId String @db.Uuid @map("gathering_id")
+  participantId String @db.Uuid @map("participant_id")
   status GatheringParticipationStatus @default(PENDING)
   readAt DateTime? @map("read_at")
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
 
-  gathering Gathering @relation(fields: [gatheringId], references: [id], onDelete: Cascade)
-  participant User @relation(fields: [participantId], references: [id], onDelete: Cascade)
-
   @@map("gathering_participation")
 }
 
 model Feed {
-  id String @id
-  writerId String @map("writer_id")
-  gatheringId String? @map("gathering_id")
+  id String @id @db.Uuid
+  writerId String @db.Uuid @map("writer_id")
+  gatheringId String? @db.Uuid @map("gathering_id")
   content String @db.VarChar(150)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  writer User @relation(fields: [writerId], references: [id])
-  gathering Gathering? @relation(fields: [gatheringId], references: [id])
-  images FeedImage[]
-  comments FeedComment[]
-  blockedFeeds BlockedFeed[]
-  friendFeedVisibilities FriendFeedVisibility[]
-
   @@map("feed")
 }
 
 view ActiveFeed {
-  id String @id
-  writerId String @map("writer_id")
-  gatheringId String? @map("gathering_id")
+  id String @id @db.Uuid
+  writerId String @db.Uuid @map("writer_id")
+  gatheringId String? @db.Uuid @map("gathering_id")
   content String @db.VarChar(150)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
@@ -205,35 +177,30 @@ view ActiveFeed {
 }
 
 model FeedImage {
-  id String @id
-  feedId String @map("feed_id")
+  id String @id @db.Uuid
+  feedId String @db.Uuid @map("feed_id")
   index Int
   url String
   createdAt DateTime @map("created_at")
-
-  feed Feed @relation(fields: [feedId], references: [id])
 
   @@map("feed_image")
 }
 
 model FeedComment {
-  id String @id
-  feedId String @map("feed_id")
-  writerId String @map("writer_id")
+  id String @id @db.Uuid
+  feedId String @db.Uuid @map("feed_id")
+  writerId String @db.Uuid @map("writer_id")
   content String
   createdAt DateTime @map("created_at")
   deletedAt DateTime? @map("deleted_at")
-
-  feed Feed @relation(fields: [feedId], references: [id])
-  writer User @relation(fields: [writerId], references: [id])
 
   @@map("feed_comment")
 }
 
 view ActiveFeedComment {
-  id String @id
-  feedId String @map("feed_id")
-  writerId String @map("writer_id")
+  id String @id @db.Uuid
+  feedId String @db.Uuid @map("feed_id")
+  writerId String @db.Uuid @map("writer_id")
   content String
   createdAt DateTime @map("created_at")
   deletedAt DateTime? @map("deleted_at")
@@ -242,78 +209,62 @@ view ActiveFeedComment {
 }
 
 model FriendFeedVisibility {
-  feedId String @map("feed_id")
-  userId String @map("user_id")
+  feedId String @db.Uuid @map("feed_id")
+  userId String @db.Uuid @map("user_id")
   createdAt DateTime
 
   @@id([feedId, userId])
-  feed Feed @relation(fields: [feedId], references: [id])
-  user User @relation(fields: [userId], references: [id])
-
   @@map("friend_feed_visibility")
 }
 
 model BlockedFeed {
-  userId    String @map("user_id")
-  feedId    String @map("feed_id")
+  userId    String @db.Uuid @map("user_id")
+  feedId    String @db.Uuid @map("feed_id")
   createdAt DateTime @map("created_at")
-
-  user User @relation(fields: [userId], references: [id])
-  feed Feed @relation(fields: [feedId], references: [id])
 
   @@unique([userId, feedId])
   @@map("blocked_feed")
 }
 
 model Friend {
-  id String @id
-  senderId String @map("sender_id")
-  receiverId String @map("receiver_id")
+  id String @id @db.Uuid
+  senderId String @db.Uuid @map("sender_id")
+  receiverId String @db.Uuid @map("receiver_id")
   status FriendStatus @default(PENDING)
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
-
-  sender User @relation(name: "SenderUser", fields: [senderId], references: [id])
-  receiver User @relation(name: "ReceiverUser", fields: [receiverId], references: [id])
 
   @@unique([senderId, receiverId])
   @@map("friend")
 }
 
 model Group {
-  id String @id
+  id String @id @db.Uuid
   name String @db.VarChar(20)
   description String @db.VarChar(40)
   groupImageUrl String @map("group_image_url")
   gatheringCount Int @default(0) @map("gathering_count")
-  ownerId String @map("owner_id")
+  ownerId String @db.Uuid @map("owner_id")
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
-
-  owner User @relation(fields: [ownerId], references: [id])
-  groupParticipation GroupParticipation[]
-  gatherings Gathering[]
 
   @@map("group")
 }
 
 model GroupParticipation {
-  id String @id
-  groupId String @map("group_id")
-  participantId String @map("participant_id")
+  id String @id @db.Uuid
+  groupId String @db.Uuid @map("group_id")
+  participantId String @db.Uuid @map("participant_id")
   status GroupParticipationStatus @default(ACCEPTED)
   createdAt DateTime @map("created_at")
-
-  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  participant User @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, participantId])
   @@map("group_participation")
 }
 
 model Notification {
-  id String @id
-  userId String @map("user_id")
+  id String @id @db.Uuid
+  userId String @db.Uuid @map("user_id")
   type NotificationTypes
   title String @db.VarChar(20)
   message String @db.VarChar(100)
@@ -321,21 +272,17 @@ model Notification {
   createdAt DateTime @map("created_at")
   readAt DateTime? @map("read_at")
 
-  user User @relation(fields: [userId], references: [id])
-
   @@map("notification")
 }
 
 model Report {
-  id String @id
-  reporterId String @map("reporter_id")
-  reportedId String @map("reported_id")
+  id String @id @db.Uuid
+  reporterId String @db.Uuid @map("reporter_id")
+  reportedId String @db.Uuid  @map("reported_id")
   type ReportTypes
   reason String
   createdAt DateTime @map("created_at")
   updatedAt DateTime @map("updated_at")
-
-  reporter User @relation(fields: [reporterId], references: [id])
 
   @@map("report")
 }

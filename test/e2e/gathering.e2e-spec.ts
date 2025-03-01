@@ -1073,7 +1073,7 @@ describe('GatheringsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status } = response;
 
-      expect(status).toEqual(403);
+      expect(status).toEqual(404);
     });
 
     it('완료된 모임을 삭제하려는 경우 실패', async () => {

@@ -11,7 +11,10 @@ async function bootstrap() {
     logger: winstonLogger,
   });
   app.use(cookieParser());
-  app.enableCors();
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
   setupSwagger(app);
   await app.listen(8080);
 }

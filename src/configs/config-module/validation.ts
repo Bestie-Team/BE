@@ -12,6 +12,8 @@ export const validationSchema = Joi.object({
   JWT_SECRET_KEY: Joi.string().required(),
   ACCESS_TOKEN_EXPIRE: Joi.string().required(),
   REFRESH_TOKEN_EXPIRE: Joi.string().required(),
+  //Sentry
+  DSN: Joi.string().required(),
   // FCM
   FCM_PROJECT_ID: Joi.string().required(),
   FCM_PRIVATE_KEY: Joi.string().required(),

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { ClsModule } from 'nestjs-cls';
 import { AppController } from 'src/app.controller';
 import { UsersModule } from 'src/modules/user/users.module';
@@ -27,6 +28,7 @@ import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.mo
       validationSchema,
     }),
     ClsModule.forRoot(clsOptions),
+    SentryModule.forRoot(),
     PrismaModule,
     EventEmitterModule.forRoot(),
     ListenersModule,

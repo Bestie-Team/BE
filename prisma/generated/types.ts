@@ -192,6 +192,12 @@ export type Notification = {
   created_at: Timestamp;
   read_at: Timestamp | null;
 };
+export type RefreshToken = {
+  user_id: string;
+  device_id: string;
+  token: string;
+  created_at: Timestamp;
+};
 export type Report = {
   id: string;
   reporter_id: string;
@@ -233,6 +239,7 @@ export type DB = {
   group: Group;
   group_participation: GroupParticipation;
   notification: Notification;
+  refresh_token: RefreshToken;
   report: Report;
   user: User;
 };

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthService } from 'src/domain/components/auth/auth.service';
+import { AuthService } from 'src/domain/services/auth/auth.service';
 import { OauthContext } from 'src/infrastructure/auth/context/oauth-context';
 import { GoogleStrategy } from 'src/infrastructure/auth/strategies/google-strategy';
 import { KakaoStrategy } from 'src/infrastructure/auth/strategies/kakao-strategy';

@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { NOT_FOUND_USER_MESSAGE } from 'src/domain/error/messages';
 import { getUserCursor } from 'src/domain/helpers/get-cursor';
-import { UsersRepository } from 'src/domain/interface/users.repository';
+import { UsersRepository } from 'src/domain/interface/user/users.repository';
 import { SearchInput } from 'src/domain/types/user.types';
 
 @Injectable()

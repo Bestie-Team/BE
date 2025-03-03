@@ -105,7 +105,7 @@ describe('Name of the group', () => {
       expect(status).toEqual(400);
     });
 
-    it('유요하지 않은 리프레시 토큰일 경우 예외가 발생한다', async () => {
+    it('유효하지 않은 리프레시 토큰일 경우 예외가 발생한다', async () => {
       const invalidRefreshToken = 'invalidToken';
 
       const registerResponse = await request(app.getHttpServer())

@@ -51,6 +51,7 @@ describe('FeedsController (e2e)', () => {
     await prisma.feed.deleteMany();
     await prisma.gatheringParticipation.deleteMany();
     await prisma.gathering.deleteMany();
+    await prisma.refreshToken.deleteMany();
     await prisma.user.deleteMany();
   });
 

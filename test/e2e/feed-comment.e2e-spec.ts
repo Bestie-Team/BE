@@ -38,6 +38,7 @@ describe('FeedCommentController (e2e)', () => {
   afterEach(async () => {
     await prisma.feedComment.deleteMany();
     await prisma.feed.deleteMany();
+    await prisma.refreshToken.deleteMany();
     await prisma.user.deleteMany();
   });
 

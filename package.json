@@ -20,7 +20,7 @@
     "test:unit": "dotenv -e .env.test -- jest --config ./test/unit/jest.json --verbose --runInBand --watch",
     "test:unit-debug": "dotenv -e .env.test -- jest --config ./test/unit/jest.json --verbose --inspect-brk --runInBand",
     "prisma-push:test": "dotenv -e .env.test -- npx prisma db push",
-    "docker:up": "docker compose up -d && dotenv -e .env.test -- npx prisma migrate dev && sleep 5",
+    "docker:up": "docker compose up -d && sleep 5 && dotenv -e .env.test -- npx prisma migrate dev",
     "docker:down": "docker compose down"
   },
   "prisma": {

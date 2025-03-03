@@ -23,6 +23,8 @@ import { Feed, Friend, User } from '@prisma/client';
 import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
 import { ResponseResult } from 'test/helpers/types';
 import { FeedListResponse } from 'src/presentation/dto/feed/response/feed-list.response';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { EmptyModule } from 'test/helpers/empty.module';
 
 describe('FeedsController (e2e)', () => {
   let app: INestApplication;
@@ -31,7 +33,10 @@ describe('FeedsController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(ListenersModule)
+      .useModule(EmptyModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);

@@ -30,7 +30,8 @@ import {
   AcceptGatheringInvitationRequest,
   RejectGatheringInvitationRequest,
 } from 'src/presentation/dto';
-import { send } from 'process';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { EmptyModule } from 'test/helpers/empty.module';
 
 describe('GatheringsController (e2e)', () => {
   let app: INestApplication;
@@ -39,7 +40,10 @@ describe('GatheringsController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(ListenersModule)
+      .useModule(EmptyModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);

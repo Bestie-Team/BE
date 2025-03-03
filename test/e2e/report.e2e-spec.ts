@@ -17,6 +17,8 @@ import {
 } from 'test/helpers/generators';
 import { CreateReportRequest } from 'src/presentation/dto/report/request/create-report.request';
 import { ReportTypes } from 'src/shared/types';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { EmptyModule } from 'test/helpers/empty.module';
 
 describe('ReportsController (e2e)', () => {
   let app: INestApplication;
@@ -25,7 +27,10 @@ describe('ReportsController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(ListenersModule)
+      .useModule(EmptyModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);

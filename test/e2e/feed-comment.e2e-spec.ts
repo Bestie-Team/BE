@@ -16,6 +16,8 @@ import {
 import { ResponseResult } from 'test/helpers/types';
 import { CreateFeedCommentRequest } from 'src/presentation/dto/comment/request/create-feed-comment.request';
 import { FeedCommentResponse } from 'src/presentation/dto/comment/response/feed-comment-list.response';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { EmptyModule } from 'test/helpers/empty.module';
 
 describe('FeedCommentController (e2e)', () => {
   let app: INestApplication;
@@ -24,7 +26,10 @@ describe('FeedCommentController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(ListenersModule)
+      .useModule(EmptyModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);

@@ -17,6 +17,8 @@ import { ResponseResult } from 'test/helpers/types';
 import { AddGroupMemberRequest, GroupListResponse } from 'src/presentation/dto';
 import { Friend, User } from '@prisma/client';
 import { UpdateGroupRequest } from 'src/presentation/dto/group/request/update-group.request';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { EmptyModule } from 'test/helpers/empty.module';
 
 describe('GroupsController (e2e)', () => {
   let app: INestApplication;
@@ -25,7 +27,10 @@ describe('GroupsController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(ListenersModule)
+      .useModule(EmptyModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);

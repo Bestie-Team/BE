@@ -21,6 +21,8 @@ import {
   UserProfileResponse,
 } from 'src/presentation/dto';
 import { UserDetailResponse } from 'src/presentation/dto/user/response/user-detail.response';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { EmptyModule } from 'test/helpers/empty.module';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
@@ -29,7 +31,10 @@ describe('UsersController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(ListenersModule)
+      .useModule(EmptyModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);

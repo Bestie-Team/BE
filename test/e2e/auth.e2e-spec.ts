@@ -8,6 +8,8 @@ import { RegisterRequest, RegisterResponse } from 'src/presentation/dto';
 import { ResponseResult } from 'test/helpers/types';
 import { RefreshAccessResponse } from 'src/presentation/dto/auth/response/refresh-access.response';
 import { login } from 'test/helpers/login';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { EmptyModule } from 'test/helpers/empty.module';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
@@ -16,7 +18,10 @@ describe('AuthController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(ListenersModule)
+      .useModule(EmptyModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);

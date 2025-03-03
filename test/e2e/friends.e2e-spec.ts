@@ -22,6 +22,8 @@ import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/
 import { generate } from 'rxjs';
 import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';
 import { FriendRequestCountResponse } from 'src/presentation/dto/friend/response/friend-request-count.response';
+import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { EmptyModule } from 'test/helpers/empty.module';
 
 describe('FriendsController (e2e)', () => {
   let app: INestApplication;
@@ -30,7 +32,10 @@ describe('FriendsController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(ListenersModule)
+      .useModule(EmptyModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get<PrismaService>(PrismaService);

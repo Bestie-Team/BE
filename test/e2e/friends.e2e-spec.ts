@@ -21,6 +21,7 @@ import { UserCursor } from 'src/presentation/dto/shared';
 import { FriendRequestListResponse } from 'src/presentation/dto/friend/response/friend-request-list.response';
 import { generate } from 'rxjs';
 import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';
+import { FriendRequestCountResponse } from 'src/presentation/dto/friend/response/friend-request-count.response';
 
 describe('FriendsController (e2e)', () => {
   let app: INestApplication;
@@ -615,6 +616,41 @@ describe('FriendsController (e2e)', () => {
       otherInvitationsAfterDelete.forEach((invitation, i) => {
         expect(invitation.id).toEqual(expectedInvitations[i].id);
       });
+    });
+  });
+
+  describe('(GET) /friends/requests/count - 전체 친구 요청 수 조회', () => {
+    const users = Array.from({ length: 5 }, (_, i) =>
+      generateUserEntity(`test${i}@test.com`, `account${i}_id`),
+    );
+
+    beforeEach(async () => {
+      await prisma.user.createMany({ data: users });
+    });
+
+    it('친구 요청 수 조회 정상 동작 ', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({ where: { accountId } });
+
+      const sentRequests = Array.from({ length: 2 }, (_, i) =>
+        generateFriendEntity(loginedUser!.id, users[i].id, 'PENDING'),
+      );
+      const receivedRequests = Array.from({ length: 3 }, (_, i) =>
+        generateFriendEntity(loginedUser!.id, users[i + 2].id, 'PENDING'),
+      );
+      await prisma.friend.createMany({
+        data: [...sentRequests, ...receivedRequests],
+      });
+
+      const response = await request(app.getHttpServer())
+        .get('/friends/requests/count')
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<FriendRequestCountResponse> =
+        response;
+
+      expect(status).toEqual(200);
+      expect(body.count).toEqual(5);
     });
   });
 });

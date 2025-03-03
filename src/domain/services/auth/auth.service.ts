@@ -26,6 +26,8 @@ import {
 import { RefreshTokenEntity } from 'src/domain/entities/token/refresh-token.entity';
 import { RefreshTokenWriter } from 'src/domain/components/token/refresh-token-writer';
 import { RefreshTokenReader } from 'src/domain/components/token/refresh-token-reader';
+import { OauthUserInfo } from 'src/infrastructure/auth/strategies/oauth-strategy';
+import { Provider } from 'src/shared/types';
 
 @Injectable()
 export class AuthService {
@@ -58,32 +60,29 @@ export class AuthService {
       providerAccessToken,
     );
 
-    const user = await this.usersReader.readOneByEmail(userInfo.email);
-    if (!user) {
-      throw new NotFoundException(userInfo);
-    }
-
-    if (!(user.provider === provider)) {
-      throw new ConflictException(userInfo);
-    }
+    const {
+      id: userId,
+      accountId,
+      profileImageUrl,
+    } = await this.getValidatedUserByEmail(provider, userInfo);
 
     const { accessToken, refreshToken } = await this.generateTokens({
-      userId: user.id,
+      userId,
       deviceId,
     });
 
     await this.storeRefreshToken({
-      userId: user.id,
+      userId,
       deviceId,
       token: refreshToken,
     });
 
     return {
-      id: user.id,
+      id: userId,
       accessToken,
       refreshToken,
-      accountId: user.accountId,
-      profileImageUrl: user.profileImageUrl,
+      accountId,
+      profileImageUrl,
     };
   }
 
@@ -156,11 +155,7 @@ export class AuthService {
     }
 
     const { userId } = decodedData;
-
-    const storedToken = await this.refreshTokenReader.readOne(userId, deviceId);
-    if (!storedToken || storedToken.token !== refreshToken) {
-      throw new UnauthorizedException(INVALID_TOKEN_MESSAGE);
-    }
+    await this.checkValidRefreshToken(userId, deviceId, refreshToken);
 
     const { accessToken, refreshToken: newRefreshToken } =
       await this.generateTokens({ userId, deviceId });
@@ -171,6 +166,17 @@ export class AuthService {
       accessToken,
       refreshToken: newRefreshToken,
     };
+  }
+
+  async checkValidRefreshToken(
+    userId: string,
+    deviceId: string,
+    token: string,
+  ) {
+    const storedToken = await this.refreshTokenReader.readOne(userId, deviceId);
+    if (!storedToken || storedToken.token !== token) {
+      throw new UnauthorizedException(INVALID_TOKEN_MESSAGE);
+    }
   }
 
   async storeRefreshToken(prototype: RefreshTokenPrototype) {
@@ -192,5 +198,21 @@ export class AuthService {
     if (typeof deviceId !== 'string') {
       throw new BadRequestException(MUST_HAVE_DEVICE_ID_MESSAGE);
     }
+  }
+
+  async getValidatedUserByEmail(
+    provider: Provider,
+    oauthUserInfo: OauthUserInfo,
+  ) {
+    const user = await this.usersReader.readOneByEmail(oauthUserInfo.email);
+    if (!user) {
+      throw new NotFoundException(oauthUserInfo);
+    }
+
+    if (!(user.provider === provider)) {
+      throw new ConflictException(oauthUserInfo);
+    }
+
+    return user;
   }
 }

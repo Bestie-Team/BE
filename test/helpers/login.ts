@@ -10,6 +10,7 @@ import { ResponseResult } from '../helpers/types';
  * @returns `Bearer ${accessToken}`
  */
 export const login = async (app: INestApplication) => {
+  const deviceId = 'deviceId123';
   const dto: RegisterRequest = {
     email: 'lighty@lighty.com',
     accountId: 'lighty',
@@ -22,12 +23,13 @@ export const login = async (app: INestApplication) => {
 
   const response = await request(app.getHttpServer())
     .post('/auth/register')
-    .set('Device-ID', 'device123')
+    .set('Device-ID', deviceId)
     .send(dto);
   const { body }: ResponseResult<LoginResponse> = response;
 
   return {
     accessToken: `Bearer ${body.accessToken}`,
     accountId: dto.accountId,
+    deviceId,
   };
 };

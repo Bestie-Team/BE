@@ -7,8 +7,9 @@ import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { RegisterRequest, RegisterResponse } from 'src/presentation/dto';
 import { ResponseResult } from 'test/helpers/types';
 import { RefreshAccessResponse } from 'src/presentation/dto/auth/response/refresh-access.response';
+import { login } from 'test/helpers/login';
 
-describe('Name of the group', () => {
+describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
 
@@ -116,7 +117,7 @@ describe('Name of the group', () => {
       const response = await request(app.getHttpServer())
         .get('/auth/token')
         .set('Device-ID', deviceId)
-        .set('Cookie', invalidRefreshToken);
+        .set('Cookie', `refresh_token=${invalidRefreshToken}`);
       const { status }: ResponseResult<RefreshAccessResponse> = response;
 
       expect(status).toEqual(401);
@@ -138,6 +139,35 @@ describe('Name of the group', () => {
       const { status }: ResponseResult<RefreshAccessResponse> = response;
 
       expect(status).toEqual(401);
+    });
+
+    it('토큰이 존재하지 않는 경우 예외가 발생한다', async () => {
+      const agent = request.agent(app.getHttpServer());
+
+      const response = await agent
+        .get('/auth/token')
+        .set('Device-ID', deviceId);
+
+      const { status }: ResponseResult<RefreshAccessResponse> = response;
+
+      expect(status).toEqual(404);
+    });
+  });
+
+  describe('(DELETE) /auth/logout - 로그아웃', () => {
+    it('로그아웃 정상 동작 ', async () => {
+      const { accessToken, deviceId } = await login(app);
+
+      const response = await request(app.getHttpServer())
+        .delete('/auth/logout')
+        .set('Authorization', accessToken)
+        .set('Device-ID', deviceId);
+      const { status } = response;
+
+      const token = await prisma.refreshToken.findMany();
+
+      expect(status).toEqual(204);
+      expect(token.length).toEqual(0);
     });
   });
 });

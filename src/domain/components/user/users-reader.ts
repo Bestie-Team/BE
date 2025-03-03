@@ -53,12 +53,7 @@ export class UsersReader {
   }
 
   async readOneByEmail(email: string) {
-    const user = await this.usersRepository.findOneByEmail(email);
-    if (!user) {
-      throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
-    }
-
-    return user;
+    return await this.usersRepository.findOneByEmail(email);
   }
 
   /**

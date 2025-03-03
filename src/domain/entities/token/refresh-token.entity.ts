@@ -1,3 +1,5 @@
+import { RefreshTokenPrototype } from 'src/domain/types/auth.types';
+
 export class RefreshTokenEntity {
   readonly userId: string;
   readonly deviceId: string;
@@ -5,7 +7,7 @@ export class RefreshTokenEntity {
   readonly createdAt: Date;
 
   static create(
-    prototype: { userId: string; deviceId: string; token: string },
+    prototype: RefreshTokenPrototype,
     stdDate: Date,
   ): RefreshTokenEntity {
     return {

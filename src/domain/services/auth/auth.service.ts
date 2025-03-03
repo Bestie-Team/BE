@@ -22,6 +22,7 @@ import {
 import {
   INVALID_TOKEN_MESSAGE,
   MUST_HAVE_DEVICE_ID_MESSAGE,
+  NOT_FOUND_REFRESH_TOKEN,
 } from 'src/domain/error/messages';
 import { RefreshTokenEntity } from 'src/domain/entities/token/refresh-token.entity';
 import { RefreshTokenWriter } from 'src/domain/components/token/refresh-token-writer';
@@ -142,7 +143,7 @@ export class AuthService {
   ) {
     this.checkExistDeviceId(deviceId);
     if (!refreshToken) {
-      throw new UnauthorizedException(INVALID_TOKEN_MESSAGE);
+      throw new NotFoundException(NOT_FOUND_REFRESH_TOKEN);
     }
 
     let decodedData: DecodedTokenData;

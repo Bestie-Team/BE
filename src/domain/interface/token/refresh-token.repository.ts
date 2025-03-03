@@ -7,6 +7,7 @@ export interface RefreshTokenRepository {
     userId: string,
     deviceId: string,
   ): Promise<RefreshToken | null>;
+  update(userId: string, deviceId: string, token: string): Promise<void>;
 }
 
 export const RefreshTokenRepository = Symbol('RefreshTokenRepository');

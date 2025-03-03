@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
+  ApiHeader,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -39,6 +40,10 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: '소셜 로그인' })
+  @ApiHeader({
+    name: 'Device-ID',
+    description: '디바이스 식별자',
+  })
   @ApiBody({ type: LoginRequest })
   @ApiParam({
     name: 'provider',
@@ -84,6 +89,10 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: '회원가입' })
+  @ApiHeader({
+    name: 'Device-ID',
+    description: '디바이스 식별자',
+  })
   @ApiBody({ type: RegisterRequest })
   @ApiResponse({
     status: 201,
@@ -107,7 +116,11 @@ export class AuthController {
 
   @ApiOperation({
     summary: 'token 재발급',
-    description: 'access, refresh 모두 재발급됩니다. refresh는 쿠키에!',
+    description: 'refresh token은 쿠키에 들어가요.',
+  })
+  @ApiHeader({
+    name: 'Device-ID',
+    description: '디바이스 식별자',
   })
   @ApiResponse({
     status: 200,
@@ -133,6 +146,10 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: '로그아웃' })
+  @ApiHeader({
+    name: 'Device-ID',
+    description: '디바이스 식별자',
+  })
   @ApiResponse({ status: 204, description: '로그아웃 완료' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard)

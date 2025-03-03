@@ -1,7 +1,7 @@
 name: Test
 
 on:
-  pull_request:
+  push:
     branches: ['develop']
 
 jobs:
@@ -22,11 +22,15 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Docker Containers
+        run: npm run docker:up
+
       - name: Run Test
         env:
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
         run: |
-          npm install
-          npm run docker:up
           npm run test
           npm run test:unit

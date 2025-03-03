@@ -30,6 +30,7 @@ import { FriendRequestUseCase } from 'src/application/use-cases/friend/friend-re
 import { FriendAcceptanceUseCase } from 'src/application/use-cases/friend/friend-acceptance.use-case';
 import { AccepFriendRequest } from 'src/presentation/dto/friend/request/accept-friend.request';
 import { FriendsService } from 'src/domain/services/friends/friends.service';
+import { FriendRequestCountResponse } from 'src/presentation/dto/friend/response/friend-request-count.response';
 
 @ApiTags('/friends')
 @ApiBearerAuth()
@@ -152,6 +153,18 @@ export class FriendsController {
       search,
       paginationInput,
     });
+  }
+
+  @ApiOperation({
+    summary: '전체 친구 요청 수',
+    description: '받은, 보낸 요청 합산',
+  })
+  @ApiResponse({ status: 200, type: FriendRequestCountResponse })
+  @Get('requests/count')
+  async getRequestCount(
+    @CurrentUser() userId: string,
+  ): Promise<FriendRequestCountResponse> {
+    return await this.friendsReader.countRequests(userId);
   }
 
   @ApiOperation({ summary: '절교' })

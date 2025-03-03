@@ -16,6 +16,7 @@ import { Provider } from 'src/shared/types';
 import { RegisterResponse } from 'src/presentation/dto/auth/response/register.response';
 import { Request, Response } from 'express';
 import { RefreshAccessResponse } from 'src/presentation/dto/auth/response/refresh-access.response';
+import { cookieOptions } from 'src/configs/cookie/refresh-token-cookie.config';
 
 @ApiTags('/auth')
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
@@ -50,17 +51,20 @@ export class AuthController {
   async login(
     @Param('provider', ValidateProviderPipe) provider: Provider,
     @Body() dto: LoginRequest,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<LoginResponse> {
-    const { accessToken } = dto;
-    const data = await this.authService.login(provider, accessToken);
+    const deviceId = req.header('Device-ID') || null;
+    const { accessToken: providerAccessToken } = dto;
+
+    const data = await this.authService.login({
+      provider,
+      providerAccessToken,
+      deviceId,
+    });
     const { refreshToken, ...responseDto } = data;
 
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: process.env.NODE_ENV === 'dev' ? 'none' : 'strict',
-    });
+    res.cookie('refresh_token', refreshToken, cookieOptions);
 
     return responseDto;
   }
@@ -75,16 +79,14 @@ export class AuthController {
   @Post('register')
   async register(
     @Body() dto: RegisterRequest,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<RegisterResponse> {
-    const data = await this.authService.register(dto);
+    const deviceId = req.header('Device-ID') || null;
+    const data = await this.authService.register(dto, deviceId);
     const { refreshToken, ...responseDto } = data;
 
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: process.env.NODE_ENV === 'dev' ? 'none' : 'strict',
-    });
+    res.cookie('refresh_token', refreshToken, cookieOptions);
 
     return responseDto;
   }
@@ -103,15 +105,15 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<RefreshAccessResponse> {
+    const deviceId = req.header('Device-ID') || null;
     const refreshToken = req.cookies['refresh_token'];
-    const data = await this.authService.refreshAccessToken(refreshToken);
+    const data = await this.authService.refreshAccessToken(
+      refreshToken,
+      deviceId,
+    );
     const { accessToken, refreshToken: newRefreshToken } = data;
 
-    res.cookie('refresh_token', newRefreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: process.env.NODE_ENV === 'dev' ? 'none' : 'strict',
-    });
+    res.cookie('refresh_token', newRefreshToken, cookieOptions);
 
     return { accessToken };
   }

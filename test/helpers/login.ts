@@ -22,6 +22,7 @@ export const login = async (app: INestApplication) => {
 
   const response = await request(app.getHttpServer())
     .post('/auth/register')
+    .set('Device-ID', 'device123')
     .send(dto);
   const { body }: ResponseResult<LoginResponse> = response;
 

@@ -54,7 +54,7 @@ export class AuthService {
 
   async login(input: LoginInput) {
     const { deviceId, provider, providerAccessToken } = input;
-    this.checkExistDeviceId(deviceId);
+    this.validateDeviceId(deviceId);
 
     const userInfo = await this.oauthContext.getUserInfo(
       provider,
@@ -88,7 +88,7 @@ export class AuthService {
   }
 
   async register(prototype: UserPrototype, deviceId: string | null) {
-    this.checkExistDeviceId(deviceId);
+    this.validateDeviceId(deviceId);
 
     const userByAccountId = await this.usersReader.readOneByAccountId(
       prototype.accountId,
@@ -141,7 +141,7 @@ export class AuthService {
     refreshToken: string | null,
     deviceId: string | null,
   ) {
-    this.checkExistDeviceId(deviceId);
+    this.validateDeviceId(deviceId);
     if (!refreshToken) {
       throw new NotFoundException(NOT_FOUND_REFRESH_TOKEN);
     }
@@ -195,7 +195,7 @@ export class AuthService {
     return user;
   }
 
-  checkExistDeviceId(deviceId: string | null): asserts deviceId is string {
+  validateDeviceId(deviceId: string | null): asserts deviceId is string {
     if (typeof deviceId !== 'string') {
       throw new BadRequestException(MUST_HAVE_DEVICE_ID_MESSAGE);
     }
@@ -215,5 +215,10 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async logout(userId: string, deviceId: string | null) {
+    this.validateDeviceId(deviceId);
+    await this.refreshTokenWriter.delete(userId, deviceId);
   }
 }

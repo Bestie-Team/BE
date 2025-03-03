@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
@@ -17,6 +29,8 @@ import { RegisterResponse } from 'src/presentation/dto/auth/response/register.re
 import { Request, Response } from 'express';
 import { RefreshAccessResponse } from 'src/presentation/dto/auth/response/refresh-access.response';
 import { cookieOptions } from 'src/configs/cookie/refresh-token-cookie.config';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
 @ApiTags('/auth')
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
@@ -116,5 +130,15 @@ export class AuthController {
     res.cookie('refresh_token', newRefreshToken, cookieOptions);
 
     return { accessToken };
+  }
+
+  @ApiOperation({ summary: '로그아웃' })
+  @ApiResponse({ status: 204, description: '로그아웃 완료' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard)
+  @Delete('logout')
+  async logout(@CurrentUser() userId: string, @Req() req: Request) {
+    const deviceId = req.header('Device-ID') || null;
+    await this.authService.logout(userId, deviceId);
   }
 }

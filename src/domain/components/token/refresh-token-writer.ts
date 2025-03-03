@@ -16,4 +16,8 @@ export class RefreshTokenWriter {
   async update(userId: string, deviceId: string, token: string) {
     await this.refreshTokenRepository.update(userId, deviceId, token);
   }
+
+  async delete(userId: string, deviceId: string) {
+    await this.refreshTokenRepository.delete(userId, deviceId);
+  }
 }

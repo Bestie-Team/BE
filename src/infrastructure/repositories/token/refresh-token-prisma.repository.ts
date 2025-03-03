@@ -45,4 +45,15 @@ export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
       },
     });
   }
+
+  async delete(userId: string, deviceId: string): Promise<void> {
+    await this.prisma.refreshToken.delete({
+      where: {
+        userId_deviceId: {
+          userId,
+          deviceId,
+        },
+      },
+    });
+  }
 }

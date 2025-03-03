@@ -16,19 +16,18 @@ export class GatheringEntity {
     readonly updatedAt: Date,
   ) {}
 
-  static create(proto: GatheringPrototype, idGen: () => string, stdDate: Date) {
-    return new GatheringEntity(
-      idGen(),
-      proto.type,
-      proto.hostUserId,
-      proto.groupId,
-      proto.name,
-      proto.description,
-      new Date(proto.gatheringDate),
-      proto.address,
-      proto.invitationImageUrl,
-      stdDate,
-      stdDate,
-    );
+  static create(
+    proto: GatheringPrototype,
+    idGen: () => string,
+    stdDate: Date,
+  ): GatheringEntity {
+    const { gatheringDate, ...input } = proto;
+    return {
+      ...input,
+      id: idGen(),
+      gatheringDate: new Date(gatheringDate),
+      createdAt: stdDate,
+      updatedAt: stdDate,
+    };
   }
 }

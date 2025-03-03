@@ -17,15 +17,13 @@ export class NotificationEntity {
     proto: NotificationPrototype,
     idGen: () => string,
     stdDate: Date,
-  ) {
-    return new NotificationEntity(
-      idGen(),
-      proto.userId,
-      proto.type,
-      proto.title,
-      proto.message,
-      stdDate,
-      proto.relatedId,
-    );
+  ): NotificationEntity {
+    return {
+      ...proto,
+      id: idGen(),
+      createdAt: stdDate,
+      relatedId: null,
+      readAt: null,
+    };
   }
 }

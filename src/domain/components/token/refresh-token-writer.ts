@@ -13,7 +13,7 @@ export class RefreshTokenWriter {
     await this.refreshTokenRepository.save(token);
   }
 
-  async update(userId: string, deviceId: string, token: string) {
+  async updateToken(userId: string, deviceId: string, token: string) {
     await this.refreshTokenRepository.update(userId, deviceId, token);
   }
 

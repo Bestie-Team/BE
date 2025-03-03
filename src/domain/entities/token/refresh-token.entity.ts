@@ -5,14 +5,17 @@ export class RefreshTokenEntity {
   readonly deviceId: string;
   readonly token: string;
   readonly createdAt: Date;
+  readonly updatedAt: Date;
 
   static create(
     prototype: RefreshTokenPrototype,
     stdDate: Date,
+    updatedAt?: Date,
   ): RefreshTokenEntity {
     return {
       ...prototype,
       createdAt: stdDate,
+      updatedAt: updatedAt || stdDate,
     };
   }
 }

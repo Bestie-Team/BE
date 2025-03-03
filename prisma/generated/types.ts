@@ -197,6 +197,7 @@ export type RefreshToken = {
   device_id: string;
   token: string;
   created_at: Timestamp;
+  updated_at: Timestamp;
 };
 export type Report = {
   id: string;

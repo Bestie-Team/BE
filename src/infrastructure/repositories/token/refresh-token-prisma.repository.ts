@@ -36,6 +36,7 @@ export class RefreshTokenPrismaRepository implements RefreshTokenRepository {
     await this.prisma.refreshToken.update({
       data: {
         token,
+        updatedAt: new Date(),
       },
       where: {
         userId_deviceId: {

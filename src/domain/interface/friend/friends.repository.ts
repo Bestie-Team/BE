@@ -41,6 +41,7 @@ export interface FriendsRepository {
     senderId: string;
     receiverId: string;
   } | null>;
+  countRequest(userId: string): Promise<number>;
   update(
     senderId: string,
     receiverId: string,

@@ -289,6 +289,15 @@ export class FriendsPrismaRepository implements FriendsRepository {
     });
   }
 
+  async countRequest(userId: string): Promise<number> {
+    return await this.txHost.tx.friend.count({
+      where: {
+        status: 'PENDING',
+        OR: [{ senderId: userId }, { receiverId: userId }],
+      },
+    });
+  }
+
   async update(
     senderId: string,
     receiverId: string,

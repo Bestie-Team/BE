@@ -77,4 +77,9 @@ export class FriendsReader {
       nextCursor,
     };
   }
+
+  async countRequests(userId: string) {
+    const count = await this.friendsRepository.countRequest(userId);
+    return { count };
+  }
 }

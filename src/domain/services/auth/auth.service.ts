@@ -161,7 +161,11 @@ export class AuthService {
     const { accessToken, refreshToken: newRefreshToken } =
       await this.generateTokens({ userId, deviceId });
 
-    await this.refreshTokenWriter.update(userId, deviceId, newRefreshToken);
+    await this.refreshTokenWriter.updateToken(
+      userId,
+      deviceId,
+      newRefreshToken,
+    );
 
     return {
       accessToken,

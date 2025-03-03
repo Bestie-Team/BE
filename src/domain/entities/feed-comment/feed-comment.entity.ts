@@ -13,13 +13,11 @@ export class FeedCommentEntity {
     proto: FeedCommentPrototype,
     idGen: () => string,
     stdDate: Date,
-  ) {
-    return new FeedCommentEntity(
-      idGen(),
-      proto.writerId,
-      proto.feedId,
-      proto.content,
-      stdDate,
-    );
+  ): FeedCommentEntity {
+    return {
+      ...proto,
+      id: idGen(),
+      createdAt: stdDate,
+    };
   }
 }

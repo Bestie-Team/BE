@@ -11,15 +11,16 @@ export class GroupEntity {
     readonly updatedAt: Date,
   ) {}
 
-  static create(input: GroupPrototype, idGen: () => string, stdDate: Date) {
-    return new GroupEntity(
-      idGen(),
-      input.name,
-      input.description,
-      input.groupImageUrl,
-      input.ownerId,
-      stdDate,
-      stdDate,
-    );
+  static create(
+    input: GroupPrototype,
+    idGen: () => string,
+    stdDate: Date,
+  ): GroupEntity {
+    return {
+      ...input,
+      id: idGen(),
+      createdAt: stdDate,
+      updatedAt: stdDate,
+    };
   }
 }

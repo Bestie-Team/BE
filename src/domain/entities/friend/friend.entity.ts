@@ -11,13 +11,16 @@ export class FriendEntity {
     readonly status?: FriendStatus,
   ) {}
 
-  static create(input: FriendPrototype, idGen: () => string, stdDate: Date) {
-    return new FriendEntity(
-      idGen(),
-      input.senderId,
-      input.receiverId,
-      stdDate,
-      stdDate,
-    );
+  static create(
+    proto: FriendPrototype,
+    idGen: () => string,
+    stdDate: Date,
+  ): FriendEntity {
+    return {
+      ...proto,
+      id: idGen(),
+      createdAt: stdDate,
+      updatedAt: stdDate,
+    };
   }
 }

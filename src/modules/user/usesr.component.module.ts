@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { UsersReader } from 'src/domain/components/user/users-reader';
 import { UsersWriter } from 'src/domain/components/user/users-writer';
-import { UsersRepository } from 'src/domain/interface/users.repository';
-import { UsersPrismaRepository } from 'src/infrastructure/repositories/users-prisma.repository';
+import { UsersRepository } from 'src/domain/interface/user/users.repository';
+import { UsersPrismaRepository } from 'src/infrastructure/repositories/user/users-prisma.repository';
 
 @Module({
   providers: [

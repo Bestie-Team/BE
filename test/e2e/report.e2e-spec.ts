@@ -40,6 +40,7 @@ describe('ReportsController (e2e)', () => {
     await prisma.feedComment.deleteMany();
     await prisma.feed.deleteMany();
     await prisma.friend.deleteMany();
+    await prisma.refreshToken.deleteMany();
     await prisma.user.deleteMany();
   });
 

@@ -58,6 +58,7 @@ describe('GatheringsController (e2e)', () => {
     await prisma.groupParticipation.deleteMany();
     await prisma.group.deleteMany();
     await prisma.friend.deleteMany();
+    await prisma.refreshToken.deleteMany();
     await prisma.user.deleteMany();
   });
 

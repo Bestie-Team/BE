@@ -10,20 +10,18 @@ export class GroupParticipationEntity {
   ) {}
 
   static create(
-    input: {
+    proto: {
       groupId: string;
       participantId: string;
       status?: GroupParticipationStatus;
     },
     idGen: () => string,
     stdDate: Date,
-  ) {
-    return new GroupParticipationEntity(
-      idGen(),
-      input.groupId,
-      input.participantId,
-      stdDate,
-      input.status,
-    );
+  ): GroupParticipationEntity {
+    return {
+      ...proto,
+      id: idGen(),
+      createdAt: stdDate,
+    };
   }
 }

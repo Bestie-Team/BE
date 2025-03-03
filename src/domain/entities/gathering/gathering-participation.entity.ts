@@ -18,7 +18,7 @@ export class GatheringParticipationEntity {
     },
     idGen: () => string,
     stdDate: Date,
-  ) {
+  ): GatheringParticipationEntity {
     return new GatheringParticipationEntity(
       idGen(),
       proto.gatheringId,

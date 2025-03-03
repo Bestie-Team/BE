@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { NOT_FOUND_USER_MESSAGE } from 'src/domain/error/messages';
 import { getUserCursor } from 'src/domain/helpers/get-cursor';
-import { UsersRepository } from 'src/domain/interface/users.repository';
+import { UsersRepository } from 'src/domain/interface/user/users.repository';
 import { SearchInput } from 'src/domain/types/user.types';
 
 @Injectable()
@@ -53,12 +53,7 @@ export class UsersReader {
   }
 
   async readOneByEmail(email: string) {
-    const user = await this.usersRepository.findOneByEmail(email);
-    if (!user) {
-      throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
-    }
-
-    return user;
+    return await this.usersRepository.findOneByEmail(email);
   }
 
   /**

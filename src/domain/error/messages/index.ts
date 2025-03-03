@@ -38,3 +38,4 @@ export const CONFLICT_GROUP_AND_FRIEND_MESSAGE =
   '그룹 번호와 친구 번호는 동시에 제공될 수 없습니다.';
 export const GATHERING_CREATION_PAST_DATE_MESSAGE =
   '현재보다 이전의 모임은 생성할 수 없습니다.';
+export const MUST_HAVE_DEVICE_ID_MESSAGE = '디바이스 식별 값이 없습니다.';

@@ -45,6 +45,7 @@ describe('UsersController (e2e)', () => {
     await prisma.feed.deleteMany();
     await prisma.groupParticipation.deleteMany();
     await prisma.group.deleteMany();
+    await prisma.refreshToken.deleteMany();
     await prisma.user.deleteMany();
   });
 

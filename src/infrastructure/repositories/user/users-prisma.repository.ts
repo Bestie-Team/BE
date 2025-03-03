@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/domain/entities/user/user.entity';
-import { UsersRepository } from 'src/domain/interface/users.repository';
+import { UsersRepository } from 'src/domain/interface/user/users.repository';
 import type {
   Profile,
   SearchedUser,

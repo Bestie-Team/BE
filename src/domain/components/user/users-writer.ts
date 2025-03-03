@@ -10,7 +10,7 @@ import {
   ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE,
   DUPLICATE_ACCOUNT_ID_MESSAGE,
 } from 'src/domain/error/messages';
-import { UsersRepository } from 'src/domain/interface/users.repository';
+import { UsersRepository } from 'src/domain/interface/user/users.repository';
 import { calcDiff, convertUnixToDate } from 'src/utils/date';
 
 @Injectable()

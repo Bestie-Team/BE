@@ -7,7 +7,7 @@ echo "Kill Server Process"
 pkill -f "node dist/main.js"
 
 echo "Start New Server"
-nohup node dist/main.js &
+NODE_ENV=production nohup node dist/main.js &
 disown
 
 echo "Success Restart"

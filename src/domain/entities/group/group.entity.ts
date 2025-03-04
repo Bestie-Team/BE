@@ -12,15 +12,18 @@ export class GroupEntity {
   ) {}
 
   static create(
-    input: GroupPrototype,
+    proto: GroupPrototype,
     idGen: () => string,
     stdDate: Date,
   ): GroupEntity {
-    return {
-      ...input,
-      id: idGen(),
-      createdAt: stdDate,
-      updatedAt: stdDate,
-    };
+    return new GroupEntity(
+      idGen(),
+      proto.name,
+      proto.description,
+      proto.groupImageUrl,
+      proto.ownerId,
+      stdDate,
+      stdDate,
+    );
   }
 }

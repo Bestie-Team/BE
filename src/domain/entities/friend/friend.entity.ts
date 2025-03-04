@@ -16,11 +16,12 @@ export class FriendEntity {
     idGen: () => string,
     stdDate: Date,
   ): FriendEntity {
-    return {
-      ...proto,
-      id: idGen(),
-      createdAt: stdDate,
-      updatedAt: stdDate,
-    };
+    return new FriendEntity(
+      idGen(),
+      proto.senderId,
+      proto.receiverId,
+      stdDate,
+      stdDate,
+    );
   }
 }

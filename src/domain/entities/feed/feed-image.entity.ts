@@ -7,14 +7,10 @@ export class FeedImageEntity {
   ) {}
 
   static create(
-    prototype: { url: string; index: number },
+    proto: { url: string; index: number },
     idGen: () => string,
     stdDate: Date,
   ): FeedImageEntity {
-    return {
-      id: idGen(),
-      ...prototype,
-      createdAt: stdDate,
-    };
+    return new FeedImageEntity(idGen(), proto.url, proto.index, stdDate);
   }
 }

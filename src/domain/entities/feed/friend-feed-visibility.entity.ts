@@ -6,12 +6,9 @@ export class FriendFeedVisibilityEntity {
   ) {}
 
   static create(
-    prototype: { feedId: string; userId: string },
+    proto: { feedId: string; userId: string },
     stdDate: Date,
   ): FriendFeedVisibilityEntity {
-    return {
-      ...prototype,
-      createdAt: stdDate,
-    };
+    return new FriendFeedVisibilityEntity(proto.feedId, proto.userId, stdDate);
   }
 }

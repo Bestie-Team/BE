@@ -9,9 +9,6 @@ export class BlockedFeedEntity {
     proto: { userId: string; feedId: string },
     stdDate: Date,
   ): BlockedFeedEntity {
-    return {
-      ...proto,
-      createdAt: stdDate,
-    };
+    return new BlockedFeedEntity(proto.userId, proto.feedId, stdDate);
   }
 }

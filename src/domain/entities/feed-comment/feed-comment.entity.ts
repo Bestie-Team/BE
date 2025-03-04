@@ -14,10 +14,12 @@ export class FeedCommentEntity {
     idGen: () => string,
     stdDate: Date,
   ): FeedCommentEntity {
-    return {
-      ...proto,
-      id: idGen(),
-      createdAt: stdDate,
-    };
+    return new FeedCommentEntity(
+      idGen(),
+      proto.writerId,
+      proto.feedId,
+      proto.content,
+      stdDate,
+    );
   }
 }

@@ -18,10 +18,12 @@ export class GroupParticipationEntity {
     idGen: () => string,
     stdDate: Date,
   ): GroupParticipationEntity {
-    return {
-      ...proto,
-      id: idGen(),
-      createdAt: stdDate,
-    };
+    return new GroupParticipationEntity(
+      idGen(),
+      proto.groupId,
+      proto.participantId,
+      stdDate,
+      proto.status,
+    );
   }
 }

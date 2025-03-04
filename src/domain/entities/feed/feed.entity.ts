@@ -15,11 +15,13 @@ export class FeedEntity {
     idGen: () => string,
     stdDate: Date,
   ): FeedEntity {
-    return {
-      ...proto,
-      id: idGen(),
-      createdAt: stdDate,
-      updatedAt: stdDate,
-    };
+    return new FeedEntity(
+      idGen(),
+      proto.writerId,
+      proto.gatheringId,
+      proto.content,
+      stdDate,
+      stdDate,
+    );
   }
 }

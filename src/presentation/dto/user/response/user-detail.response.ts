@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Provider } from '../../shared';
 
 export class UserDetailResponse {
   @ApiProperty({ example: 'uuid' })
@@ -21,4 +22,13 @@ export class UserDetailResponse {
 
   @ApiProperty({ example: 52 })
   readonly friendCount: number;
+
+  @ApiProperty({ example: 'lighty@gmail.com' })
+  readonly email: string;
+
+  @ApiProperty({
+    example: 'GOOGLE',
+    enum: ['GOOGLE', 'KAKAO', 'APPLE'],
+  })
+  readonly provider: Provider;
 }

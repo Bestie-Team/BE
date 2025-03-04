@@ -37,6 +37,8 @@ export interface UserDetail extends User {
   readonly groupCount: number;
   readonly feedCount: number;
   readonly friendCount: number;
+  readonly email: string;
+  readonly provider: Provider;
 }
 
 export interface Profile {

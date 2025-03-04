@@ -208,7 +208,14 @@ export class UsersPrismaRepository implements UsersRepository {
 
     const row = await this.txHost.tx.$kysely
       .selectFrom('active_user as u')
-      .select(['u.id', 'u.account_id', 'u.name', 'u.profile_image_url'])
+      .select([
+        'u.id',
+        'u.account_id',
+        'u.name',
+        'u.profile_image_url',
+        'u.email',
+        'u.provider',
+      ])
       .select((qb) =>
         qb
           .selectFrom('friend as f')
@@ -255,6 +262,8 @@ export class UsersPrismaRepository implements UsersRepository {
           friendCount: Number(row.friend_count || 0),
           groupCount: Number(row.group_count || 0),
           name: row.name,
+          email: row.email,
+          provider: row.provider,
           profileImageUrl: row.profile_image_url,
         }
       : null;

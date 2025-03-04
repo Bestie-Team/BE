@@ -165,7 +165,7 @@ export class UsersController {
     @Body() dto: ChangeProfileImageRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.usersWriter.updateProfileImage(userId, dto.profileImageUrl);
+    await this.usersService.changeProfileImage(userId, dto.profileImageUrl);
   }
 
   @ApiOperation({ summary: '계정 아이디 변경' })

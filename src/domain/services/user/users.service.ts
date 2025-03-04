@@ -18,6 +18,10 @@ export class UsersService {
     private readonly usersWriter: UsersWriter,
   ) {}
 
+  async changeProfileImage(userId: string, profileImageUrl: string) {
+    await this.usersWriter.updateProfileImage(userId, profileImageUrl);
+  }
+
   async changeAccountId(userId: string, accountId: string, today = new Date()) {
     await this.checkAccountIdChangeCooldown(userId, today);
     await this.checkDuplicateAccountId(accountId);

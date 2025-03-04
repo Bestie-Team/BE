@@ -320,9 +320,9 @@ export class UsersPrismaRepository implements UsersRepository {
   }
 
   async update(data: Partial<UserEntity>): Promise<void> {
-    const { id, ...updateDate } = data;
+    const { id, ...updateData } = data;
     await this.txHost.tx.user.update({
-      data: updateDate,
+      data: updateData,
       where: {
         id,
       },

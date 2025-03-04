@@ -39,6 +39,7 @@ import { UserDetailResponse } from 'src/presentation/dto/user/response/user-deta
 import { UserProfileResponse } from 'src/presentation/dto/user/response/user-profile.response';
 import { UsersWriter } from 'src/domain/components/user/users-writer';
 import { UsersReader } from 'src/domain/components/user/users-reader';
+import { UsersService } from 'src/domain/services/user/users.service';
 
 @ApiTags('/users')
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
@@ -46,6 +47,7 @@ import { UsersReader } from 'src/domain/components/user/users-reader';
 export class UsersController {
   constructor(
     private readonly usersWriter: UsersWriter,
+    private readonly usersService: UsersService,
     private readonly usersReader: UsersReader,
   ) {}
 
@@ -147,7 +149,7 @@ export class UsersController {
   })
   @Get('availability')
   async existAccountId(@Query('accountId') accountId: string) {
-    await this.usersWriter.checkDuplicateAccountId(accountId);
+    await this.usersService.checkDuplicateAccountId(accountId);
   }
 
   @ApiOperation({ summary: '프로필 사진 변경' })
@@ -191,7 +193,7 @@ export class UsersController {
     @Body() dto: ChangeAccountIdRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.usersWriter.updateAccountId(userId, dto.accountId);
+    await this.usersService.changeAccountId(userId, dto.accountId);
   }
 
   @ApiOperation({ summary: '알림 토큰 변경' })

@@ -7,8 +7,9 @@ export interface FeedPrototype {
   readonly content: string;
 }
 
-export interface CreateGatheringFeedInput
-  extends Pick<FeedPrototype, 'writerId' | 'content'> {
+export interface CreateGatheringFeedInput {
+  readonly writerId: string;
+  readonly content: string;
   readonly gatheringId: string;
 }
 

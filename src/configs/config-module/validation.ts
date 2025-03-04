@@ -7,6 +7,8 @@ export const validationSchema = Joi.object({
   CLOUDWATCH_LOG_GROUP: Joi.string().required(),
   CLOUDWATCH_LOG_STREAM: Joi.string().required(),
   CLOUDWATCH_REGION: Joi.string().required(),
+  CLOUDWATCH_KEY_ID: Joi.string().required(),
+  CLOUDWATCH_SECRET_KEY: Joi.string().required(),
   // AWS S3
   AWS_BUCKET_REGION: Joi.string().required(),
   AWS_ACCESS_KEY_ID: Joi.string().required(),

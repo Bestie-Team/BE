@@ -39,6 +39,9 @@ if (isProduction) {
       logGroupName: process.env.CLOUDWATCH_LOG_GROUP,
       logStreamName: process.env.CLOUDWATCH_LOG_STREAM,
       awsRegion: process.env.CLOUDWATCH_REGION,
+      awsAccessKeyId: process.env.CLOUDWATCH_KEY_ID,
+      awsSecretKey: process.env.CLOUDWATCH_SECRET_KEY,
+      level: 'info',
       jsonMessage: true,
     }),
   );

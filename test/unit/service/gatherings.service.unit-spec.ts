@@ -56,11 +56,16 @@ describe('GatheringsService', () => {
     db = app.get<PrismaService>(PrismaService);
   });
 
+  afterAll(async () => {
+    await db.$disconnect();
+  });
+
   afterEach(async () => {
     await db.gatheringParticipation.deleteMany();
     await db.gathering.deleteMany();
     await db.friend.deleteMany();
     await db.group.deleteMany();
+    await db.refreshToken.deleteMany();
     await db.user.deleteMany();
   });
 

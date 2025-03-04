@@ -42,6 +42,10 @@ describe('FriendsService', () => {
     db = app.get<PrismaService>(PrismaService);
   });
 
+  afterAll(async () => {
+    await db.$disconnect();
+  });
+
   afterEach(async () => {
     await db.friend.deleteMany();
     await db.user.deleteMany();

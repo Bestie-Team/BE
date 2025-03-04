@@ -43,6 +43,13 @@ if (isProduction) {
       awsSecretKey: process.env.CLOUDWATCH_SECRET_KEY,
       level: 'info',
       jsonMessage: true,
+      awsOptions: {
+        credentials: {
+          accessKeyId: String(process.env.CLOUDWATCH_KEY_ID),
+          secretAccessKey: String(process.env.CLOUDWATCH_SECRET_KEY),
+        },
+        region: process.env.CLOUDWATCH_REGION,
+      },
     }),
   );
 }

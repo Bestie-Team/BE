@@ -13,4 +13,10 @@ export class FeedImageEntity {
   ): FeedImageEntity {
     return new FeedImageEntity(idGen(), proto.url, proto.index, stdDate);
   }
+
+  static createBulk(urls: string[], idGen: () => string, stdDate: Date) {
+    return urls.map((url, index) =>
+      this.create({ url, index }, idGen, stdDate),
+    );
+  }
 }

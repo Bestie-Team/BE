@@ -25,6 +25,18 @@ export class FeedsReader {
     return feed;
   }
 
+  async readOneByGatheringIdAndWriterId(gatheringId: string, writerId: string) {
+    const feed = await this.feedsRepository.findOneByGatheringIdAndWriterId(
+      gatheringId,
+      writerId,
+    );
+    if (!feed) {
+      throw new NotFoundException(NOT_FOUND_FEED_MESSAGE);
+    }
+
+    return feed;
+  }
+
   async readAll(userId: string, feedPaginationInput: FeedPaginationInput) {
     return await this.getFeeds(userId, feedPaginationInput, 'ALL');
   }

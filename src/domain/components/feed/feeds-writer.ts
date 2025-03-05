@@ -1,32 +1,10 @@
-import {
-  ConflictException,
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { Transactional } from '@nestjs-cls/transactional';
-import { v4 } from 'uuid';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
-import {
-  CreateGatheringFeedInput,
-  FeedPrototype,
-} from 'src/domain/types/feed.types';
-import {
-  DUPLICATE_GATHERING_FEED,
-  FEED_CREATION_PERIOD_EXCEEDED_MESSAGE,
-  FORBIDDEN_MESSAGE,
-  IS_NOT_DONE_GATHERING_MESSAGE,
-  NOT_FOUND_GATHERING_MESSAGE,
-} from 'src/domain/error/messages';
-import { calcDiffDate } from 'src/utils/date';
+import { FORBIDDEN_MESSAGE } from 'src/domain/error/messages';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
 import { FriendFeedVisibilitiesRepository } from 'src/domain/interface/feed/friend-feed-visibilities.repository';
-import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
-import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
 
 @Injectable()
 export class FeedsWriter {
@@ -35,39 +13,10 @@ export class FeedsWriter {
     private readonly feedsRepository: FeedsRepository,
     @Inject(FriendFeedVisibilitiesRepository)
     private readonly friendFeedVisibilitiesRepository: FriendFeedVisibilitiesRepository,
-    private readonly friendsChecker: FriendsChecker,
-    private readonly gatheringsReader: GatheringsReader,
   ) {}
 
-  async createGatheringFeed(
-    input: CreateGatheringFeedInput,
-    imageUrls: string[],
-    today: Date = new Date(),
-  ) {
-    const { gatheringId, writerId } = input;
-    await this.checkCreateGatheringFeedConstraints(
-      gatheringId,
-      writerId,
-      today,
-    );
-
-    const stdDate = new Date();
-    const feed = FeedEntity.create(input, v4, stdDate);
-    const images: FeedImageEntity[] = imageUrls.map((url, index) =>
-      FeedImageEntity.create({ url, index }, v4, stdDate),
-    );
-
+  async create(feed: FeedEntity, images: FeedImageEntity[]) {
     await this.feedsRepository.save(feed, images);
-  }
-
-  async createFriendFeed(
-    prototype: FeedPrototype,
-    imageUrls: string[],
-    friendIds: string[],
-  ) {
-    const { writerId } = prototype;
-    await this.friendsChecker.checkIsFriendAll(writerId, friendIds);
-    await this.createFriendFeedTransaction(prototype, imageUrls, friendIds);
   }
 
   async updateContent(content: string, feedId: string, userId: string) {
@@ -80,66 +29,10 @@ export class FeedsWriter {
     await this.feedsRepository.delete(id);
   }
 
-  private async checkCreateGatheringFeedConstraints(
-    gatheringId: string,
-    writerId: string,
-    today: Date,
+  async createFriendFeedVisibilities(
+    visibilities: FriendFeedVisibilityEntity[],
   ) {
-    const gathering = await this.gatheringsReader.readOne(gatheringId);
-    if (!gathering) {
-      throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);
-    }
-    if (!gathering.endedAt) {
-      throw new UnprocessableEntityException(IS_NOT_DONE_GATHERING_MESSAGE);
-    }
-    const diffDate = calcDiffDate(today, gathering.endedAt);
-    if (diffDate >= 30) {
-      throw new UnprocessableEntityException(
-        FEED_CREATION_PERIOD_EXCEEDED_MESSAGE,
-      );
-    }
-    const existFeed =
-      await this.feedsRepository.findOneByGatheringIdAndWriterId(
-        gatheringId,
-        writerId,
-      );
-    if (existFeed) {
-      throw new ConflictException(DUPLICATE_GATHERING_FEED);
-    }
-  }
-
-  @Transactional()
-  private async createFriendFeedTransaction(
-    prototype: FeedPrototype,
-    imageUrls: string[],
-    friendIds: string[],
-  ) {
-    const feedId = await this.saveFeed(prototype, imageUrls);
-    await this.saveFriendFeedVisibilities(feedId, friendIds);
-  }
-
-  private async saveFeed(prototype: FeedPrototype, imageUrls: string[]) {
-    const stdDate = new Date();
-    const feed = FeedEntity.create(prototype, v4, stdDate);
-    const images: FeedImageEntity[] = imageUrls.map((url, index) =>
-      FeedImageEntity.create({ url, index }, v4, stdDate),
-    );
-    await this.feedsRepository.save(feed, images);
-
-    return feed.id;
-  }
-
-  private async saveFriendFeedVisibilities(
-    feedId: string,
-    friendIds: string[],
-  ) {
-    const stdDate = new Date();
-    const friendFeedVisibilities = friendIds.map((friendId) =>
-      FriendFeedVisibilityEntity.create({ feedId, userId: friendId }, stdDate),
-    );
-    await this.friendFeedVisibilitiesRepository.saveMany(
-      friendFeedVisibilities,
-    );
+    await this.friendFeedVisibilitiesRepository.saveMany(visibilities);
   }
 
   private async checkOwnership(feedId: string, ownerId: string) {

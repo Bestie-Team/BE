@@ -29,6 +29,7 @@ import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-optio
 import { BlockedFeedsService } from 'src/domain/components/feed/blocked-feeds.service';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { FeedsWriter } from 'src/domain/components/feed/feeds-writer';
+import { FeedsService } from 'src/domain/services/feed/feeds.service';
 import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
 import { BlockedFeedListRequest } from 'src/presentation/dto/feed/request/blocked-feed-list.request';
 import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
@@ -48,6 +49,7 @@ export class FeedsController {
   constructor(
     private readonly feedsWriteService: FeedsWriter,
     private readonly feedsReadService: FeedsReader,
+    private readonly feedsService: FeedsService,
     private readonly blockedFeedsService: BlockedFeedsService,
   ) {}
 
@@ -103,7 +105,7 @@ export class FeedsController {
     @CurrentUser() userId: string,
   ) {
     const { imageUrls, ...rest } = dto;
-    await this.feedsWriteService.createGatheringFeed(
+    await this.feedsService.createGatheringFeed(
       {
         ...rest,
         writerId: userId,
@@ -126,7 +128,7 @@ export class FeedsController {
     @CurrentUser() userId: string,
   ) {
     const { imageUrls, content, friendIds } = dto;
-    await this.feedsWriteService.createFriendFeed(
+    await this.feedsService.createFriendFeed(
       {
         writerId: userId,
         gatheringId: null,

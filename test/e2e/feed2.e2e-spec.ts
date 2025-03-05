@@ -72,6 +72,13 @@ describe('FeedsController (e2e)', () => {
       const gathering = await prisma.gathering.create({
         data: generateGatheringEntity(loginedUser!.id),
       });
+      const participation = await prisma.gatheringParticipation.create({
+        data: generateGatheringParticipationEntity(
+          gathering.id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      });
       await prisma.gathering.update({
         data: { endedAt: new Date() },
         where: { id: gathering.id },

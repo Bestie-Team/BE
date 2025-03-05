@@ -1,6 +1,11 @@
 import { Transactional } from '@nestjs-cls/transactional';
 import { v4 } from 'uuid';
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { FeedsWriter } from 'src/domain/components/feed/feeds-writer';
 import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
@@ -9,7 +14,9 @@ import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
 import {
+  DUPLICATE_GATHERING_FEED,
   FEED_CREATION_PERIOD_EXCEEDED_MESSAGE,
+  FORBIDDEN_MESSAGE,
   IS_NOT_DONE_GATHERING_MESSAGE,
 } from 'src/domain/error/messages';
 import {
@@ -17,6 +24,11 @@ import {
   FeedPrototype,
 } from 'src/domain/types/feed.types';
 import { calcDateDiff } from 'src/utils/date';
+import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
+import {
+  FeedNotFoundException,
+  GatheringParticipationNotFoundException,
+} from 'src/domain/error/exceptions/not-found.exception';
 
 @Injectable()
 export class FeedsService {
@@ -25,6 +37,7 @@ export class FeedsService {
     private readonly feedsWriter: FeedsWriter,
     private readonly friendsChecker: FriendsChecker,
     private readonly gatheringsReader: GatheringsReader,
+    private readonly gatheringParticipationReader: GatheringInvitationsReader,
   ) {}
 
   async createGatheringFeed(
@@ -84,7 +97,6 @@ export class FeedsService {
     today: Date,
   ) {
     const gathering = await this.gatheringsReader.readOne(gatheringId);
-
     if (!gathering.endedAt) {
       throw new UnprocessableEntityException(IS_NOT_DONE_GATHERING_MESSAGE);
     }
@@ -97,12 +109,29 @@ export class FeedsService {
     }
 
     try {
-      await this.feedsReader.readOneByGatheringIdAndWriterId(
+      const participation = await this.gatheringParticipationReader.readOne(
         gatheringId,
         writerId,
       );
+      if (participation.status !== 'ACCEPTED') {
+        throw new ForbiddenException(FORBIDDEN_MESSAGE);
+      }
+
+      const alreadyWrittnFeed =
+        await this.feedsReader.readOneByGatheringIdAndWriterId(
+          gatheringId,
+          writerId,
+        );
+      if (alreadyWrittnFeed) {
+        throw new ConflictException(DUPLICATE_GATHERING_FEED);
+      }
     } catch (e: unknown) {
-      return;
+      if (e instanceof GatheringParticipationNotFoundException) {
+        throw new ForbiddenException(FORBIDDEN_MESSAGE);
+      }
+      if (e instanceof ConflictException) throw e;
+      if (e instanceof FeedNotFoundException) return;
+      throw e;
     }
   }
 }

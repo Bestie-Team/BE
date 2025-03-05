@@ -23,6 +23,10 @@ export interface GatheringParticipationsRepository {
     senderId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<SentGatheringInvitation[]>;
+  findOneByGatheringIdAndParticipantId(
+    gatheringId: string,
+    participantId: string,
+  ): Promise<{ id: string; status: GatheringParticipationStatus } | null>;
   updateStatus(
     invitationId: string,
     status: GatheringParticipationStatus,

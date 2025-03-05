@@ -5,6 +5,7 @@ import { BlockedFeedsModule } from 'src/modules/feed/blocked-feeds.module';
 import { FeedsService } from 'src/domain/services/feed/feeds.service';
 import { FriendsCheckerModule } from 'src/modules/friend/friends-chcker.module';
 import { GatheringsComponentModule } from 'src/modules/gathering/gatherings-component.module';
+import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
 
 @Module({
   imports: [
@@ -12,9 +13,10 @@ import { GatheringsComponentModule } from 'src/modules/gathering/gatherings-comp
     FeedsComponentModule,
     FriendsCheckerModule,
     GatheringsComponentModule,
+    GatheringParticipationModules,
   ],
   controllers: [FeedsController],
   providers: [FeedsService],
-  exports: [],
+  exports: [FeedsService],
 })
 export class FeedsModule {}

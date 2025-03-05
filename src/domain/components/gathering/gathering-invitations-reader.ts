@@ -1,4 +1,5 @@
 import { Inject } from '@nestjs/common';
+import { GatheringParticipationNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
 import {
   getReceivedGatheringInvitationCursor,
   getSentGatheringInvitationCursor,
@@ -50,5 +51,18 @@ export class GatheringInvitationsReader {
       invitations,
       nextCursor,
     };
+  }
+
+  async readOne(gatheringId: string, participantId: string) {
+    const participation =
+      await this.gatheringParticipationsRepository.findOneByGatheringIdAndParticipantId(
+        gatheringId,
+        participantId,
+      );
+    if (!participation) {
+      throw new GatheringParticipationNotFoundException();
+    }
+
+    return participation;
   }
 }

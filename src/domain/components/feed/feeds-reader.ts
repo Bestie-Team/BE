@@ -1,4 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { FeedNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
 import { NOT_FOUND_FEED_MESSAGE } from 'src/domain/error/messages';
 import { getFeedCursor } from 'src/domain/helpers/get-cursor';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
@@ -31,7 +32,7 @@ export class FeedsReader {
       writerId,
     );
     if (!feed) {
-      throw new NotFoundException(NOT_FOUND_FEED_MESSAGE);
+      throw new FeedNotFoundException();
     }
 
     return feed;

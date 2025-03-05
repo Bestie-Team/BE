@@ -204,6 +204,19 @@ export class GatheringParticipationsPrismaRepository
     return Object.values(result);
   }
 
+  async findOneByGatheringIdAndParticipantId(
+    gatheringId: string,
+    participantId: string,
+  ): Promise<{ id: string; status: GatheringParticipationStatus } | null> {
+    return await this.txHost.tx.gatheringParticipation.findFirst({
+      select: { id: true, status: true },
+      where: {
+        gatheringId,
+        participantId,
+      },
+    });
+  }
+
   async updateStatus(
     invitationId: string,
     status: SharedGatheringParticipationStatus,

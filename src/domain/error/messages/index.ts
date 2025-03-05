@@ -1,6 +1,7 @@
 export const NOT_FOUND_USER_MESSAGE = '존재하지 않는 회원 정보입니다.';
 export const NOT_FOUND_FRIEND_MESSAGE = '존재하지 않는 친구 혹은 요청입니다.';
 export const NOT_FOUND_GATHERING_MESSAGE = '존재하지 않는 모임입니다.';
+export const NOT_FOUND_GATHERING_PARTICIPATION = '존재하지 않는 초대입니다.';
 export const NOT_FOUND_GROUP_MESSAGE = '존재하지 않는 그룹입니다.';
 export const NOT_FOUND_COMMENT_MESSAGE = '존재하지 않는 댓글입니다.';
 export const NOT_FOUND_FEED_MESSAGE = '존재하지 않는 피드입니다.';

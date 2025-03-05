@@ -3,11 +3,15 @@ name: Test
 on:
   pull_request:
     branches: ['develop']
+  push:
+    branches: ['develop']
 
 jobs:
   test:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2

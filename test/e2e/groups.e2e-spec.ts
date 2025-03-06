@@ -14,11 +14,16 @@ import {
 } from 'test/helpers/generators';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
 import { ResponseResult } from 'test/helpers/types';
-import { AddGroupMemberRequest, GroupListResponse } from 'src/presentation/dto';
+import {
+  AddGroupMemberRequest,
+  GroupDetailResponse,
+  GroupListResponse,
+} from 'src/presentation/dto';
 import { Friend, User } from '@prisma/client';
 import { UpdateGroupRequest } from 'src/presentation/dto/group/request/update-group.request';
 import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
 import { EmptyModule } from 'test/helpers/empty.module';
+import { identity } from 'rxjs';
 
 describe('GroupsController (e2e)', () => {
   let app: INestApplication;
@@ -257,6 +262,60 @@ describe('GroupsController (e2e)', () => {
           expect(group.members.length).toEqual(3);
         }
       });
+    });
+  });
+
+  describe('(GET) /groups/{id} - 그룹 상세 조회', () => {
+    it('그룹 상세 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const users = Array.from({ length: 5 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `account${i}_id`),
+      );
+      await prisma.user.createMany({ data: users });
+
+      const group = generateGroupEntity(users[0].id);
+      await prisma.group.create({ data: group });
+
+      const groupParticipations = Array.from({ length: 5 }, (_, i) =>
+        generateGroupParticipationEntity(
+          group.id,
+          users[i].id,
+          new Date(),
+          'ACCEPTED',
+        ),
+      );
+      const loginedUserParticipation = generateGroupParticipationEntity(
+        group.id,
+        loginedUser!.id,
+        new Date(),
+        'ACCEPTED',
+      );
+      await prisma.groupParticipation.createMany({
+        data: [...groupParticipations, loginedUserParticipation],
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/groups/${group.id}`)
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GroupDetailResponse> = response;
+
+      expect(status).toEqual(200);
+      expect(body.id).toEqual(group.id);
+      expect(body.description).toEqual(group.description);
+      expect(body.gatheringCount).toEqual(0);
+      expect(body.groupImageUrl).toEqual(group.groupImageUrl);
+      expect(body.name).toEqual(group.name);
+      expect(body.owner.id).toEqual(users[0].id);
+      expect(body.members.length).toEqual(5);
+      expect(body.joinDate).toEqual(
+        loginedUserParticipation.createdAt.toISOString(),
+      );
     });
   });
 

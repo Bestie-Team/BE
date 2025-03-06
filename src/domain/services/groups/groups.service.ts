@@ -60,6 +60,7 @@ export class GroupsService {
     await this.groupParticipationsWriter.createMany(participations);
   }
 
+  // TODO 최대 인원 체크
   async addMembers(
     groupId: string,
     inviterId: string,

@@ -1,5 +1,5 @@
 import { GroupEntity } from 'src/domain/entities/group/group.entity';
-import { Group } from 'src/domain/types/group.types';
+import { Group, GroupDetail } from 'src/domain/types/group.types';
 import { PaginationInput } from 'src/shared/types';
 
 export interface GroupsRepository {
@@ -13,6 +13,7 @@ export interface GroupsRepository {
     groupId: string,
     ownerId: string,
   ): Promise<{ id: string } | null>;
+  findDetailById(id: string): Promise<GroupDetail | null>;
   update(id: string, data: Partial<GroupEntity>): Promise<void>;
   delete(groupId: string): Promise<void>;
 }

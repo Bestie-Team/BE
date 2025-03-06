@@ -24,6 +24,15 @@ export class GroupsReader {
     };
   }
 
+  async readDetail(id: string) {
+    const group = await this.groupsRepository.findDetailById(id);
+    if (!group) {
+      throw new NotFoundException(NOT_FOUND_GROUP_MESSAGE);
+    }
+
+    return group;
+  }
+
   async readOne(groupId: string, ownerId: string) {
     const group = await this.groupsRepository.findOneByGroupAndOwnerId(
       groupId,

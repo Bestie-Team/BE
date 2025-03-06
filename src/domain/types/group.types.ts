@@ -17,3 +17,14 @@ export interface Group {
   readonly owner: User;
   readonly members: User[];
 }
+
+export interface GroupDetail {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly gatheringCount: number;
+  readonly groupImageUrl: string;
+  readonly joinDate: Date;
+  readonly owner: User;
+  readonly members: User[];
+}

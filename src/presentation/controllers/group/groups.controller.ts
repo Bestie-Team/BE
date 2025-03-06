@@ -33,14 +33,18 @@ import {
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GroupsReader } from 'src/domain/components/group/groups-reader';
-import { toListDto } from 'src/presentation/converters/group/group.converters';
-import { AddGroupMemberRequest, PaginationRequest } from 'src/presentation/dto';
+import {
+  AddGroupMemberRequest,
+  GroupDetailResponse,
+  PaginationRequest,
+} from 'src/presentation/dto';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
 import { CreateGroupRequest } from 'src/presentation/dto/group/request/create-group.request';
 import { UpdateGroupRequest } from 'src/presentation/dto/group/request/update-group.request';
 import { GroupListResponse } from 'src/presentation/dto/group/response/group-list.response';
 import { GroupsService } from 'src/domain/services/groups/groups.service';
+import { groupConverter } from 'src/presentation/converters/group/group.converters';
 
 @ApiTags('/groups')
 @ApiBearerAuth()
@@ -109,7 +113,19 @@ export class GroupsController {
     @CurrentUser() userId: string,
   ): Promise<GroupListResponse> {
     const domain = await this.groupsReader.read(userId, paginationDto);
-    return toListDto(domain);
+    return groupConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '그룹 상세 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '그룹 상세 조회 완료',
+    type: GroupDetailResponse,
+  })
+  @Get(':groupId')
+  async getGroupDetail(@Param('groupId') groupId: string) {
+    const domain = await this.groupsReader.readDetail(groupId);
+    return groupConverter.toDto(domain);
   }
 
   @ApiOperation({ summary: '그룹원 추가' })

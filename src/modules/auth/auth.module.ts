@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { UsersRepository } from 'src/domain/interface/users.repository';
 import { AuthService } from 'src/domain/services/auth/auth.service';
 import { OauthContext } from 'src/infrastructure/auth/context/oauth-context';
 import { GoogleStrategy } from 'src/infrastructure/auth/strategies/google-strategy';
-import { UsersPrismaRepository } from 'src/infrastructure/repositories/users-prisma.repository';
+import { KakaoStrategy } from 'src/infrastructure/auth/strategies/kakao-strategy';
+import { RefreshTokenComponentModule } from 'src/modules/token/refresh-token-component.module';
+import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
 import { AuthController } from 'src/presentation/controllers/auth/auth.controller';
 
 @Module({
@@ -19,13 +20,10 @@ import { AuthController } from 'src/presentation/controllers/auth/auth.controlle
         };
       },
     }),
+    UsersComponentModule,
+    RefreshTokenComponentModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    OauthContext,
-    GoogleStrategy,
-    { provide: UsersRepository, useClass: UsersPrismaRepository },
-  ],
+  providers: [AuthService, OauthContext, GoogleStrategy, KakaoStrategy],
 })
 export class AuthModule {}

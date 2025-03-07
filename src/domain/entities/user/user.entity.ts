@@ -8,23 +8,26 @@ export class UserEntity {
     readonly name: string,
     readonly accountId: string,
     readonly provider: Provider,
-    readonly profileImageUrl: string,
+    readonly profileImageUrl: string | null,
+    readonly termsOfServiceConsent: boolean,
+    readonly privacyPolicyConsent: boolean,
+    readonly notificationToken: string | null,
     readonly createdAt: Date,
+    readonly updatedAt: Date,
   ) {}
 
   static create(
     input: UserPrototype,
     idGen: () => string,
     stdDate: Date,
+    updatedAt?: Date,
   ): UserEntity {
-    return new UserEntity(
-      idGen(),
-      input.email,
-      input.name,
-      input.accountId,
-      input.provider,
-      input.profileImageUrl,
-      stdDate,
-    );
+    return {
+      ...input,
+      id: idGen(),
+      notificationToken: null,
+      createdAt: stdDate,
+      updatedAt: updatedAt || stdDate,
+    };
   }
 }

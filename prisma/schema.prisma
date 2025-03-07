@@ -1,5 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+generator kysely {
+  provider = "prisma-kysely"
 }
 
 generator markdown {
@@ -9,8 +14,9 @@ generator markdown {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 enum OAuthProvider {
@@ -19,190 +25,348 @@ enum OAuthProvider {
   APPLE
 }
 
+enum GatheringType {
+  FRIEND
+  GROUP
+}
+
 enum FriendStatus {
   PENDING
   ACCEPTED
+  REPORTED
+}
+
+enum GatheringParticipationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum GroupParticipationStatus {
+  ACCEPTED
+  REPORTED
+}
+
+enum NotificationTypes {
+  GATHERING_INVITATION_RECEIVED
+  GATHERING_INVITATION_ACCEPTED
+  GROUP_INVITATION
+  FRIEND_REQUEST
+  FRIEND_REQUEST_ACCEPTED
+  FEED_COMMENT
+}
+
+enum ReportTypes {
+  FRIEND
+  FEED
+  GROUP
+  FEED_COMMENT
 }
 
 model User {
-  id String @id
-  email String @db.VarChar(255) @unique
-  provider OAuthProvider
-  name String @db.VarChar(10)
-  accountId String @db.VarChar(15) @map("account_id") @unique
-  profileImageUrl String @map("avatar_url")
-  createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
+  id                           String        @id @db.Uuid
+  email                        String        @db.VarChar(255)
+  provider                     OAuthProvider
+  name                         String        @db.VarChar(20)
+  accountId                    String        @map("account_id") @db.VarChar(15)
+  profileImageUrl              String?       @map("profile_image_url")
+  termsOfServiceConsent        Boolean       @map("terms_of_service_consent")
+  privacyPolicyConsent         Boolean       @map("privacy_policy_consent")
+  marketingNotificationConsent Boolean       @default(false) @map("marketing_notification_consent")
+  serviceNotificationConsent   Boolean       @default(false) @map("service_notification_consent")
+  notificationToken            String?       @map("notification_token")
+  createdAt                    DateTime      @map("created_at")
+  updatedAt                    DateTime      @map("updated_at")
+  deletedAt                    DateTime?     @map("deleted_at")
 
-  gatherings Gathering[]
-  receivedInvitations GatheringInvitation[] @relation("InviterUser")
-  sentInvitations GatheringInvitation[] @relation("InviteeUser")
-  gatheringParticipant GatheringParticipation[]
-  feeds Feed[]
-  friends1 Friend[] @relation("Friend1User")
-  friends2 Friend[] @relation("Friend2User")
-  ownedGroups Group[]
-  groupParticipation GroupParticipation[]
-  feedComments FeedComment[]
-  blockedFeeds BlockedFeed[]
-  sentFriendRequest FriendRequest[] @relation("SenderUser")
-  receivedFriendRequests FriendRequest[] @relation("ReceiverUser")
+  gatherings             Gathering[]
+  gatheringParticipant   GatheringParticipation[]
+  feeds                  Feed[]
+  ownedGroups            Group[]
+  groupParticipation     GroupParticipation[]
+  feedComments           FeedComment[]
+  blockedFeeds           BlockedFeed[]
+  sentFriendRequest      Friend[]                 @relation("SenderUser")
+  receivedFriendRequests Friend[]                 @relation("ReceiverUser")
+  friendFeedVisibilities FriendFeedVisibility[]
+  notifications          Notification[]
+  reports                Report[]
+  refreshTokens          RefreshToken[]
 
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
   @@map("user")
 }
 
+view ActiveUser {
+  id                           String        @id @db.Uuid
+  email                        String        @unique @db.VarChar(255)
+  provider                     OAuthProvider
+  name                         String        @db.VarChar(20)
+  accountId                    String        @unique @map("account_id") @db.VarChar(15)
+  profileImageUrl              String?       @map("profile_image_url")
+  termsOfServiceConsent        Boolean       @map("terms_of_service_consent")
+  privacyPolicyConsent         Boolean       @map("privacy_policy_consent")
+  marketingNotificationConsent Boolean       @default(false) @map("marketing_notification_consent")
+  serviceNotificationConsent   Boolean       @default(false) @map("service_notification_consent")
+  notificationToken            String?       @map("notification_token")
+  createdAt                    DateTime      @map("created_at")
+  updatedAt                    DateTime      @map("updated_at")
+  deletedAt                    DateTime?     @map("deleted_at")
+
+  @@unique([email, deletedAt])
+  @@unique([accountId, deletedAt])
+  @@map("active_user")
+}
+
 model Gathering {
-  id String @id
-  hostUserId String @map("host_user_id")
-  name String @db.VarChar(20)
-  description String @db.VarChar(40)
-  gatheringDate DateTime @map("gathering_date")
-  address String @db.VarChar(100)
-  invitationImageUrl String @map("invitation_image_url")
-  isDone Boolean @default(false) @map("is_done")
-  createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
+  id                 String        @id @db.Uuid
+  type               GatheringType
+  groupId            String?       @map("group_id") @db.Uuid
+  hostUserId         String        @map("host_user_id") @db.Uuid
+  name               String        @db.VarChar(20)
+  description        String        @db.VarChar(40)
+  gatheringDate      DateTime      @map("gathering_date")
+  address            String        @db.VarChar(100)
+  invitationImageUrl String        @map("invitation_image_url")
+  endedAt            DateTime?     @map("ended_at")
+  createdAt          DateTime      @map("created_at")
+  updatedAt          DateTime      @map("updated_at")
+  deletedAt          DateTime?     @map("deleted_at")
 
-  user User @relation(fields: [hostUserId], references: [id])
-  invitations GatheringInvitation[]
-  participation GatheringParticipation[]
+  group          Group?                   @relation(fields: [groupId], references: [id])
+  user           User                     @relation(fields: [hostUserId], references: [id])
+  participations GatheringParticipation[]
+  feeds          Feed[]
 
+  @@index([hostUserId])
+  @@index([groupId])
   @@map("gathering")
 }
-model GatheringInvitation {
-  id String @id
-  gatheringId String @map("gathering_id")
-  inviterId String @map("inviter_id")
-  inviteeId String @map("invitee_id")
-  createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
 
-  gathering Gathering @relation(fields: [gatheringId], references: [id])
-  inviter User @relation(name: "InviterUser", fields: [inviterId], references: [id])
-  invitee User @relation(name: "InviteeUser", fields: [inviteeId], references: [id])
+view ActiveGathering {
+  id                 String        @id @db.Uuid
+  type               GatheringType
+  groupId            String?       @map("group_id") @db.Uuid
+  hostUserId         String        @map("host_user_id") @db.Uuid
+  name               String        @db.VarChar(20)
+  description        String        @db.VarChar(40)
+  gatheringDate      DateTime      @map("gathering_date")
+  address            String        @db.VarChar(100)
+  invitationImageUrl String        @map("invitation_image_url")
+  endedAt            DateTime?     @map("ended_at")
+  createdAt          DateTime      @map("created_at")
+  updatedAt          DateTime      @map("updated_at")
+  deletedAt          DateTime?     @map("deleted_at")
 
-  @@map("gathering_invitation")
+  @@map("active_gathering")
 }
 
 model GatheringParticipation {
-  id String @id
-  gatheringId String @map("gathering_id")
-  participantId String @map("participant_id")
-  createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
+  id            String                       @id @db.Uuid
+  gatheringId   String                       @map("gathering_id") @db.Uuid
+  participantId String                       @map("participant_id") @db.Uuid
+  status        GatheringParticipationStatus @default(PENDING)
+  readAt        DateTime?                    @map("read_at")
+  createdAt     DateTime                     @map("created_at")
+  updatedAt     DateTime                     @map("updated_at")
 
-  gathering Gathering @relation(fields: [gatheringId], references: [id])
-  participant User @relation(fields: [participantId], references: [id])
+  gathering   Gathering @relation(fields: [gatheringId], references: [id], onDelete: Cascade)
+  participant User      @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
+  @@index([gatheringId])
+  @@index([participantId])
   @@map("gathering_participation")
 }
 
 model Feed {
-  id String @id
-  writerId String @map("writer_id")
-  content String @db.VarChar(150)
-  createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
+  id          String    @id @db.Uuid
+  writerId    String    @map("writer_id") @db.Uuid
+  gatheringId String?   @map("gathering_id") @db.Uuid
+  content     String    @db.VarChar(150)
+  createdAt   DateTime  @map("created_at")
+  updatedAt   DateTime  @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
-  writer User @relation(fields: [writerId], references: [id])
-  images FeedImage[]
-  comments FeedComment[]
-  blockedFeeds BlockedFeed[]
+  writer                 User                   @relation(fields: [writerId], references: [id])
+  gathering              Gathering?             @relation(fields: [gatheringId], references: [id])
+  images                 FeedImage[]
+  comments               FeedComment[]
+  blockedFeeds           BlockedFeed[]
+  friendFeedVisibilities FriendFeedVisibility[]
 
+  @@index([writerId])
+  @@index([gatheringId])
   @@map("feed")
 }
 
+view ActiveFeed {
+  id          String    @id @db.Uuid
+  writerId    String    @map("writer_id") @db.Uuid
+  gatheringId String?   @map("gathering_id") @db.Uuid
+  content     String    @db.VarChar(150)
+  createdAt   DateTime  @map("created_at")
+  updatedAt   DateTime  @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("active_feed")
+}
+
 model FeedImage {
-  id String @id
-  feedId String @map("feed_id")
-  url String
+  id        String   @id @db.Uuid
+  feedId    String   @map("feed_id") @db.Uuid
+  index     Int
+  url       String
   createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
 
   feed Feed @relation(fields: [feedId], references: [id])
 
+  @@index([feedId])
   @@map("feed_image")
 }
 
 model FeedComment {
-  id String @id
-  feedId String @map("feed_id")
-  writerId String @map("writer_id")
-  content String
-  createdAt DateTime @map("created_at")
+  id        String    @id @db.Uuid
+  feedId    String    @map("feed_id") @db.Uuid
+  writerId  String    @map("writer_id") @db.Uuid
+  content   String
+  createdAt DateTime  @map("created_at")
   deletedAt DateTime? @map("deleted_at")
 
-  feed Feed @relation(fields: [feedId], references: [id])
+  feed   Feed @relation(fields: [feedId], references: [id])
   writer User @relation(fields: [writerId], references: [id])
 
+  @@index([feedId])
+  @@index([writerId])
   @@map("feed_comment")
 }
 
+view ActiveFeedComment {
+  id        String    @id @db.Uuid
+  feedId    String    @map("feed_id") @db.Uuid
+  writerId  String    @map("writer_id") @db.Uuid
+  content   String
+  createdAt DateTime  @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("active_feed_comment")
+}
+
+model FriendFeedVisibility {
+  feedId    String   @map("feed_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime
+
+  feed Feed @relation(fields: [feedId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([feedId, userId])
+  @@index([userId])
+  @@map("friend_feed_visibility")
+}
+
 model BlockedFeed {
-  userId    String
-  feedId    String
+  userId    String   @map("user_id") @db.Uuid
+  feedId    String   @map("feed_id") @db.Uuid
   createdAt DateTime @map("created_at")
 
   user User @relation(fields: [userId], references: [id])
   feed Feed @relation(fields: [feedId], references: [id])
 
   @@unique([userId, feedId])
+  @@index([feedId])
   @@map("blocked_feed")
 }
 
 model Friend {
-  id String @id
-  friend1Id String
-  friend2Id String
-  createdAt DateTime @map("created_at")
+  id         String       @id @db.Uuid
+  senderId   String       @map("sender_id") @db.Uuid
+  receiverId String       @map("receiver_id") @db.Uuid
+  status     FriendStatus @default(PENDING)
+  createdAt  DateTime     @map("created_at")
+  updatedAt  DateTime     @map("updated_at")
 
-  friend1 User @relation(name: "Friend1User", fields: [friend1Id], references: [id])
-  friend2 User @relation(name: "Friend2User", fields: [friend2Id], references: [id])
-
-  @@unique([friend1Id, friend2Id])
-  @@map("friend")
-}
-
-model FriendRequest {
-  id String @id
-  senderId String @map("sender_id")
-  receiverId String @map("receiver_id")
-  createdAt DateTime @map("created_at")
-
-  sender User @relation(name: "SenderUser", fields: [senderId], references: [id])
+  sender   User @relation(name: "SenderUser", fields: [senderId], references: [id])
   receiver User @relation(name: "ReceiverUser", fields: [receiverId], references: [id])
 
   @@unique([senderId, receiverId])
-  @@map("friend_request")
+  @@index([receiverId])
+  @@map("friend")
 }
 
 model Group {
-  id String @id
-  name String @db.VarChar(20)
-  description String @db.VarChar(40)
-  groupImageUrl String @map("group_image_url")
-  gatheringCount Int @default(0) @map("gathering_count")
-  ownerId String @map("owner_id")
-  createdAt DateTime @map("created_at")
+  id             String   @id @db.Uuid
+  name           String   @db.VarChar(20)
+  description    String   @db.VarChar(40)
+  groupImageUrl  String   @map("group_image_url")
+  gatheringCount Int      @default(0) @map("gathering_count")
+  ownerId        String   @map("owner_id") @db.Uuid
+  createdAt      DateTime @map("created_at")
+  updatedAt      DateTime @map("updated_at")
 
-  owner User @relation(fields: [ownerId], references: [id])
+  owner              User                 @relation(fields: [ownerId], references: [id])
   groupParticipation GroupParticipation[]
+  gatherings         Gathering[]
 
+  @@index([ownerId])
   @@map("group")
 }
 
 model GroupParticipation {
-  id String @id
-  groupId String @map("group_id")
-  participantId String @map("participant_id")
-  createdAt DateTime @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
+  id            String                   @id @db.Uuid
+  groupId       String                   @map("group_id") @db.Uuid
+  participantId String                   @map("participant_id") @db.Uuid
+  status        GroupParticipationStatus @default(ACCEPTED)
+  createdAt     DateTime                 @map("created_at")
 
-  group Group @relation(fields: [groupId], references: [id])
-  participant User @relation(fields: [participantId], references: [id])
+  group       Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  participant User  @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, participantId])
+  @@index([participantId])
   @@map("group_participation")
+}
+
+model Notification {
+  id        String            @id @db.Uuid
+  userId    String            @map("user_id") @db.Uuid
+  type      NotificationTypes
+  title     String            @db.VarChar(20)
+  message   String            @db.VarChar(100)
+  relatedId String?           @map("related_id")
+  createdAt DateTime          @map("created_at")
+  readAt    DateTime?         @map("read_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("notification")
+}
+
+model Report {
+  id         String      @id @db.Uuid
+  reporterId String      @map("reporter_id") @db.Uuid
+  reportedId String      @map("reported_id") @db.Uuid
+  type       ReportTypes
+  reason     String
+  createdAt  DateTime    @map("created_at")
+  updatedAt  DateTime    @map("updated_at")
+
+  reporter User @relation(fields: [reporterId], references: [id])
+
+  @@index([reporterId])
+  @@map("report")
+}
+
+model RefreshToken {
+  userId    String   @map("user_id") @db.Uuid
+  deviceId  String   @map("device_id")
+  token     String
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId, deviceId])
+  @@map("refresh_token")
 }

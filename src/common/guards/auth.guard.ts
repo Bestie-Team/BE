@@ -1,11 +1,12 @@
 import {
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { DecodedTokenData } from 'src/domain/types/auth.types';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -17,22 +18,23 @@ export class AuthGuard implements CanActivate {
       .getRequest<Request & { userId?: string }>();
     const accessToken = this.extractAccessTokenFromHeader(req);
 
-    req.userId = await this.verifyAccessToken(accessToken);
+    const decoded = await this.verifyAccessToken(accessToken);
+    req.userId = decoded.userId;
     return true;
   }
 
   private async verifyAccessToken(accessToken: string) {
     try {
-      return await this.jwtService.verifyAsync(accessToken);
+      return await this.jwtService.verifyAsync<DecodedTokenData>(accessToken);
     } catch (e: unknown) {
-      throw new ForbiddenException('권한이 없습니다.');
+      throw new UnauthorizedException('권한이 없습니다.');
     }
   }
 
   private extractAccessTokenFromHeader(request: Request) {
     const { authorization } = request.headers;
     if (!authorization || authorization.trim() === '') {
-      throw new ForbiddenException('권한이 없습니다.');
+      throw new UnauthorizedException('권한이 없습니다.');
     }
 
     return authorization.split(' ')[1];

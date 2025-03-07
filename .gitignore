@@ -39,3 +39,6 @@ ERD.md
 
 # Cursor
 .cursorrules
+
+# Dto type package
+/src/presentation/dto/types

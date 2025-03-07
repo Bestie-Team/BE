@@ -6,12 +6,14 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import { SentryExceptionCaptured } from '@sentry/nestjs';
 import { Request, Response } from 'express';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger();
+  private readonly logger = new Logger('Exception Filter');
 
+  @SentryExceptionCaptured()
   catch(exception: Error, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const req = ctx.getRequest<Request>();
@@ -38,10 +40,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         `${reqMessage}\nerrorBody: ${JSON.stringify(responseBody, null, 2)}`,
       );
 
-    res.status(status).json({
-      ...responseBody,
-      timestamp: new Date().toISOString(),
-    });
+    const body =
+      typeof responseBody === 'object'
+        ? {
+            ...responseBody,
+            timestamp: new Date().toISOString(),
+          }
+        : {
+            message: responseBody,
+            timestamp: new Date().toISOString(),
+          };
+    res.status(status).json(body);
   }
 
   generateRequestMessage(req: Request) {

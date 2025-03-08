@@ -25,5 +25,6 @@ import { AuthController } from 'src/presentation/controllers/auth/auth.controlle
   ],
   controllers: [AuthController],
   providers: [AuthService, OauthContext, GoogleStrategy, KakaoStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}

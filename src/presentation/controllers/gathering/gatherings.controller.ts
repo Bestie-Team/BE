@@ -23,9 +23,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { GatheringInvitationAcceptanceUseCase } from 'src/application/use-cases/gathering/gathering-invitation-acceptance.use-case';
-import { IMAGE_BASE_URL } from 'src/common/constant';
+import { BUCKET_IMAGE_PATH, IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { ApiFileOperation } from 'src/common/decorators/swagger';
+import {
+  ApiFileOperation,
+  ApiPresignedUrlOperation,
+} from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
@@ -48,6 +51,8 @@ import { ReceivedGatheringInvitationListResponse } from 'src/presentation/dto/ga
 import { GatheringListResponse } from 'src/presentation/dto/gathering/response/gathering-list.response';
 import { SentGatheringInvitationListResponse } from 'src/presentation/dto/gathering/response/sent-gathering-invitation-list.response';
 import { GatheringsService } from 'src/domain/services/gatherings/gatherings.service';
+import { PresignedUrlResponse } from 'src/presentation/dto/file/response/presigned-url.response';
+import { S3PresignedManager } from 'src/infrastructure/aws/s3/s3-presigned-manager';
 
 @ApiTags('/gatherings')
 @ApiBearerAuth()
@@ -62,6 +67,7 @@ export class GatheringsController {
     private readonly gatheringInvitationsReadService: GatheringInvitationsReader,
     private readonly gatheringsService: GatheringsService,
     private readonly gatheringInvitationAcceptanceUseCase: GatheringInvitationAcceptanceUseCase,
+    private readonly s3PresignedManager: S3PresignedManager,
   ) {}
 
   @ApiFileOperation()
@@ -86,6 +92,14 @@ export class GatheringsController {
     return {
       imageUrl: `${IMAGE_BASE_URL}/${file.key}`,
     };
+  }
+
+  @ApiPresignedUrlOperation()
+  @Get('invitation/presigned')
+  async getPresignedUrl(): Promise<PresignedUrlResponse> {
+    return await this.s3PresignedManager.getPresignedUrl(
+      BUCKET_IMAGE_PATH.GATHERING,
+    );
   }
 
   @ApiOperation({ summary: '모임 생성' })

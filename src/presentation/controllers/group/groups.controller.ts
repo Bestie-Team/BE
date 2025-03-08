@@ -24,11 +24,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { GroupCreationUseCase } from 'src/application/use-cases/group/group-creation.use-case';
-import { IMAGE_BASE_URL } from 'src/common/constant';
+import { BUCKET_IMAGE_PATH, IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import {
   ApiFileOperation,
   ApiGroupPaginationQuery,
+  ApiPresignedUrlOperation,
 } from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateGroupCoverImageMulterOptions } from 'src/configs/multer-s3/multer-options';
@@ -45,6 +46,8 @@ import { UpdateGroupRequest } from 'src/presentation/dto/group/request/update-gr
 import { GroupListResponse } from 'src/presentation/dto/group/response/group-list.response';
 import { GroupsService } from 'src/domain/services/groups/groups.service';
 import { groupConverter } from 'src/presentation/converters/group/group.converters';
+import { PresignedUrlResponse } from 'src/presentation/dto/file/response/presigned-url.response';
+import { S3PresignedManager } from 'src/infrastructure/aws/s3/s3-presigned-manager';
 
 @ApiTags('/groups')
 @ApiBearerAuth()
@@ -57,6 +60,7 @@ export class GroupsController {
     private readonly groupsService: GroupsService,
     private readonly groupsReader: GroupsReader,
     private readonly groupCreationUseCase: GroupCreationUseCase,
+    private readonly s3PresignedManager: S3PresignedManager,
   ) {}
 
   @ApiFileOperation()
@@ -81,6 +85,14 @@ export class GroupsController {
     return {
       imageUrl: `${IMAGE_BASE_URL}/${file.key}`,
     };
+  }
+
+  @ApiPresignedUrlOperation()
+  @Get('cover/presigned')
+  async getPresignedUrl(): Promise<PresignedUrlResponse> {
+    return await this.s3PresignedManager.getPresignedUrl(
+      BUCKET_IMAGE_PATH.GROUP,
+    );
   }
 
   @ApiOperation({ summary: '그룹 생성' })

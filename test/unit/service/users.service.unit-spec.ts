@@ -87,7 +87,7 @@ describe('FriendsService', () => {
       async () =>
         await usersService.changeAccountId(user.id, newAccountId, today),
     ).rejects.toThrow(
-      new UnprocessableEntityException(ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE),
+      new UnprocessableEntityException(ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE(1)),
     );
   });
 

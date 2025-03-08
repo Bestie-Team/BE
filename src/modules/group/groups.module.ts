@@ -7,9 +7,11 @@ import { GroupsService } from 'src/domain/services/groups/groups.service';
 import { GroupsComponentModule } from 'src/modules/group/groups-component.module';
 import { GroupParticipationsModule } from 'src/modules/group/group-participations.module';
 import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
+import { S3Module } from 'src/infrastructure/aws/s3/s3.module';
 
 @Module({
   imports: [
+    S3Module,
     GroupsComponentModule,
     GroupParticipationsModule,
     UsersComponentModule,

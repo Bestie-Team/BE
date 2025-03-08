@@ -33,9 +33,10 @@ export class UsersService {
     const { createdAt, updatedAt } = await this.usersReader.readOne(userId);
 
     const isSetFirst = createdAt.getTime() === updatedAt.getTime();
-    if (!isSetFirst && calcDateDiff(today, updatedAt, 'd') < 30) {
+    const daysRemaining = calcDateDiff(today, updatedAt, 'd');
+    if (!isSetFirst && daysRemaining < 30) {
       throw new UnprocessableEntityException(
-        ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE,
+        ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE(30 - daysRemaining),
       );
     }
   }

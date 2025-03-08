@@ -19,10 +19,11 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { IMAGE_BASE_URL } from 'src/common/constant';
+import { BUCKET_IMAGE_PATH, IMAGE_BASE_URL } from 'src/common/constant';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-options';
@@ -30,6 +31,7 @@ import { BlockedFeedsService } from 'src/domain/components/feed/blocked-feeds.se
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { FeedsWriter } from 'src/domain/components/feed/feeds-writer';
 import { FeedsService } from 'src/domain/services/feed/feeds.service';
+import { S3PresignedManager } from 'src/infrastructure/aws/s3/s3-presigned-manager';
 import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
 import { BlockedFeedListRequest } from 'src/presentation/dto/feed/request/blocked-feed-list.request';
 import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/create-friend-feed.request';
@@ -38,6 +40,7 @@ import { FeedListRequest } from 'src/presentation/dto/feed/request/feed-list.req
 import { UpdateFeedRequest } from 'src/presentation/dto/feed/request/update-feed.request';
 import { FeedListResponse } from 'src/presentation/dto/feed/response/feed-list.response';
 import { FileListRequest } from 'src/presentation/dto/file/request/file-list.request';
+import { PresignedUrlResponse } from 'src/presentation/dto/file/response/presigned-url.response';
 import { UploadImageListResponse } from 'src/presentation/dto/file/response/upload-image-list.response';
 
 @ApiTags('/feeds')
@@ -51,6 +54,7 @@ export class FeedsController {
     private readonly feedsReadService: FeedsReader,
     private readonly feedsService: FeedsService,
     private readonly blockedFeedsService: BlockedFeedsService,
+    private readonly s3PresignedManager: S3PresignedManager,
   ) {}
 
   @ApiOperation({
@@ -76,6 +80,26 @@ export class FeedsController {
     return {
       imageUrls: files.map((file) => `${IMAGE_BASE_URL}/${file.key}`),
     };
+  }
+
+  @ApiOperation({
+    summary: '프로필 사진 업로드 presigned url 생성',
+    description: 'url 만료 시간 20초',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'presigned url 생성 성공',
+    type: [PresignedUrlResponse],
+  })
+  @ApiQuery({ name: 'count', example: 5, description: '업로드할 이미지 수' })
+  @Get('images/presigned')
+  async getPresignedUrl(
+    @Query('count') count: number,
+  ): Promise<PresignedUrlResponse[]> {
+    return await this.s3PresignedManager.getPresignedUrls(
+      BUCKET_IMAGE_PATH.FEED,
+      count,
+    );
   }
 
   @ApiOperation({ summary: '모임 피드 작성' })

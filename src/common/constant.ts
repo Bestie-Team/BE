@@ -16,3 +16,10 @@ export const notificationTypes = {
 export type NotificationTypes = keyof typeof notificationTypes;
 
 export const APP_NAME = 'LIGHTY';
+
+export const BUCKET_IMAGE_PATH = {
+  FEED: 'feed/image',
+  USER: 'user/profile',
+  GATHERING: 'gathering/invitation',
+  GROUP: 'group/cover',
+};

@@ -6,9 +6,11 @@ import { FeedsService } from 'src/domain/services/feed/feeds.service';
 import { FriendsCheckerModule } from 'src/modules/friend/friends-chcker.module';
 import { GatheringsComponentModule } from 'src/modules/gathering/gatherings-component.module';
 import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
+import { S3Module } from 'src/infrastructure/aws/s3/s3.module';
 
 @Module({
   imports: [
+    S3Module,
     BlockedFeedsModule,
     FeedsComponentModule,
     FriendsCheckerModule,

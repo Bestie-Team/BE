@@ -22,14 +22,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { ApiFileOperation } from 'src/common/decorators/swagger';
+import {
+  ApiFileOperation,
+  ApiPresignedUrlOperation,
+} from 'src/common/decorators/swagger';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CreateProfileImageMulterOptions } from 'src/configs/multer-s3/multer-options';
 import { FileRequest } from 'src/presentation/dto/file/request/file.request';
 import { SearchUserRequest } from 'src/presentation/dto/user/request/search-user.request';
 import { SearchUserResponse } from 'src/presentation/dto/user/response/search-user.response';
 import { UploadImageResponse } from 'src/presentation/dto/file/response/upload-image.response';
-import { IMAGE_BASE_URL } from 'src/common/constant';
+import { BUCKET_IMAGE_PATH, IMAGE_BASE_URL } from 'src/common/constant';
 import { ChangeProfileImageRequest } from 'src/presentation/dto/user/request/change-profile-image.request';
 import {
   ChangeAccountIdRequest,
@@ -40,6 +43,8 @@ import { UserProfileResponse } from 'src/presentation/dto/user/response/user-pro
 import { UsersWriter } from 'src/domain/components/user/users-writer';
 import { UsersReader } from 'src/domain/components/user/users-reader';
 import { UsersService } from 'src/domain/services/user/users.service';
+import { S3PresignedManager } from 'src/infrastructure/aws/s3/s3-presigned-manager';
+import { PresignedUrlResponse } from 'src/presentation/dto/file/response/presigned-url.response';
 
 @ApiTags('/users')
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
@@ -49,6 +54,7 @@ export class UsersController {
     private readonly usersWriter: UsersWriter,
     private readonly usersService: UsersService,
     private readonly usersReader: UsersReader,
+    private readonly s3PresignedManager: S3PresignedManager,
   ) {}
 
   @ApiFileOperation()
@@ -73,6 +79,16 @@ export class UsersController {
     return {
       imageUrl: `${IMAGE_BASE_URL}/${file.key}`,
     };
+  }
+
+  @ApiBearerAuth()
+  @ApiPresignedUrlOperation()
+  @UseGuards(AuthGuard)
+  @Get('profile/presigned')
+  async getPresignedUrl(): Promise<PresignedUrlResponse> {
+    return await this.s3PresignedManager.getPresignedUrl(
+      BUCKET_IMAGE_PATH.USER,
+    );
   }
 
   @Get('search')

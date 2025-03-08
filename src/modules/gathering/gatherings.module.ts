@@ -9,9 +9,11 @@ import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
 import { NotificationsManagerModule } from 'src/modules/notification/notifications-manager.module';
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { GroupsComponentModule } from 'src/modules/group/groups-component.module';
+import { S3Module } from 'src/infrastructure/aws/s3/s3.module';
 
 @Module({
   imports: [
+    S3Module,
     GroupParticipationsModule,
     GroupsComponentModule,
     GatheringsComponentModule,

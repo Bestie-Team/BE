@@ -19,7 +19,7 @@ export class S3PresignedManager {
     this.bucketName = String(process.env.AWS_BUCKEY_NAME);
   }
 
-  async getPresignedUrl(path: string, expiresIn = 30) {
+  async getPresignedUrl(path: string, expiresIn = 300) {
     const key = `${path}/${v4()}`;
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
@@ -34,5 +34,15 @@ export class S3PresignedManager {
       presignedUrl,
       key,
     };
+  }
+
+  async getPresignedUrls(path: string, count: number, expiresIn = 300) {
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      const url = await this.getPresignedUrl(path, expiresIn);
+      result.push(url);
+    }
+
+    return result;
   }
 }

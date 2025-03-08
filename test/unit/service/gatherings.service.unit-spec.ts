@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClsModule } from 'nestjs-cls';
 import { clsOptions } from 'src/configs/cls/cls-options';
@@ -45,6 +46,7 @@ describe('GatheringsService', () => {
         GatheringParticipationModules,
         NotificationsManagerModule,
         EventModule,
+        EventEmitterModule.forRoot(),
         UsersComponentModule,
         ClsModule.forRoot(clsOptions),
         PrismaModule,

@@ -610,6 +610,94 @@ describe('GatheringsController (e2e)', () => {
     });
   });
 
+  describe('(GET) /gatherings/all - 모임 전체 조회', () => {
+    const stdDate = new Date();
+    const oneday = 86400000;
+    const users = Array.from({ length: 5 }, (_, i) =>
+      generateUserEntity(`test${i}@test.com`, `account${i}`),
+    );
+    const gatherings = Array.from({ length: 10 }, (_, i) =>
+      generateGatheringEntity(
+        users[0].id,
+        stdDate,
+        `모임${i}`,
+        new Date(stdDate.getTime() + oneday * i),
+      ),
+    );
+    const hostParticipations = Array.from({ length: 10 }, (_, i) =>
+      generateGatheringParticipationEntity(
+        gatherings[i].id,
+        users[0].id,
+        'ACCEPTED',
+      ),
+    );
+
+    beforeEach(async () => {
+      await prisma.user.createMany({ data: users });
+      await prisma.gathering.createMany({ data: gatherings });
+      await prisma.gatheringParticipation.createMany({
+        data: hostParticipations,
+      });
+      await prisma.gathering.updateMany({
+        data: { endedAt: new Date() },
+        where: {
+          gatheringDate: { gte: new Date(stdDate.getTime() + oneday * 3) },
+        },
+      });
+    });
+
+    it('모임 전체 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: {
+          accountId,
+        },
+      });
+      const participations = Array.from({ length: 10 }, (_, i) =>
+        generateGatheringParticipationEntity(
+          gatherings[i].id,
+          loginedUser!.id,
+          'ACCEPTED',
+        ),
+      );
+      await prisma.gatheringParticipation.createMany({ data: participations });
+
+      const minDate = stdDate.toISOString();
+      const maxDate = new Date(stdDate.getTime() + oneday * 10).toISOString();
+      const cursor = {
+        createdAt: stdDate.toISOString(),
+        id: '256f6dd3-bb65-4b96-a455-df4144fbec65',
+      };
+      const limit = 10;
+
+      const response = await request(app.getHttpServer())
+        .get(
+          `/gatherings/all?minDate=${minDate}&maxDate=${maxDate}&limit=${limit}&cursor=${JSON.stringify(
+            cursor,
+          )}`,
+        )
+        .set('Authorization', accessToken);
+      const { status, body }: ResponseResult<GatheringListResponse> = response;
+      const { gatherings: resGatherings, nextCursor } = body;
+
+      expect(status).toEqual(200);
+      expect(nextCursor?.id).toEqual(gatherings.at(-1)?.id);
+      expect(resGatherings.length).toEqual(10);
+      resGatherings.forEach((gathering, i) => {
+        expect(gathering.id).toEqual(gatherings[i].id);
+        expect(gathering.name).toEqual(gatherings[i].name);
+        expect(gathering.description).toEqual(gatherings[i].description);
+        expect(gathering.invitationImageUrl).toEqual(
+          gatherings[i].invitationImageUrl,
+        );
+        expect(gathering.gatheringDate).toEqual(
+          gatherings[i].gatheringDate.toISOString(),
+        );
+      });
+    });
+  });
+
   describe('(GET) /gatherings/no-feed - 피드를 작성하지 않은 완료된 모임 조회', () => {
     it('피드를 작성하지 않은 완료된 모임 조회 정상 동작', async () => {
       const { accessToken, accountId } = await login(app);

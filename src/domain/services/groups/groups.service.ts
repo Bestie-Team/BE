@@ -1,11 +1,5 @@
 import { Transactional } from '@nestjs-cls/transactional';
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
 import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
@@ -14,13 +8,15 @@ import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { GroupsWriter } from 'src/domain/components/group/groups-writer';
 import { GroupParticipationEntity } from 'src/domain/entities/group/group-participation';
 import { GroupEntity } from 'src/domain/entities/group/group.entity';
-import {
-  CANT_INVITE_REPORTED_USER,
-  GROUP_MEMBER_ALREADY_EXIST_MESSAGE,
-  GROUP_OWNER_CANT_LEAVE_MESSAGE,
-} from 'src/domain/error/messages';
 import { GroupPrototype } from 'src/domain/types/group.types';
 import { FORBIDDEN_MESSAGE } from '@nestjs/core/guards';
+import { GroupNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
+import {
+  GroupMemberLimitExceededException,
+  GroupOwnerCannotLeaveException,
+  ReportedUserCannotInviteException,
+} from 'src/domain/error/exceptions/unprocessable.exception';
+import { AlreadyExistMemberException } from 'src/domain/error/exceptions/conflice.exception';
 
 @Injectable()
 export class GroupsService {
@@ -60,7 +56,7 @@ export class GroupsService {
     await this.groupParticipationsWriter.createMany(participations);
   }
 
-  // TODO 최대 인원 체크
+  // TODO 그룹원 추가할 떄 신고한 애는 조회 안 돼야할듯
   async addMembers(
     groupId: string,
     inviterId: string,
@@ -68,12 +64,21 @@ export class GroupsService {
   ) {
     await this.friendsChecker.checkIsFriendAll(inviterId, participantIds);
     await this.checkExisting(participantIds);
+    await this.checkMemberCount(groupId, participantIds.length);
+
     const stdDate = new Date();
     const groupParticipations = participantIds.map((participantId) =>
       GroupParticipationEntity.create({ groupId, participantId }, v4, stdDate),
     );
 
     await this.groupParticipationsWriter.createMany(groupParticipations);
+  }
+
+  private async checkMemberCount(groupId: string, newMemberCount: number) {
+    const count = await this.groupParticipationsReader.getMemberCount(groupId);
+    if (count + newMemberCount > 10) {
+      throw new GroupMemberLimitExceededException();
+    }
   }
 
   private async checkExisting(userIds: string[]) {
@@ -83,21 +88,25 @@ export class GroupsService {
     participations.forEach((participation) => {
       if (participation) {
         if (participation.status === 'REPORTED') {
-          throw new UnprocessableEntityException(CANT_INVITE_REPORTED_USER);
+          throw new ReportedUserCannotInviteException();
         }
         if (participation.status === 'ACCEPTED') {
-          throw new ConflictException(GROUP_MEMBER_ALREADY_EXIST_MESSAGE);
+          throw new AlreadyExistMemberException();
         }
       }
     });
   }
 
   async leaveGroup(groupId: string, userId: string) {
-    const isOwner = await this.groupsReader.readOne(groupId, userId);
-    if (isOwner) {
-      throw new BadRequestException(GROUP_OWNER_CANT_LEAVE_MESSAGE);
+    try {
+      await this.groupsReader.readOne(groupId, userId);
+      throw new GroupOwnerCannotLeaveException();
+    } catch (e: unknown) {
+      if (e instanceof GroupNotFoundException) {
+        return await this.groupParticipationsWriter.delete(groupId, userId);
+      }
+      throw e;
     }
-    await this.groupParticipationsWriter.delete(groupId, userId);
   }
 
   async update(
@@ -116,11 +125,13 @@ export class GroupsService {
   }
 
   async delete(groupId: string, userId: string) {
-    const isOwner = await this.groupsReader.readOne(groupId, userId);
-    if (!isOwner) {
-      throw new ForbiddenException(FORBIDDEN_MESSAGE);
+    try {
+      await this.groupsReader.readOne(groupId, userId);
+      await this.groupsWriter.delete(groupId);
+    } catch (e: unknown) {
+      if (e instanceof GroupNotFoundException) {
+        throw new ForbiddenException(FORBIDDEN_MESSAGE);
+      }
     }
-
-    await this.groupsWriter.delete(groupId);
   }
 }

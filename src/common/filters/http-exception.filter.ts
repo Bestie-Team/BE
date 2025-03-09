@@ -8,8 +8,11 @@ import {
 } from '@nestjs/common';
 import { SentryExceptionCaptured } from '@sentry/nestjs';
 import { Request, Response } from 'express';
+import { BadRequestException } from 'src/domain/error/exceptions/bad-request.exception';
+import { ConflictException } from 'src/domain/error/exceptions/conflice.exception';
 import { DomainException } from 'src/domain/error/exceptions/domain.exception';
 import { NotFoundException } from 'src/domain/error/exceptions/not-found.exception';
+import { UnprocessableException } from 'src/domain/error/exceptions/unprocessable.exception';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -50,6 +53,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
     if (exception instanceof NotFoundException) {
       return HttpStatus.NOT_FOUND;
+    }
+    if (exception instanceof BadRequestException) {
+      return HttpStatus.BAD_REQUEST;
+    }
+    if (exception instanceof UnprocessableException) {
+      return HttpStatus.UNPROCESSABLE_ENTITY;
+    }
+    if (exception instanceof ConflictException) {
+      return HttpStatus.CONFLICT;
     }
     return HttpStatus.INTERNAL_SERVER_ERROR;
   }

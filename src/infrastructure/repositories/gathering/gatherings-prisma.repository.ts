@@ -72,6 +72,55 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
     return await this.findGatherings(subquery);
   }
 
+  async findAllByUserId(
+    userId: string,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
+  ): Promise<Gathering[]> {
+    const { minDate, maxDate, cursor, limit } = paginatedDateRangeInput;
+
+    const paginationCondition = {
+      OR: [
+        {
+          gatheringDate:
+            cursor.createdAt === minDate
+              ? {
+                  gte: minDate,
+                  lte: maxDate,
+                }
+              : {
+                  gt: cursor.createdAt,
+                  lte: maxDate,
+                },
+        },
+        {
+          AND: [{ gatheringDate: cursor.createdAt }, { id: { gt: cursor.id } }],
+        },
+      ],
+    };
+
+    return await this.txHost.tx.gathering.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        gatheringDate: true,
+        invitationImageUrl: true,
+      },
+      where: {
+        deletedAt: null,
+        participations: {
+          some: {
+            status: 'ACCEPTED',
+            participantId: userId,
+          },
+        },
+        ...paginationCondition,
+      },
+      orderBy: [{ gatheringDate: 'asc' }, { id: 'asc' }],
+      take: limit,
+    });
+  }
+
   async findEndedGatheringsByUserId(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
@@ -272,6 +321,7 @@ export class GatheringsPrismaRepository implements GatheringsRepository {
       },
     });
 
+    // TODO 이거 다 비스니스 로직인듯 위로 올리기
     return result
       ? {
           id: result.id,

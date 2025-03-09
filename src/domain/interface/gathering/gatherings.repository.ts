@@ -15,6 +15,10 @@ export interface GatheringsRepository {
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,
   ): Promise<Gathering[]>;
+  findAllByUserId(
+    userId: string,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
+  ): Promise<Gathering[]>;
   findEndedGatheringsByUserId(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,

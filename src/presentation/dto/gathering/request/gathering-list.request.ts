@@ -1,8 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsInt, IsUUID, ValidateNested } from 'class-validator';
+import {
+  IsDateString,
+  IsInt,
+  IsNotEmpty,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 import { plainToInstance, Transform, Type } from 'class-transformer';
 
-class Cursor {
+export class GatheringCursor {
   @ApiProperty({ example: '2024-01-01T00:00:00.000Z' })
   @IsDateString({}, { message: 'createdAt이 ISO8601 형식이 아닙니다.' })
   readonly createdAt: string;
@@ -22,20 +28,21 @@ export class GatheringListRequest {
   maxDate: string;
 
   @ApiProperty({
-    type: Cursor,
+    type: GatheringCursor,
     description: '첫 번째 커서: { createdAt: maxDate, id: uuid 아무 값이나 }',
   })
   @Transform(({ value }) => {
     try {
       const json = JSON.parse(value); // 문자열을 객체로 변환
-      return plainToInstance(Cursor, json);
+      return plainToInstance(GatheringCursor, json);
     } catch (e) {
-      throw new Error('커서 값을 파싱하는 데 실패했습니다.');
+      throw new Error(`${value} invalid cursor.`);
     }
   })
+  @IsNotEmpty()
   @ValidateNested({ message: '커서가 유효하지 않습니다.' })
-  @Type(() => Cursor)
-  readonly cursor: Cursor;
+  @Type(() => GatheringCursor)
+  readonly cursor: GatheringCursor;
 
   @ApiProperty({ example: 10 })
   @IsInt({ message: 'limit이 정수가 아닙니다.' })

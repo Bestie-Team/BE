@@ -55,6 +55,25 @@ export class GatheringsReader {
     };
   }
 
+  async readAll(
+    userId: string,
+    paginatedDateRangeInput: PaginatedDateRangeInput,
+  ) {
+    const gatherings = await this.gatheringsRepository.findAllByUserId(
+      userId,
+      paginatedDateRangeInput,
+    );
+    const nextCursor = getGatheringCursor(
+      gatherings,
+      paginatedDateRangeInput.limit,
+    );
+
+    return {
+      gatherings,
+      nextCursor,
+    };
+  }
+
   async readEnded(
     userId: string,
     paginatedDateRangeInput: PaginatedDateRangeInput,

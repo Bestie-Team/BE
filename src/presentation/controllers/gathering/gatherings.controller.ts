@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -34,14 +35,16 @@ import { CreateGatheringInvitationImageMulterOptions } from 'src/configs/multer-
 import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
-import { GatheringsWriter } from 'src/domain/components/gathering/gatherings-writer';
 import { gatheringInvitationConverter } from 'src/presentation/converters/gathering/gathering-invitation.converters';
 import { gatheringConverter } from 'src/presentation/converters/gathering/gathering.converters';
 import { FileRequest, UploadImageResponse } from 'src/presentation/dto';
 import { AcceptGatheringInvitationRequest } from 'src/presentation/dto/gathering/request/accept-gathering-invitation.request';
 import { CreateGatheringRequest } from 'src/presentation/dto/gathering/request/create-gathering.request';
 import { GatheringInvitationListRequest } from 'src/presentation/dto/gathering/request/gathering-invitation-list.request';
-import { GatheringListRequest } from 'src/presentation/dto/gathering/request/gathering-list.request';
+import {
+  GatheringCursor,
+  GatheringListRequest,
+} from 'src/presentation/dto/gathering/request/gathering-list.request';
 import { NoFeedGatheringListRequest } from 'src/presentation/dto/gathering/request/no-feed-gathering-list.request';
 import { RejectGatheringInvitationRequest } from 'src/presentation/dto/gathering/request/reject-gathering-invitation.request';
 import { UpdateGatheringRequest } from 'src/presentation/dto/gathering/request/update-gathering.request';
@@ -61,7 +64,6 @@ import { S3PresignedManager } from 'src/infrastructure/aws/s3/s3-presigned-manag
 @Controller('gatherings')
 export class GatheringsController {
   constructor(
-    private readonly gatheringsWriter: GatheringsWriter,
     private readonly gatheringsReadService: GatheringsReader,
     private readonly gatheringInvitationsWriter: GatheringInvitationsWriter,
     private readonly gatheringInvitationsReadService: GatheringInvitationsReader,
@@ -167,6 +169,28 @@ export class GatheringsController {
     @CurrentUser() userId: string,
   ): Promise<GatheringListResponse> {
     const domain = await this.gatheringsReadService.read(userId, dto);
+    return gatheringConverter.toListDto(domain);
+  }
+
+  @ApiOperation({
+    summary: '참여한 모든 모임 목록 조회 (완료, 비완료 구분 X)',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    type: GatheringCursor,
+    description: '첫 번째 커서: { createdAt: minDate, id: uuid 아무 값이나 }',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '모임 목록 조회 완료',
+    type: GatheringListResponse,
+  })
+  @Get('all')
+  async getAll(
+    @Query() dto: GatheringListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<GatheringListResponse> {
+    const domain = await this.gatheringsReadService.readAll(userId, dto);
     return gatheringConverter.toListDto(domain);
   }
 

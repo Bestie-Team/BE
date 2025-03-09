@@ -20,7 +20,7 @@ export class FeedsReader {
   async readOne(id: string) {
     const feed = await this.feedsRepository.findOneById(id);
     if (!feed) {
-      throw new NotFoundException(NOT_FOUND_FEED_MESSAGE);
+      throw new FeedNotFoundException();
     }
 
     return feed;

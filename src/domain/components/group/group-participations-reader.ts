@@ -17,4 +17,8 @@ export class GroupParticipationsReader {
       await this.groupParticipationsRepository.findMembersByGroupId(groupId);
     return participations.map((participation) => participation.participantId);
   }
+
+  async getMemberCount(groupId: string) {
+    return await this.groupParticipationsRepository.countMember(groupId);
+  }
 }

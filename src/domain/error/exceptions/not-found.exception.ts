@@ -1,6 +1,7 @@
 import { DomainException } from 'src/domain/error/exceptions/domain.exception';
 import {
   NOT_FOUND_FEED_MESSAGE,
+  NOT_FOUND_FRIEND_MESSAGE,
   NOT_FOUND_GATHERING_MESSAGE,
   NOT_FOUND_GATHERING_PARTICIPATION,
   NOT_FOUND_GROUP_MESSAGE,
@@ -40,5 +41,11 @@ export class UserNotFoundException extends NotFoundException {
 export class GroupNotFoundException extends NotFoundException {
   constructor() {
     super(NOT_FOUND_GROUP_MESSAGE);
+  }
+}
+
+export class FriendNotFoundException extends NotFoundException {
+  constructor() {
+    super(NOT_FOUND_FRIEND_MESSAGE);
   }
 }

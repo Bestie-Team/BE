@@ -1,5 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { NOT_FOUND_GATHERING_MESSAGE } from 'src/domain/error/messages';
+import { Inject, Injectable } from '@nestjs/common';
 import { GatheringsRepository } from 'src/domain/interface/gathering/gatherings.repository';
 import { getGatheringCursor } from 'src/domain/helpers/get-cursor';
 import {
@@ -8,6 +7,7 @@ import {
   PaginatedDateRangeInput,
 } from 'src/shared/types';
 import { EndedGathering, Gathering } from 'src/domain/types/gathering.types';
+import { GatheringNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
 
 @Injectable()
 export class GatheringsReader {
@@ -128,17 +128,18 @@ export class GatheringsReader {
       gatheringId,
     );
     if (!gathering) {
-      throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);
+      throw new GatheringNotFoundException();
     }
+
     return gathering;
   }
 
   async readOne(id: string) {
     const gathering = await this.gatheringsRepository.findOneById(id);
-
     if (!gathering) {
-      throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);
+      throw new GatheringNotFoundException();
     }
+
     return gathering;
   }
 
@@ -147,10 +148,10 @@ export class GatheringsReader {
       id,
       hostId,
     );
-
     if (!gathering) {
-      throw new NotFoundException(NOT_FOUND_GATHERING_MESSAGE);
+      throw new GatheringNotFoundException();
     }
+
     return gathering;
   }
 }

@@ -69,10 +69,6 @@ export class FriendsChecker {
       receiverId,
     );
 
-    if (!friendRequest) {
-      throw new FriendNotFoundException();
-    }
-
     if (friendRequest.status === 'ACCEPTED') {
       throw new AlreadyFriendsException();
     }

@@ -69,7 +69,7 @@ describe('FriendsController (e2e)', () => {
         .post('/friends')
         .send(dto)
         .set('Authorization', accessToken);
-      const { status }: ResponseResult<SearchUserResponse> = response;
+      const { status, body }: ResponseResult<SearchUserResponse> = response;
 
       expect(status).toEqual(201);
     });
@@ -172,7 +172,7 @@ describe('FriendsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status } = response;
 
-      expect(status).toEqual(400);
+      expect(status).toEqual(422);
     });
   });
 

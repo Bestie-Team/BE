@@ -137,7 +137,7 @@ describe('GroupsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status, body } = response;
 
-      expect(status).toEqual(400);
+      expect(status).toEqual(422);
     });
   });
 
@@ -484,7 +484,7 @@ describe('GroupsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status } = response;
 
-      expect(status).toEqual(400);
+      expect(status).toEqual(422);
     });
   });
 
@@ -529,7 +529,7 @@ describe('GroupsController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .delete(`/groups/${groupId}/members`)
         .set('Authorization', accessToken);
-      const { status } = response;
+      const { status, body } = response;
       const groupParticipation = await prisma.groupParticipation.findMany({
         where: {
           groupId,
@@ -578,7 +578,7 @@ describe('GroupsController (e2e)', () => {
         .set('Authorization', accessToken);
       const { status } = response;
 
-      expect(status).toEqual(400);
+      expect(status).toEqual(422);
     });
   });
 

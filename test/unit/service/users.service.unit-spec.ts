@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ClsModule } from 'nestjs-cls';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { clsOptions } from 'src/configs/cls/cls-options';
+import { DuplicateAccountIdException } from 'src/domain/error/exceptions/conflice.exception';
 import { ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE } from 'src/domain/error/messages';
 import { UsersService } from 'src/domain/services/user/users.service';
 import { PrismaModule } from 'src/infrastructure/prisma/prisma.module';
@@ -116,5 +117,23 @@ describe('FriendsService', () => {
 
     expect(updatedUser).not.toBeNull();
     expect(updatedUser?.accountId).toEqual(newAccountId);
+  });
+
+  it('탈퇴한지 30일이 지나지 않은 동일한 아이디의 회원이 존재하는 경우 예외가 발생한다.', async () => {
+    const user = generateUserEntity('test@test.com', 'account_id');
+    await db.user.create({ data: user });
+
+    const newAccountId = 'new_account_id';
+
+    const deletedUser = generateUserEntity('test@test.com', newAccountId);
+    await db.user.create({ data: deletedUser });
+    await db.user.update({
+      data: { deletedAt: new Date(Date.now() - 29 * 24 * 60 * 60 * 1000) },
+      where: { id: deletedUser.id },
+    });
+
+    await expect(
+      async () => await usersService.changeAccountId(user.id, newAccountId),
+    ).rejects.toThrow(new DuplicateAccountIdException());
   });
 });

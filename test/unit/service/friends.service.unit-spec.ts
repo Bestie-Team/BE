@@ -1,14 +1,14 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClsModule } from 'nestjs-cls';
 import { clsOptions } from 'src/configs/cls/cls-options';
 import {
-  FRIEND_ALREADY_EXIST_MESSAGE,
-  FRIEND_REQUEST_ALREADY_EXIST_MESSAGE,
-  IS_NOT_FRIEND_RELATION_MESSAGE,
-  NOT_FOUND_FRIEND_MESSAGE,
-  NOT_FOUND_USER_MESSAGE,
-} from 'src/domain/error/messages';
+  AlreadyExistRequestException,
+  AlreadyFriendsException,
+} from 'src/domain/error/exceptions/conflice.exception';
+import {
+  FriendNotFoundException,
+  UserNotFoundException,
+} from 'src/domain/error/exceptions/not-found.exception';
 import { FriendsService } from 'src/domain/services/friends/friends.service';
 import { PrismaModule } from 'src/infrastructure/prisma/prisma.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
@@ -69,7 +69,7 @@ describe('FriendsService', () => {
           senderId: sender.id,
           receiverId: receiver.id,
         }),
-      ).rejects.toThrow(new ConflictException(FRIEND_ALREADY_EXIST_MESSAGE));
+      ).rejects.toThrow(new AlreadyFriendsException());
     });
 
     it('요청을 중복으로 보내면 예외가 발생한다.', async () => {
@@ -82,9 +82,7 @@ describe('FriendsService', () => {
           senderId: sender.id,
           receiverId: receiver.id,
         }),
-      ).rejects.toThrow(
-        new ConflictException(FRIEND_REQUEST_ALREADY_EXIST_MESSAGE),
-      );
+      ).rejects.toThrow(new AlreadyExistRequestException());
     });
 
     it('존재하지 않는 회원에게 요청을 보내면 예외가 발생한다.', async () => {
@@ -95,7 +93,7 @@ describe('FriendsService', () => {
           senderId: sender.id,
           receiverId: nonExistId,
         }),
-      ).rejects.toThrow(new NotFoundException(NOT_FOUND_USER_MESSAGE));
+      ).rejects.toThrow(new UserNotFoundException());
     });
   });
 
@@ -110,7 +108,7 @@ describe('FriendsService', () => {
     it('친구가 아닌데 삭제하려는 경우 예외가 발생한다.', async () => {
       await expect(async () =>
         friendsService.unfriend(receiver.id, sender.id),
-      ).rejects.toThrow(new NotFoundException(IS_NOT_FRIEND_RELATION_MESSAGE));
+      ).rejects.toThrow(new FriendNotFoundException());
     });
 
     it('대상이 존재하지 않는 회원이면 예외가 발생한다.', async () => {
@@ -118,7 +116,7 @@ describe('FriendsService', () => {
 
       await expect(async () =>
         friendsService.unfriend(nonExistId, sender.id),
-      ).rejects.toThrow(new NotFoundException(IS_NOT_FRIEND_RELATION_MESSAGE));
+      ).rejects.toThrow(new FriendNotFoundException());
     });
   });
 
@@ -134,7 +132,7 @@ describe('FriendsService', () => {
     it('대기 상태인 요청이 없는 경우 예외가 발생한다.', async () => {
       await expect(async () =>
         friendsService.accept(otherUser.id, receiver.id),
-      ).rejects.toThrow(new NotFoundException(NOT_FOUND_FRIEND_MESSAGE));
+      ).rejects.toThrow(new FriendNotFoundException());
     });
 
     it('이미 친구 관계인 회원인 경우 예외가 발생한다.', async () => {
@@ -143,7 +141,7 @@ describe('FriendsService', () => {
 
       await expect(async () =>
         friendsService.accept(sender.id, receiver.id),
-      ).rejects.toThrow(new ConflictException(FRIEND_ALREADY_EXIST_MESSAGE));
+      ).rejects.toThrow(new AlreadyFriendsException());
     });
 
     it('대상이 존재하지 않는 회원이면 예외가 발생한다.', async () => {
@@ -151,7 +149,7 @@ describe('FriendsService', () => {
 
       await expect(async () =>
         friendsService.accept(sender.id, nonExistId),
-      ).rejects.toThrow(new NotFoundException(NOT_FOUND_FRIEND_MESSAGE));
+      ).rejects.toThrow(new FriendNotFoundException());
     });
   });
 
@@ -179,7 +177,7 @@ describe('FriendsService', () => {
     it('대기 상태인 요청이 없는 경우 예외가 발생한다.', async () => {
       await expect(async () =>
         friendsService.reject(otherUser.id, receiver.id),
-      ).rejects.toThrow(new NotFoundException(NOT_FOUND_FRIEND_MESSAGE));
+      ).rejects.toThrow(new FriendNotFoundException());
     });
 
     it('대상이 존재하지 않는 회원이면 예외가 발생한다.', async () => {
@@ -187,7 +185,7 @@ describe('FriendsService', () => {
 
       await expect(async () =>
         friendsService.reject(sender.id, nonExistId),
-      ).rejects.toThrow(new NotFoundException(NOT_FOUND_USER_MESSAGE));
+      ).rejects.toThrow(new FriendNotFoundException());
     });
   });
 });

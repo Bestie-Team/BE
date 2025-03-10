@@ -1,14 +1,9 @@
-import {
-  ConflictException,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { UsersReader } from 'src/domain/components/user/users-reader';
 import { UsersWriter } from 'src/domain/components/user/users-writer';
-import {
-  ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE,
-  DUPLICATE_ACCOUNT_ID_MESSAGE,
-} from 'src/domain/error/messages';
+import { DuplicateAccountIdException } from 'src/domain/error/exceptions/conflice.exception';
+import { UserNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
+import { ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE } from 'src/domain/error/messages';
 import { calcDateDiff } from 'src/utils/date';
 
 @Injectable()
@@ -30,23 +25,38 @@ export class UsersService {
   }
 
   private async checkAccountIdChangeCooldown(userId: string, today: Date) {
-    const { createdAt, updatedAt } = await this.usersReader.readOne(userId);
+    try {
+      const { createdAt, updatedAt } = await this.usersReader.readOne(userId);
 
-    const isSetFirst = createdAt.getTime() === updatedAt.getTime();
-    const daysRemaining = calcDateDiff(today, updatedAt, 'd');
-    if (!isSetFirst && daysRemaining < 30) {
-      throw new UnprocessableEntityException(
-        ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE(30 - daysRemaining),
-      );
+      const isSetFirst = createdAt.getTime() === updatedAt.getTime();
+      const daysRemaining = calcDateDiff(today, updatedAt, 'd');
+      if (!isSetFirst && daysRemaining < 30) {
+        throw new UnprocessableEntityException(
+          ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE(30 - daysRemaining),
+        );
+      }
+    } catch (e: unknown) {
+      throw e;
     }
   }
 
-  async checkDuplicateAccountId(accountId: string) {
-    const userByAccountId = await this.usersReader.readOneByAccountId(
-      accountId,
-    );
-    if (userByAccountId) {
-      throw new ConflictException(DUPLICATE_ACCOUNT_ID_MESSAGE);
+  async checkDuplicateAccountId(accountId: string, today = new Date()) {
+    try {
+      const { deletedAt } = await this.usersReader.readOneByAccountId(
+        accountId,
+      );
+      if (deletedAt) {
+        if (calcDateDiff(today, deletedAt, 'd') < 30) {
+          throw new DuplicateAccountIdException();
+        }
+        return;
+      }
+      throw new DuplicateAccountIdException();
+    } catch (e: unknown) {
+      if (e instanceof UserNotFoundException) {
+        return;
+      }
+      throw e;
     }
   }
 }

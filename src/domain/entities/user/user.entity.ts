@@ -14,6 +14,7 @@ export class UserEntity {
     readonly notificationToken: string | null,
     readonly createdAt: Date,
     readonly updatedAt: Date,
+    readonly deletedAt: Date | null,
   ) {}
 
   static create(
@@ -22,12 +23,19 @@ export class UserEntity {
     stdDate: Date,
     updatedAt?: Date,
   ): UserEntity {
-    return {
-      ...input,
-      id: idGen(),
-      notificationToken: null,
-      createdAt: stdDate,
-      updatedAt: updatedAt || stdDate,
-    };
+    return new UserEntity(
+      idGen(),
+      input.email,
+      input.name,
+      input.accountId,
+      input.provider,
+      input.profileImageUrl ?? null,
+      input.termsOfServiceConsent,
+      input.privacyPolicyConsent,
+      null,
+      stdDate,
+      updatedAt ?? stdDate,
+      null,
+    );
   }
 }

@@ -1,5 +1,5 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { NOT_FOUND_USER_MESSAGE } from 'src/domain/error/messages';
+import { Inject, Injectable } from '@nestjs/common';
+import { UserNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
 import { getUserCursor } from 'src/domain/helpers/get-cursor';
 import { UsersRepository } from 'src/domain/interface/user/users.repository';
 import { SearchInput } from 'src/domain/types/user.types';
@@ -28,7 +28,7 @@ export class UsersReader {
   async readDetail(id: string) {
     const user = await this.usersRepository.findDetailById(id);
     if (!user) {
-      throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
+      throw new UserNotFoundException();
     }
 
     return user;
@@ -37,7 +37,7 @@ export class UsersReader {
   async readProfile(id: string) {
     const user = await this.usersRepository.findProfileById(id);
     if (!user) {
-      throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
+      throw new UserNotFoundException();
     }
 
     return user;
@@ -46,21 +46,40 @@ export class UsersReader {
   async readOne(userId: string) {
     const user = await this.usersRepository.findOneById(userId);
     if (!user) {
-      throw new NotFoundException(NOT_FOUND_USER_MESSAGE);
+      throw new UserNotFoundException();
     }
 
     return user;
   }
 
   async readOneByEmail(email: string) {
-    return await this.usersRepository.findOneByEmail(email);
+    const user = await this.usersRepository.findOneByEmail(email);
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    return user;
+  }
+
+  async readDeletedByEmail(email: string) {
+    const user = await this.usersRepository.findDeletedByEmail(email);
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    return user;
   }
 
   /**
    * 검색 결과가 없는 경우 null을 반환함.
    */
-  async readOneByAccountId(accountId: string): Promise<{ id: string } | null> {
-    return await this.usersRepository.findOneByAccountId(accountId);
+  async readOneByAccountId(accountId: string) {
+    const user = await this.usersRepository.findOneByAccountId(accountId);
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    return user;
   }
 
   async readMulti(userIds: string[]) {

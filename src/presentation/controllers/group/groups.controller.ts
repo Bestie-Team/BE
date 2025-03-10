@@ -135,7 +135,9 @@ export class GroupsController {
     type: GroupDetailResponse,
   })
   @Get(':groupId')
-  async getGroupDetail(@Param('groupId') groupId: string) {
+  async getGroupDetail(
+    @Param('groupId') groupId: string,
+  ): Promise<GroupDetailResponse> {
     const domain = await this.groupsReader.readDetail(groupId);
     return groupConverter.toDto(domain);
   }

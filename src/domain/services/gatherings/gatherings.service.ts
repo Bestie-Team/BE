@@ -52,13 +52,16 @@ export class GatheringsService {
       await this.setFriendInvitees(inviteeIds, friendUserIds, hostUserId);
     }
 
-    const { gathering, participations } = this.creteEntities(input, inviteeIds);
+    const { gathering, participations } = this.createEntities(
+      input,
+      inviteeIds,
+    );
 
     await this.createTransaction(gathering, participations);
     this.notificationsManager.sendGatheringCreation(hostUserId, inviteeIds);
   }
 
-  private creteEntities(input: GatheringPrototype, inviteeIds: string[]) {
+  private createEntities(input: GatheringPrototype, inviteeIds: string[]) {
     const stdDate = new Date();
     const gathering = GatheringEntity.create(input, v4, stdDate);
     const participations = GatheringParticipationEntity.createBulk(

@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/domain/entities/user/user.entity';
 import { UsersRepository } from 'src/domain/interface/user/users.repository';
 import type {
+  DeletedUser,
   Profile,
   SearchedUser,
   User,
-  UserBasicInfo,
+  UserForLogin,
   UserDetail,
 } from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
@@ -28,7 +29,7 @@ export class UsersPrismaRepository implements UsersRepository {
     });
   }
 
-  async findOneByEmail(email: string): Promise<UserBasicInfo | null> {
+  async findOneByEmail(email: string): Promise<UserForLogin | null> {
     return await this.txHost.tx.user.findFirst({
       select: {
         id: true,
@@ -36,22 +37,27 @@ export class UsersPrismaRepository implements UsersRepository {
         accountId: true,
         profileImageUrl: true,
         provider: true,
+        deletedAt: true,
       },
       where: {
         email,
-        deletedAt: null,
+      },
+      orderBy: {
+        deletedAt: 'desc',
       },
     });
   }
 
-  async findOneByAccountId(accountId: string): Promise<{ id: string } | null> {
+  async findOneByAccountId(
+    accountId: string,
+  ): Promise<{ id: string; deletedAt: Date | null } | null> {
     return await this.txHost.tx.user.findFirst({
       select: {
         id: true,
+        deletedAt: true,
       },
       where: {
         accountId,
-        deletedAt: null,
       },
     });
   }
@@ -326,6 +332,24 @@ export class UsersPrismaRepository implements UsersRepository {
           hasFeed: row.has_feed,
         }
       : null;
+  }
+
+  async findDeletedByEmail(email: string): Promise<DeletedUser | null> {
+    return await this.txHost.tx.user.findFirst({
+      select: {
+        id: true,
+        accountId: true,
+        name: true,
+        email: true,
+        profileImageUrl: true,
+        provider: true,
+        deletedAt: true,
+      },
+      where: {
+        email,
+        NOT: [{ deletedAt: null }],
+      },
+    });
   }
 
   async update(data: Partial<UserEntity>): Promise<void> {

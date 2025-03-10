@@ -36,5 +36,5 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
         run: |
+          npm run test:e2e
           npm run test
-          npm run test:unit

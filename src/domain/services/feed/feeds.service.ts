@@ -1,11 +1,6 @@
 import { Transactional } from '@nestjs-cls/transactional';
 import { v4 } from 'uuid';
-import {
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { FeedsWriter } from 'src/domain/components/feed/feeds-writer';
 import { FriendsChecker } from 'src/domain/components/friend/friends-checker';
@@ -13,12 +8,7 @@ import { GatheringsReader } from 'src/domain/components/gathering/gatherings-rea
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed-visibility.entity';
-import {
-  DUPLICATE_GATHERING_FEED,
-  FEED_CREATION_PERIOD_EXCEEDED_MESSAGE,
-  FORBIDDEN_MESSAGE,
-  IS_NOT_DONE_GATHERING_MESSAGE,
-} from 'src/domain/error/messages';
+import { FORBIDDEN_MESSAGE } from 'src/domain/error/messages';
 import {
   CreateGatheringFeedInput,
   FeedPrototype,
@@ -29,6 +19,11 @@ import {
   FeedNotFoundException,
   GatheringParticipationNotFoundException,
 } from 'src/domain/error/exceptions/not-found.exception';
+import {
+  FeedCreationPeriodExceededException,
+  GatheringNotCompletedException,
+} from 'src/domain/error/exceptions/unprocessable.exception';
+import { DuplicateFeedException } from 'src/domain/error/exceptions/conflice.exception';
 
 @Injectable()
 export class FeedsService {
@@ -98,39 +93,42 @@ export class FeedsService {
   ) {
     const gathering = await this.gatheringsReader.readOne(gatheringId);
     if (!gathering.endedAt) {
-      throw new UnprocessableEntityException(IS_NOT_DONE_GATHERING_MESSAGE);
+      throw new GatheringNotCompletedException();
     }
+    await this.checkIsParticipation(gatheringId, writerId);
+    await this.checkFeedCreationPeriod(today, gathering.endedAt);
+    await this.checkDuplicateFeed(gatheringId, writerId);
+  }
 
-    const diffDate = calcDateDiff(today, gathering.endedAt, 'd');
+  private async checkFeedCreationPeriod(today: Date, endedAt: Date) {
+    const diffDate = calcDateDiff(today, endedAt, 'd');
     if (diffDate >= 30) {
-      throw new UnprocessableEntityException(
-        FEED_CREATION_PERIOD_EXCEEDED_MESSAGE,
-      );
+      throw new FeedCreationPeriodExceededException();
     }
+  }
 
+  private async checkIsParticipation(gatheringId: string, writerId: string) {
     try {
-      const participation = await this.gatheringParticipationReader.readOne(
-        gatheringId,
-        writerId,
-      );
-      if (participation.status !== 'ACCEPTED') {
-        throw new ForbiddenException(FORBIDDEN_MESSAGE);
-      }
-
-      const alreadyWrittnFeed =
-        await this.feedsReader.readOneByGatheringIdAndWriterId(
-          gatheringId,
-          writerId,
-        );
-      if (alreadyWrittnFeed) {
-        throw new ConflictException(DUPLICATE_GATHERING_FEED);
-      }
+      await this.gatheringParticipationReader.readOne(gatheringId, writerId);
     } catch (e: unknown) {
       if (e instanceof GatheringParticipationNotFoundException) {
         throw new ForbiddenException(FORBIDDEN_MESSAGE);
       }
-      if (e instanceof ConflictException) throw e;
-      if (e instanceof FeedNotFoundException) return;
+      throw e;
+    }
+  }
+
+  private async checkDuplicateFeed(gatheringId: string, writerId: string) {
+    try {
+      await this.feedsReader.readOneByGatheringIdAndWriterId(
+        gatheringId,
+        writerId,
+      );
+      throw new DuplicateFeedException();
+    } catch (e: unknown) {
+      if (e instanceof FeedNotFoundException) {
+        return;
+      }
       throw e;
     }
   }

@@ -1,8 +1,8 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { GroupsRepository } from 'src/domain/interface/group/groups.repository';
 import { getGroupCursor } from 'src/domain/helpers/get-cursor';
 import { PaginationInput } from 'src/shared/types';
-import { NOT_FOUND_GROUP_MESSAGE } from 'src/domain/error/messages';
+import { GroupNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
 
 @Injectable()
 export class GroupsReader {
@@ -27,7 +27,7 @@ export class GroupsReader {
   async readDetail(id: string) {
     const group = await this.groupsRepository.findDetailById(id);
     if (!group) {
-      throw new NotFoundException(NOT_FOUND_GROUP_MESSAGE);
+      throw new GroupNotFoundException();
     }
 
     return group;
@@ -38,6 +38,9 @@ export class GroupsReader {
       groupId,
       ownerId,
     );
+    if (!group) {
+      throw new GroupNotFoundException();
+    }
 
     return group;
   }
@@ -45,7 +48,7 @@ export class GroupsReader {
   async readOneById(id: string) {
     const group = await this.groupsRepository.findOneById(id);
     if (!group) {
-      throw new NotFoundException(NOT_FOUND_GROUP_MESSAGE);
+      throw new GroupNotFoundException();
     }
 
     return group;

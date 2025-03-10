@@ -1,26 +1,30 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { FriendsReader } from 'src/domain/components/friend/friends-reader';
 import {
-  CANT_REQUEST_REPORTED_FRIEND_MESSAGE,
-  FRIEND_ALREADY_EXIST_MESSAGE,
-  FRIEND_REQUEST_ALREADY_EXIST_MESSAGE,
-  IS_NOT_FRIEND_RELATION_MESSAGE,
-  NOT_FOUND_FRIEND_MESSAGE,
-} from 'src/domain/error/messages';
+  AlreadyExistRequestException,
+  AlreadyFriendsException,
+} from 'src/domain/error/exceptions/conflice.exception';
+import { FriendNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
+import {
+  FriendshipRequiredException,
+  ReportedUserCannotRequestException,
+} from 'src/domain/error/exceptions/unprocessable.exception';
 
 @Injectable()
 export class FriendsChecker {
   constructor(private readonly friendsReader: FriendsReader) {}
 
   async checkIsFriend(userId: string, friendId: string) {
-    const friend = await this.friendsReader.readOne(friendId, userId);
-    if (!friend || friend.status !== 'ACCEPTED') {
-      throw new BadRequestException(IS_NOT_FRIEND_RELATION_MESSAGE);
+    try {
+      const friend = await this.friendsReader.readOne(friendId, userId);
+      if (friend.status !== 'ACCEPTED') {
+        throw new FriendshipRequiredException();
+      }
+    } catch (e: unknown) {
+      if (e instanceof FriendNotFoundException) {
+        throw new FriendshipRequiredException();
+      }
+      throw e;
     }
   }
 
@@ -33,22 +37,30 @@ export class FriendsChecker {
   }
 
   async checkExistFriend(senderId: string, receiverId: string) {
-    const existFriend = await this.friendsReader.readOne(senderId, receiverId);
-
-    if (existFriend) {
-      if (existFriend.status === 'ACCEPTED') {
-        throw new ConflictException(FRIEND_ALREADY_EXIST_MESSAGE);
+    try {
+      const existFriend = await this.friendsReader.readOne(
+        senderId,
+        receiverId,
+      );
+      if (existFriend) {
+        if (existFriend.status === 'ACCEPTED') {
+          throw new AlreadyFriendsException();
+        }
+        if (existFriend.status === 'PENDING') {
+          throw new AlreadyExistRequestException();
+        }
+        // TODO 요구사항 변경에 따라 수정 가능성 있음.
+        // TODO 검색에 노출 안 되도록
+        if (existFriend.status === 'REPORTED') {
+          throw new ReportedUserCannotRequestException();
+        }
       }
-      if (existFriend.status === 'PENDING') {
-        throw new ConflictException(FRIEND_REQUEST_ALREADY_EXIST_MESSAGE);
+    } catch (e: unknown) {
+      if (e instanceof FriendNotFoundException) {
+        return;
       }
-      // TODO 요구사항 변경에 따라 수정 가능성 있음.
-      if (existFriend.status === 'REPORTED') {
-        throw new BadRequestException(CANT_REQUEST_REPORTED_FRIEND_MESSAGE);
-      }
+      throw e;
     }
-
-    return existFriend;
   }
 
   async checkExistPendingRequest(senderId: string, receiverId: string) {
@@ -57,12 +69,8 @@ export class FriendsChecker {
       receiverId,
     );
 
-    if (!friendRequest) {
-      throw new NotFoundException(NOT_FOUND_FRIEND_MESSAGE);
-    }
-
     if (friendRequest.status === 'ACCEPTED') {
-      throw new ConflictException(FRIEND_ALREADY_EXIST_MESSAGE);
+      throw new AlreadyFriendsException();
     }
 
     return friendRequest;
@@ -71,7 +79,7 @@ export class FriendsChecker {
   async checkExistAcceptedFriend(friendUserId: string, userId: string) {
     const friend = await this.friendsReader.readOne(friendUserId, userId);
     if (!friend || friend.status !== 'ACCEPTED') {
-      throw new NotFoundException(IS_NOT_FRIEND_RELATION_MESSAGE);
+      throw new FriendNotFoundException();
     }
 
     return friend;

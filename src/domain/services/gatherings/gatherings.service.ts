@@ -1,6 +1,5 @@
 import { Transactional } from '@nestjs-cls/transactional';
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   UnprocessableEntityException,
@@ -18,14 +17,16 @@ import { NotificationsManager } from 'src/domain/components/notification/notific
 import { GroupParticipationsReader } from 'src/domain/components/group/group-participations-reader';
 import {
   CANT_DELETE_END_GATHERING,
-  CONFLICT_GROUP_AND_FRIEND_MESSAGE,
   FORBIDDEN_MESSAGE,
-  GATHERING_CREATION_PAST_DATE_MESSAGE,
-  REQUIRED_GROUP_OR_FRIEND_MESSAGE,
 } from 'src/domain/error/messages';
 import { GroupsReader } from 'src/domain/components/group/groups-reader';
 import { GatheringType } from 'src/shared/types';
 import { GatheringsReader } from 'src/domain/components/gathering/gatherings-reader';
+import {
+  BadRequestException,
+  GroupOrFriendRequiredException,
+} from 'src/domain/error/exceptions/bad-request.exception';
+import { GatheringCreationPastDateException } from 'src/domain/error/exceptions/unprocessable.exception';
 
 @Injectable()
 export class GatheringsService {
@@ -42,19 +43,25 @@ export class GatheringsService {
     const { groupId, hostUserId, gatheringDate, type } = input;
     this.validate(type, groupId, friendUserIds, gatheringDate);
 
-    let inviteeIds: string[] = [];
+    const inviteeIds: string[] = [];
 
     if (type === 'GROUP' && groupId) {
-      await this.groupsReader.readOneById(groupId);
-      inviteeIds = await this.groupParticipationsReader.readParticipants(
-        groupId,
-      );
+      await this.setGroupInvitees(inviteeIds, groupId);
     }
     if (type === 'FRIEND' && friendUserIds) {
-      inviteeIds = [...friendUserIds, hostUserId];
-      await this.gatheringsWriter.checkIsFriend(hostUserId, friendUserIds);
+      await this.setFriendInvitees(inviteeIds, friendUserIds, hostUserId);
     }
 
+    const { gathering, participations } = this.createEntities(
+      input,
+      inviteeIds,
+    );
+
+    await this.createTransaction(gathering, participations);
+    this.notificationsManager.sendGatheringCreation(hostUserId, inviteeIds);
+  }
+
+  private createEntities(input: GatheringPrototype, inviteeIds: string[]) {
     const stdDate = new Date();
     const gathering = GatheringEntity.create(input, v4, stdDate);
     const participations = GatheringParticipationEntity.createBulk(
@@ -62,19 +69,38 @@ export class GatheringsService {
         gatheringId: gathering.id,
         participantIds: inviteeIds,
         status: inviteeIds.map((inviteeId) =>
-          inviteeId === hostUserId ? 'ACCEPTED' : 'PENDING',
+          inviteeId === input.hostUserId ? 'ACCEPTED' : 'PENDING',
         ),
       },
       v4,
       stdDate,
     );
 
-    await this.createTransaction(gathering, participations);
-    this.notificationsManager.sendGatheringCreation(hostUserId, inviteeIds);
+    return {
+      gathering,
+      participations,
+    };
+  }
+
+  private async setGroupInvitees(inviteeIds: string[], groupId: string) {
+    await this.groupsReader.readOneById(groupId);
+    const members = await this.groupParticipationsReader.readParticipants(
+      groupId,
+    );
+    inviteeIds.push(...members);
+  }
+
+  private async setFriendInvitees(
+    inviteeIds: string[],
+    friendUserIds: string[],
+    hostUserId: string,
+  ) {
+    await this.gatheringsWriter.checkIsFriend(hostUserId, friendUserIds);
+    inviteeIds.push(...friendUserIds, hostUserId);
   }
 
   @Transactional()
-  async createTransaction(
+  private async createTransaction(
     gathering: GatheringEntity,
     gatheringParticipations: GatheringParticipationEntity[],
   ) {
@@ -109,12 +135,12 @@ export class GatheringsService {
   }
 
   @Transactional()
-  async deleteTransaction(gatheringId: string) {
+  private async deleteTransaction(gatheringId: string) {
     await this.gatheringsWriter.delete(gatheringId);
     await this.gatheringsParticipationsWriter.deleteMany(gatheringId);
   }
 
-  // TODO 나중에 Checker로 분리도 가능.
+  // TODO 나중에 분리
   private validate(
     type: GatheringType,
     groupId: string | null,
@@ -122,23 +148,25 @@ export class GatheringsService {
     gatheringDate: string,
   ) {
     if (!groupId && !friendUserIds) {
-      throw new BadRequestException(REQUIRED_GROUP_OR_FRIEND_MESSAGE);
+      throw new GroupOrFriendRequiredException();
     }
     if (type === 'GROUP' && !groupId) {
-      throw new BadRequestException();
+      throw new BadRequestException('그룹 모임에 그룹 번호는 필수입니다.');
     }
     if (type === 'FRIEND' && !friendUserIds) {
-      throw new BadRequestException();
+      throw new BadRequestException('친구 모임에 친구 번호는 필수입니다.');
     }
     if (groupId && friendUserIds) {
-      throw new BadRequestException(CONFLICT_GROUP_AND_FRIEND_MESSAGE);
+      throw new BadRequestException(
+        '그룹 번호와 친구 번호는 동시에 제공될 수 없습니다.',
+      );
     }
     this.validateGatheringDate(gatheringDate);
   }
 
   private validateGatheringDate(gatheringDate: string) {
     if (Date.now() > new Date(gatheringDate).getTime()) {
-      throw new BadRequestException(GATHERING_CREATION_PAST_DATE_MESSAGE);
+      throw new GatheringCreationPastDateException();
     }
   }
 }

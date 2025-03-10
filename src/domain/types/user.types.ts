@@ -11,12 +11,19 @@ export interface UserPrototype {
   readonly privacyPolicyConsent: boolean;
 }
 
-export interface UserBasicInfo {
+export interface UserInfo {
+  readonly email: string;
+  readonly name: string;
+  readonly provider: Provider;
+}
+
+export interface UserForLogin {
   readonly id: string;
   readonly email: string;
   readonly accountId: string;
   readonly profileImageUrl: string | null;
   readonly provider: Provider;
+  readonly deletedAt: Date | null;
 }
 
 /**
@@ -27,6 +34,11 @@ export interface User {
   readonly accountId: string;
   readonly name: string;
   readonly profileImageUrl: string | null;
+}
+
+export interface DeletedUser extends User {
+  readonly deletedAt: Date | null;
+  readonly provider: Provider;
 }
 
 export interface SearchedUser extends User {

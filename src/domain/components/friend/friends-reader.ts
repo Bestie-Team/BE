@@ -6,6 +6,7 @@ import {
   getUserCursor,
 } from 'src/domain/helpers/get-cursor';
 import { SearchInput } from 'src/domain/types/user.types';
+import { FriendNotFoundException } from 'src/domain/error/exceptions/not-found.exception';
 
 @Injectable()
 export class FriendsReader {
@@ -28,10 +29,15 @@ export class FriendsReader {
   }
 
   async readOne(firstUserId: string, secondUserId: string) {
-    return await this.friendsRepository.findOneBySenderAndReceiverId(
+    const friend = await this.friendsRepository.findOneBySenderAndReceiverId(
       firstUserId,
       secondUserId,
     );
+    if (!friend) {
+      throw new FriendNotFoundException();
+    }
+
+    return friend;
   }
 
   async search(userId: string, searchInput: SearchInput) {

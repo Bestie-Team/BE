@@ -1,12 +1,11 @@
 import {
-  BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Transactional } from '@nestjs-cls/transactional';
 import { v4 } from 'uuid';
 import { UserEntity } from 'src/domain/entities/user/user.entity';
 import { UserPrototype } from 'src/domain/types/user.types';
@@ -29,6 +28,17 @@ import { RefreshTokenWriter } from 'src/domain/components/token/refresh-token-wr
 import { RefreshTokenReader } from 'src/domain/components/token/refresh-token-reader';
 import { OauthUserInfo } from 'src/infrastructure/auth/strategies/oauth-strategy';
 import { Provider } from 'src/shared/types';
+import {
+  UserNotFoundException,
+  UserNotRegisteredException,
+} from 'src/domain/error/exceptions/not-found.exception';
+import { calcDateDiff } from 'src/utils/date';
+import {
+  DuplicateAccountIdException,
+  DuplicateEmailException,
+  RegisterdOtherPlatformException,
+} from 'src/domain/error/exceptions/conflice.exception';
+import { BadRequestException } from 'src/domain/error/exceptions/bad-request.exception';
 
 @Injectable()
 export class AuthService {
@@ -52,7 +62,7 @@ export class AuthService {
     ) as string;
   }
 
-  async login(input: LoginInput) {
+  async login(input: LoginInput, today = new Date()) {
     const { deviceId, provider, providerAccessToken } = input;
     this.validateDeviceId(deviceId);
 
@@ -61,41 +71,53 @@ export class AuthService {
       providerAccessToken,
     );
 
-    const {
-      id: userId,
-      accountId,
-      profileImageUrl,
-    } = await this.getValidatedUserByEmail(provider, userInfo);
+    const user = await this.getValidatedUserByEmail(provider, userInfo, today);
 
     const { accessToken, refreshToken } = await this.generateTokens({
-      userId,
+      userId: user.id,
       deviceId,
     });
 
-    await this.storeRefreshToken({
-      userId,
-      deviceId,
-      token: refreshToken,
-    });
+    if (user.deletedAt) {
+      await this.restoreUser(user.id, deviceId, refreshToken);
+    } else {
+      await this.handleStoreRefreshToken(user.id, deviceId, refreshToken);
+    }
 
     return {
-      id: userId,
+      id: user.id,
       accessToken,
       refreshToken,
-      accountId,
-      profileImageUrl,
+      accountId: user.accountId,
+      profileImageUrl: user.profileImageUrl,
     };
+  }
+
+  @Transactional()
+  private async restoreUser(userId: string, deviceId: string, token: string) {
+    await this.usersWriter.resetDeletedAt(userId);
+    await this.handleStoreRefreshToken(userId, deviceId, token);
+  }
+
+  private async handleStoreRefreshToken(
+    userId: string,
+    deviceId: string,
+    newToken: string,
+  ) {
+    const token = await this.refreshTokenReader.readOne(userId, deviceId);
+
+    if (token) {
+      await this.refreshTokenWriter.updateToken(userId, deviceId, newToken);
+    } else {
+      await this.storeRefreshToken({ userId, deviceId, token: newToken });
+    }
   }
 
   async register(prototype: UserPrototype, deviceId: string | null) {
     this.validateDeviceId(deviceId);
 
-    const userByAccountId = await this.usersReader.readOneByAccountId(
-      prototype.accountId,
-    );
-    if (userByAccountId) {
-      throw new ConflictException('이미 존재하는 아이디입니다.');
-    }
+    await this.checkDuplicateEmail(prototype.email);
+    await this.checkDuplicateAccountId(prototype.accountId);
 
     const { id: userId, accountId } = await this.createUser(prototype);
     const { accessToken, refreshToken } = await this.generateTokens({
@@ -115,6 +137,44 @@ export class AuthService {
       refreshToken,
       accountId,
     };
+  }
+
+  async checkDuplicateEmail(email: string, today = new Date()) {
+    try {
+      const user = await this.usersReader.readDeletedByEmail(email);
+      const { deletedAt } = user;
+      if (deletedAt) {
+        if (calcDateDiff(today, deletedAt, 'd') < 30) {
+          throw new DuplicateEmailException();
+        }
+        return;
+      }
+    } catch (e: unknown) {
+      if (e instanceof UserNotFoundException) {
+        return;
+      }
+      throw e;
+    }
+  }
+
+  async checkDuplicateAccountId(accountId: string, today = new Date()) {
+    try {
+      const { deletedAt } = await this.usersReader.readOneByAccountId(
+        accountId,
+      );
+      if (deletedAt) {
+        if (calcDateDiff(today, deletedAt, 'd') < 30) {
+          throw new DuplicateAccountIdException();
+        }
+        return;
+      }
+      throw new DuplicateAccountIdException();
+    } catch (e: unknown) {
+      if (e instanceof UserNotFoundException) {
+        return;
+      }
+      throw e;
+    }
   }
 
   async generateTokens(payload: TokenPayload) {
@@ -173,7 +233,7 @@ export class AuthService {
     };
   }
 
-  async checkValidRefreshToken(
+  private async checkValidRefreshToken(
     userId: string,
     deviceId: string,
     token: string,
@@ -184,14 +244,14 @@ export class AuthService {
     }
   }
 
-  async storeRefreshToken(prototype: RefreshTokenPrototype) {
+  private async storeRefreshToken(prototype: RefreshTokenPrototype) {
     const stdDate = new Date();
     const token = RefreshTokenEntity.create(prototype, stdDate);
 
     await this.refreshTokenWriter.create(token);
   }
 
-  async createUser(prototype: UserPrototype) {
+  private async createUser(prototype: UserPrototype) {
     const stdDate = new Date();
     const user = UserEntity.create(prototype, v4, stdDate);
 
@@ -199,26 +259,44 @@ export class AuthService {
     return user;
   }
 
-  validateDeviceId(deviceId: string | null): asserts deviceId is string {
+  private validateDeviceId(
+    deviceId: string | null,
+  ): asserts deviceId is string {
     if (typeof deviceId !== 'string') {
       throw new BadRequestException(MUST_HAVE_DEVICE_ID_MESSAGE);
     }
   }
 
-  async getValidatedUserByEmail(
+  private async getValidatedUserByEmail(
     provider: Provider,
     oauthUserInfo: OauthUserInfo,
+    today = new Date(),
   ) {
-    const user = await this.usersReader.readOneByEmail(oauthUserInfo.email);
-    if (!user) {
-      throw new NotFoundException(oauthUserInfo);
-    }
+    try {
+      const user = await this.usersReader.readOneByEmail(oauthUserInfo.email);
+      const { deletedAt } = user;
 
-    if (!(user.provider === provider)) {
-      throw new ConflictException(oauthUserInfo);
-    }
+      if (deletedAt) {
+        if (calcDateDiff(today, deletedAt, 'd') < 30) {
+          if (user.provider !== provider) {
+            throw new RegisterdOtherPlatformException(oauthUserInfo);
+          }
+          return user;
+        }
+        throw new UserNotRegisteredException(oauthUserInfo);
+      } else {
+        if (user.provider !== provider) {
+          throw new RegisterdOtherPlatformException(oauthUserInfo);
+        }
+      }
 
-    return user;
+      return user;
+    } catch (e: unknown) {
+      if (e instanceof UserNotFoundException) {
+        throw new UserNotRegisteredException(oauthUserInfo);
+      }
+      throw e;
+    }
   }
 
   async logout(userId: string, deviceId: string | null) {

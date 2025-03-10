@@ -56,6 +56,12 @@ export class GroupParticipationsPrismaRepository
     });
   }
 
+  async countMember(groupId: string): Promise<number> {
+    return await this.txHost.tx.groupParticipation.count({
+      where: { groupId, status: 'ACCEPTED' },
+    });
+  }
+
   async delete(groupId: string, participantId: string): Promise<void> {
     await this.txHost.tx.groupParticipation.delete({
       where: {

@@ -14,6 +14,7 @@ export class GatheringEntity {
     readonly createdAt: Date,
     readonly updatedAt: Date,
     readonly gatheringDate: Date,
+    readonly endedAt: null | Date = null,
   ) {}
 
   static create(

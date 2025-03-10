@@ -70,9 +70,6 @@ export class UsersReader {
     return user;
   }
 
-  /**
-   * 검색 결과가 없는 경우 null을 반환함.
-   */
   async readOneByAccountId(accountId: string) {
     const user = await this.usersRepository.findOneByAccountId(accountId);
     if (!user) {

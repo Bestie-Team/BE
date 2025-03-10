@@ -12,6 +12,7 @@ export interface GroupParticipationsRepository {
    */
   findMembersByGroupId(groupId: string): Promise<{ participantId: string }[]>;
   delete(groupId: string, participantId: string): Promise<void>;
+  countMember(groupId: string): Promise<number>;
   update(
     groupId: string,
     participantId: string,

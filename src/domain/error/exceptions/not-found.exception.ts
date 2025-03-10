@@ -7,6 +7,7 @@ import {
   NOT_FOUND_GROUP_MESSAGE,
   NOT_FOUND_USER_MESSAGE,
 } from 'src/domain/error/messages';
+import { UserInfo } from 'src/domain/types/user.types';
 
 export class NotFoundException extends DomainException {
   constructor(message: string, name = 'not found') {
@@ -47,5 +48,14 @@ export class GroupNotFoundException extends NotFoundException {
 export class FriendNotFoundException extends NotFoundException {
   constructor() {
     super(NOT_FOUND_FRIEND_MESSAGE);
+  }
+}
+
+export class UserNotRegisteredException extends NotFoundException {
+  readonly body: UserInfo;
+
+  constructor(data: UserInfo) {
+    super('required register');
+    this.body = data;
   }
 }

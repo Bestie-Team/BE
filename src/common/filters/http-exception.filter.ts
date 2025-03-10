@@ -71,16 +71,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
       return exception.getResponse();
     }
     if (exception instanceof DomainException) {
-      // 기본 형식의 응답 객체 생성
-      const response = {
+      let response = {
         message: exception.message,
         statusCode: status,
         error: exception.name,
       };
 
-      // if ('data' in exception && exception['data'] !== undefined) {
-      //   response['data'] = exception['data'];
-      // }
+      if ('body' in exception && exception['body']) {
+        if (typeof exception['body'] === 'object') {
+          response = {
+            ...response,
+            ...exception['body'],
+          };
+        }
+      }
 
       return response;
     }

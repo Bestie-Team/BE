@@ -109,13 +109,7 @@ export class FeedsService {
 
   private async checkIsParticipation(gatheringId: string, writerId: string) {
     try {
-      const participation = await this.gatheringParticipationReader.readOne(
-        gatheringId,
-        writerId,
-      );
-      if (participation.status !== 'ACCEPTED') {
-        throw new ForbiddenException(FORBIDDEN_MESSAGE);
-      }
+      await this.gatheringParticipationReader.readOne(gatheringId, writerId);
     } catch (e: unknown) {
       if (e instanceof GatheringParticipationNotFoundException) {
         throw new ForbiddenException(FORBIDDEN_MESSAGE);

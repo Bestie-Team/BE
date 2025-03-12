@@ -26,7 +26,11 @@ export class UsersWriter {
   }
 
   async updateNotificationToken(token: string, userId: string) {
-    await this.usersRepository.update({ id: userId, notificationToken: token });
+    await this.usersRepository.update({
+      id: userId,
+      notificationToken: token,
+      serviceNotificationConsent: true,
+    });
   }
 
   async resetDeletedAt(id: string) {

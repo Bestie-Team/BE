@@ -15,6 +15,8 @@ export class UserEntity {
     readonly createdAt: Date,
     readonly updatedAt: Date,
     readonly deletedAt: Date | null,
+    readonly serviceNotificationConsent: boolean = false,
+    readonly marketingNotificationConsent: boolean = false,
   ) {}
 
   static create(

@@ -3,6 +3,7 @@ export const GOOGLE_USER_INFO_URL =
   'https://www.googleapis.com/oauth2/v3/userinfo';
 export const KAKAO_USER_INFO_URL =
   'https://kapi.kakao.com/v2/user/me?secure_resource=true';
+export const APPLE_KEYS_URL = 'https://appleid.apple.com/auth/keys';
 
 export const notificationTypes = {
   GATHERING_INVITATION_RECEIVED: 'GATHERING_INVITATION_RECEIVED',

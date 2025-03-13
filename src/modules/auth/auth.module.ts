@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from 'src/domain/services/auth/auth.service';
 import { OauthContext } from 'src/infrastructure/auth/context/oauth-context';
+import { AppleStrategy } from 'src/infrastructure/auth/strategies/apple-strategy';
 import { GoogleStrategy } from 'src/infrastructure/auth/strategies/google-strategy';
 import { KakaoStrategy } from 'src/infrastructure/auth/strategies/kakao-strategy';
 import { RefreshTokenComponentModule } from 'src/modules/token/refresh-token-component.module';
@@ -24,7 +25,13 @@ import { AuthController } from 'src/presentation/controllers/auth/auth.controlle
     RefreshTokenComponentModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, OauthContext, GoogleStrategy, KakaoStrategy],
+  providers: [
+    AuthService,
+    OauthContext,
+    GoogleStrategy,
+    KakaoStrategy,
+    AppleStrategy,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

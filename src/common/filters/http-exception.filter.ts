@@ -31,7 +31,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     process.env.NODE_ENV !== 'test' &&
       this.logger.warn(
-        `${message}\nerrorBody: ${JSON.stringify(responseBody, null, 2)}`,
+        JSON.stringify({ ...message, errorBody: responseBody }, null, 2),
       );
 
     const body = {
@@ -96,17 +96,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   generateMessage(req: Request) {
     const { ip, path, body, params, query, method } = req;
-    const userAgent = req.header('user-agent') || 'unknown';
+    const agent = req.header('user-agent') || 'unknown';
     const referer = req.header('referer') || 'unknown';
 
-    const userAgentMsg = `\nagent: ${JSON.stringify(userAgent, null, 2)}`;
-    const ipMsg = `\nip: ${JSON.stringify(ip, null, 2)}`;
-    const requestMsg = `\nrequest: ${method} ${path}`;
-    const refererMsg = `\nreferer: ${JSON.stringify(referer, null, 2)}`;
-    const bodyMsg = `\nbody: ${JSON.stringify(body, null, 2)}`;
-    const paramsMsg = `\nparams: ${JSON.stringify(params, null, 2)}`;
-    const queryMsg = `\nquery: ${JSON.stringify(query, null, 2)}`;
-
-    return `${userAgentMsg}${ipMsg}${requestMsg}${refererMsg}${bodyMsg}${paramsMsg}${queryMsg}`;
+    return {
+      agent,
+      ip,
+      request: `${method} ${path}`,
+      referer,
+      body,
+      params,
+      query,
+    };
   }
 }

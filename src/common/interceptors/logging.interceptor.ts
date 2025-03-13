@@ -26,7 +26,9 @@ export class LoggingInterceptor implements NestInterceptor {
       tap(() => {
         const duration = Date.now() - startTime;
         if (process.env.NODE_ENV !== 'test') {
-          this.logger.log(`${message} \nduration: ${duration}ms`);
+          this.logger.log(
+            JSON.stringify({ ...message, duration: `${duration}ms` }, null, 2),
+          );
         }
       }),
     );
@@ -34,19 +36,19 @@ export class LoggingInterceptor implements NestInterceptor {
 
   private generateMessage(req: Request, res: Response) {
     const { ip, path, body, params, query, method } = req;
-    const userAgent = req.header('user-agent') || 'unknown';
+    const agent = req.header('user-agent') || 'unknown';
     const referer = req.header('referer') || 'unknown';
     const status = res.statusCode;
 
-    const userAgentMsg = `\nagent: ${JSON.stringify(userAgent, null, 2)}`;
-    const ipMsg = `\nip: ${JSON.stringify(ip, null, 2)}`;
-    const requestMsg = `\nrequest: ${method} ${path}`;
-    const refererMsg = `\nreferer: ${JSON.stringify(referer, null, 2)}`;
-    const bodyMsg = `\nbody: ${JSON.stringify(body, null, 2)}`;
-    const paramsMsg = `\nparams: ${JSON.stringify(params, null, 2)}`;
-    const queryMsg = `\nquery: ${JSON.stringify(query, null, 2)}`;
-    const statusMsg = `\nstatus: ${status}`;
-
-    return `${userAgentMsg}${ipMsg}${requestMsg}${refererMsg}${bodyMsg}${paramsMsg}${queryMsg}${statusMsg}`;
+    return {
+      agent,
+      ip,
+      request: `${method} ${path}`,
+      referer,
+      body,
+      params,
+      query,
+      status,
+    };
   }
 }

@@ -5,7 +5,7 @@ import {
   Logger,
   NestInterceptor,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { Observable, tap } from 'rxjs';
 
 @Injectable()
@@ -19,27 +19,36 @@ export class LoggingInterceptor implements NestInterceptor {
     const startTime = Date.now();
     const ctx = context.switchToHttp();
     const req = ctx.getRequest<Request>();
-    const message = this.generateMessage(req);
+    const res = ctx.getResponse<Response>();
+    const message = this.generateMessage(req, res);
 
     return next.handle().pipe(
       tap(() => {
         const duration = Date.now() - startTime;
         if (process.env.NODE_ENV !== 'test') {
-          this.logger.log(`${message} \nduration: ${duration}ms`);
+          this.logger.log(
+            JSON.stringify({ ...message, duration: `${duration}ms` }, null, 2),
+          );
         }
       }),
     );
   }
 
-  private generateMessage(req: Request) {
+  private generateMessage(req: Request, res: Response) {
     const { ip, path, body, params, query, method } = req;
-    const ipMsg = `\nip: ${JSON.stringify(ip, null, 2)}`;
-    const pathMsg = `\npath: ${JSON.stringify(path, null, 2)}`;
-    const methodMsg = `\nmethod: ${JSON.stringify(method, null, 2)}`;
-    const bodyMsg = `\nbody: ${JSON.stringify(body, null, 2)}`;
-    const paramsMsg = `\nparams: ${JSON.stringify(params, null, 2)}`;
-    const queryMsg = `\nquery: ${JSON.stringify(query, null, 2)}`;
+    const agent = req.header('user-agent') || 'unknown';
+    const referer = req.header('referer') || 'unknown';
+    const status = res.statusCode;
 
-    return `${ipMsg}${pathMsg}${methodMsg}${bodyMsg}${paramsMsg}${queryMsg}`;
+    return {
+      agent,
+      ip,
+      request: `${method} ${path}`,
+      referer,
+      body,
+      params,
+      query,
+      status,
+    };
   }
 }

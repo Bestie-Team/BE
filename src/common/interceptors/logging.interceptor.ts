@@ -26,9 +26,7 @@ export class LoggingInterceptor implements NestInterceptor {
       tap(() => {
         const duration = Date.now() - startTime;
         if (process.env.NODE_ENV !== 'test') {
-          this.logger.log(
-            JSON.stringify({ ...message, duration: `${duration}ms` }, null, 2),
-          );
+          this.logger.log({ ...message, duration: `${duration}ms` });
         }
       }),
     );
@@ -49,6 +47,7 @@ export class LoggingInterceptor implements NestInterceptor {
       params,
       query,
       status,
+      timestamp: new Date().toISOString(),
     };
   }
 }

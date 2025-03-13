@@ -277,19 +277,18 @@ export class AuthService {
       const { deletedAt } = user;
 
       if (deletedAt) {
-        if (calcDateDiff(today, deletedAt, 'd') < 30) {
-          if (user.provider !== provider) {
-            throw new RegisterdOtherPlatformException(oauthUserInfo);
-          }
-          return user;
+        if (calcDateDiff(today, deletedAt, 'd') >= 30) {
+          throw new UserNotRegisteredException(oauthUserInfo);
         }
-        throw new UserNotRegisteredException(oauthUserInfo);
-      } else {
         if (user.provider !== provider) {
           throw new RegisterdOtherPlatformException(oauthUserInfo);
         }
+        return user;
       }
 
+      if (user.provider !== provider) {
+        throw new RegisterdOtherPlatformException(oauthUserInfo);
+      }
       return user;
     } catch (e: unknown) {
       if (e instanceof UserNotFoundException) {

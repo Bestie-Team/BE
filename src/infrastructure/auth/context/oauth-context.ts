@@ -3,11 +3,14 @@ import { Provider } from 'src/shared/types';
 import { GoogleStrategy } from '../strategies/google-strategy';
 import { KakaoStrategy } from 'src/infrastructure/auth/strategies/kakao-strategy';
 import { OauthUserInfo } from 'src/infrastructure/auth/strategies/oauth-strategy';
+import { AppleStrategy } from 'src/infrastructure/auth/strategies/apple-strategy';
+
 @Injectable()
 export class OauthContext {
   constructor(
     private readonly googleStrategy: GoogleStrategy,
     private readonly kakaoStrategy: KakaoStrategy,
+    private readonly appleStrategy: AppleStrategy,
   ) {}
 
   async getUserInfo(provider: Provider, token: string): Promise<OauthUserInfo> {
@@ -16,10 +19,6 @@ export class OauthContext {
       ? await this.googleStrategy.getUserInfo(token)
       : provider === 'KAKAO'
       ? await this.kakaoStrategy.getUserInfo(token)
-      : {
-          email: 'apple-not-imple',
-          name: 'name',
-          provider: 'APPLE',
-        };
+      : await this.appleStrategy.getUserInfo(token);
   }
 }

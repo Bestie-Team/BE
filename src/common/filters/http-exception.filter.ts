@@ -27,23 +27,22 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = this.getHttpStatusFromException(exception);
     const responseBody = this.getResponseBodyFromException(exception, status);
 
-    const reqMessage = this.generateRequestMessage(req);
+    const message = this.generateMessage(req);
 
     process.env.NODE_ENV !== 'test' &&
       this.logger.warn(
-        `${reqMessage}\nerrorBody: ${JSON.stringify(responseBody, null, 2)}`,
+        JSON.stringify({ ...message, errorBody: responseBody }, null, 2),
       );
 
-    const body =
-      typeof responseBody === 'object'
-        ? {
-            ...responseBody,
-            timestamp: new Date().toISOString(),
-          }
-        : {
-            message: responseBody,
-            timestamp: new Date().toISOString(),
-          };
+    const body = {
+      ...(status === 500
+        ? { message: 'Server error' }
+        : typeof responseBody === 'object'
+        ? responseBody
+        : { message: responseBody }),
+      timestamp: new Date().toISOString(),
+    };
+
     res.status(status).json(body);
   }
 
@@ -95,20 +94,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
     };
   }
 
-  generateRequestMessage(req: Request) {
-    const { body, params, query, ip, method, url } = req;
+  generateMessage(req: Request) {
+    const { ip, path, body, params, query, method } = req;
+    const agent = req.header('user-agent') || 'unknown';
+    const referer = req.header('referer') || 'unknown';
 
-    const methodMessage = `\nmethod: ${method}`;
-    const urlMessage = `\nurl: ${url}`;
-    const ipMessage = `\nip: ${ip}`;
-    const paramMessage = params
-      ? ` \nparams: ${JSON.stringify(params, null, 2)}`
-      : '';
-    const queryMessage = query
-      ? ` \nquery: ${JSON.stringify(query, null, 2)}`
-      : '';
-    const bodyMessage = body ? ` \nbody: ${JSON.stringify(body, null, 2)}` : '';
-
-    return `${methodMessage}${urlMessage}${ipMessage}${paramMessage}${queryMessage}${bodyMessage}`;
+    return {
+      agent,
+      ip,
+      request: `${method} ${path}`,
+      referer,
+      body,
+      params,
+      query,
+    };
   }
 }

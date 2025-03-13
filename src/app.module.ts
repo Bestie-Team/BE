@@ -20,6 +20,8 @@ import { FeedCommentsModule } from 'src/modules/feed-comment/feed-comments.modul
 import { NotificationsModule } from 'src/modules/notification/notifications.module';
 import { ReportsModule } from 'src/modules/report/reports.module';
 import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
+import { WinstonModule } from 'nest-winston';
+import { windstonOptions } from 'src/configs/winston/winston-options';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.mo
       isGlobal: true,
       validationSchema,
     }),
+    WinstonModule.forRoot(windstonOptions),
     ClsModule.forRoot(clsOptions),
     SentryModule.forRoot(),
     PrismaModule,

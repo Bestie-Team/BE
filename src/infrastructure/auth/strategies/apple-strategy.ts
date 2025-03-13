@@ -29,22 +29,6 @@ export class AppleStrategy implements OauthStrategy {
     };
   }
 
-  private async verifyToken(identifyToken: string, key: jwksClient.SigningKey) {
-    try {
-      const verfiedToken: Payload = await this.jwtService.verifyAsync(
-        identifyToken,
-        {
-          secret: key.getPublicKey(),
-          algorithms: ['RS256'],
-        },
-      );
-
-      return verfiedToken;
-    } catch (e: unknown) {
-      throw new Error(`invalid token cause: ${e}`);
-    }
-  }
-
   private extractKidFromHeader(identifyToken: string) {
     try {
       const decoded: DecodedIdentifyToken = this.jwtService.decode(
@@ -62,6 +46,22 @@ export class AppleStrategy implements OauthStrategy {
 
   private async getSigningKey(kid: string) {
     return await this.client.getSigningKey(kid);
+  }
+
+  private async verifyToken(identifyToken: string, key: jwksClient.SigningKey) {
+    try {
+      const verfiedToken: Payload = await this.jwtService.verifyAsync(
+        identifyToken,
+        {
+          secret: key.getPublicKey(),
+          algorithms: ['RS256'],
+        },
+      );
+
+      return verfiedToken;
+    } catch (e: unknown) {
+      throw new Error(`invalid token cause: ${e}`);
+    }
   }
 }
 

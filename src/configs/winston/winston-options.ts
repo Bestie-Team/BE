@@ -13,25 +13,33 @@ const transportList: Transport[] = [
   new transports.File({
     filename: 'logs/error.log',
     level: 'error',
-    format: format.combine(format.json()),
+    format: format.combine(format.timestamp(), format.json()),
   }),
   new transports.File({
     filename: 'logs/combined.log',
-    format: format.combine(format.json()),
-  }),
-  new transports.Console({
-    format: isProduction
-      ? format.json()
-      : format.combine(
-          format.timestamp(),
-          format.ms(),
-          nestWinstonModuleUtilities.format.nestLike('Lighty', {
-            colors: true,
-            prettyPrint: true,
-          }),
-        ),
+    format: format.combine(format.timestamp(), format.json()),
   }),
 ];
+
+if (!isProduction) {
+  transportList.push(
+    new transports.Console({
+      level: 'silly',
+      format: format.combine(
+        format.json(),
+        format.timestamp(),
+        format.ms(),
+        format.printf(({ level, message, timestamp, ...meta }) => {
+          return `${timestamp} [${level.toUpperCase()}] ${JSON.stringify(
+            message,
+            null,
+            2,
+          )} ${JSON.stringify(meta)}`;
+        }),
+      ),
+    }),
+  );
+}
 
 if (isProduction) {
   transportList.push(
@@ -42,7 +50,9 @@ if (isProduction) {
       awsAccessKeyId: process.env.CLOUDWATCH_KEY_ID,
       awsSecretKey: process.env.CLOUDWATCH_SECRET_KEY,
       level: 'info',
-      jsonMessage: true,
+      messageFormatter: ({ level, message }) => {
+        return `[${level}] : ${JSON.stringify(message)}}`;
+      },
       awsOptions: {
         credentials: {
           accessKeyId: String(process.env.CLOUDWATCH_KEY_ID),

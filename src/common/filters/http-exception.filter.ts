@@ -4,10 +4,12 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
+  Inject,
 } from '@nestjs/common';
 import { SentryExceptionCaptured } from '@sentry/nestjs';
 import { Request, Response } from 'express';
+import { Logger } from 'winston';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { BadRequestException } from 'src/domain/error/exceptions/bad-request.exception';
 import { ConflictException } from 'src/domain/error/exceptions/conflice.exception';
 import { DomainException } from 'src/domain/error/exceptions/domain.exception';
@@ -16,7 +18,10 @@ import { UnprocessableException } from 'src/domain/error/exceptions/unprocessabl
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger('Exception Filter');
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
+  ) {}
 
   @SentryExceptionCaptured()
   catch(exception: Error, host: ArgumentsHost) {

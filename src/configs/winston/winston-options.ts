@@ -13,15 +13,15 @@ const transportList: Transport[] = [
   new transports.File({
     filename: 'logs/error.log',
     level: 'error',
-    format: format.combine(format.timestamp(), format.json()),
+    format: format.combine(format.json()),
   }),
   new transports.File({
     filename: 'logs/combined.log',
-    format: format.combine(format.timestamp(), format.json()),
+    format: format.combine(format.json()),
   }),
   new transports.Console({
     format: isProduction
-      ? format.simple()
+      ? format.json()
       : format.combine(
           format.timestamp(),
           format.ms(),
@@ -56,6 +56,7 @@ if (isProduction) {
 
 export const windstonOptions: WinstonModuleOptions = {
   level: isProduction ? 'info' : 'silly',
+  format: format.json(),
   transports: transportList,
 };
 

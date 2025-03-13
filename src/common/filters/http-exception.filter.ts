@@ -30,9 +30,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const message = this.generateMessage(req);
 
     process.env.NODE_ENV !== 'test' &&
-      this.logger.warn(
-        JSON.stringify({ ...message, errorBody: responseBody }, null, 2),
-      );
+      this.logger.warn({ ...message, errorBody: responseBody });
 
     const body = {
       ...(status === 500
@@ -107,6 +105,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       body,
       params,
       query,
+      timestamp: new Date().toISOString(),
     };
   }
 }

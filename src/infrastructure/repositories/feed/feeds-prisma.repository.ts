@@ -211,6 +211,8 @@ export class FeedsPrismaRepository implements FeedsRepository {
             eb('f.id', 'in', (qb) =>
               qb
                 .selectFrom('friend_feed_visibility as fv')
+                .innerJoin('active_feed as f', 'f.id', 'fv.feed_id')
+                .innerJoin('active_user as u', 'u.id', 'f.writer_id')
                 .select('fv.feed_id')
                 .where('fv.user_id', '=', userIdUuid),
             ),

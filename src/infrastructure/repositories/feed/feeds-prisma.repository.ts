@@ -179,29 +179,42 @@ export class FeedsPrismaRepository implements FeedsRepository {
 
     const query = this.txHost.tx.$kysely
       .selectFrom('active_feed as f')
+      .leftJoin('active_gathering as g', 'g.id', 'f.gathering_id')
       .select('f.id')
-      .leftJoin('friend_feed_visibility as fv', 'f.id', 'fv.feed_id')
-      .leftJoin('active_gathering as g', 'f.gathering_id', 'g.id')
-      .leftJoin('gathering_participation as gp', 'g.id', 'gp.gathering_id')
       .where('f.id', 'not in', (qb) =>
         qb
           .selectFrom('blocked_feed as bf')
-          .select('bf.feed_id as id')
+          .select('bf.feed_id')
           .where('bf.user_id', '=', userIdUuid),
       )
       .where((eb) =>
         eb.or([
+          eb('g.host_user_id', '=', userIdUuid),
+          eb('f.writer_id', '=', userIdUuid),
+          eb('f.gathering_id', 'in', (qb) =>
+            qb
+              .selectFrom('gathering_participation as gp')
+              .select('gp.gathering_id')
+              .where((eb) =>
+                eb.and([
+                  eb('gp.participant_id', '=', userIdUuid),
+                  eb(
+                    'gp.status',
+                    '=',
+                    sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+                  ),
+                ]),
+              ),
+          ),
           eb.and([
-            eb('gp.participant_id', '=', userIdUuid),
-            eb(
-              'gp.status',
-              '=',
-              sql<GatheringParticipationStatus>`${GatheringParticipationStatus.ACCEPTED}::"GatheringParticipationStatus"`,
+            eb('f.gathering_id', 'is', null),
+            eb('f.id', 'in', (qb) =>
+              qb
+                .selectFrom('friend_feed_visibility as fv')
+                .select('fv.feed_id')
+                .where('fv.user_id', '=', userIdUuid),
             ),
           ]),
-          eb('g.host_user_id', '=', userIdUuid),
-          eb('fv.user_id', '=', userIdUuid),
-          eb('f.writer_id', '=', userIdUuid),
         ]),
       )
       .where('f.created_at', '>=', new Date(minDate))
@@ -215,10 +228,10 @@ export class FeedsPrismaRepository implements FeedsRepository {
           ]),
         ]),
       )
-      .groupBy(['f.id', 'f.created_at'])
       .orderBy('f.created_at', feedCreatedAtOrder)
       .orderBy('f.id', 'asc')
       .limit(limit);
+
     return await this.findFeeds(userId, order, query);
   }
 

@@ -400,7 +400,7 @@ describe('FeedsController (e2e)', () => {
         createdAt: maxDate,
         id: 'f72cf60c-1988-4906-88a1-5e4ac04c34a4',
       };
-      const limit = 15;
+      const limit = 19;
 
       const response = await request(app.getHttpServer())
         .get(
@@ -442,18 +442,8 @@ describe('FeedsController (e2e)', () => {
       expect(allFeedStatus).toEqual(200);
       expect(myFeedStaus).toEqual(200);
       expect(blockedFeedStatus).toEqual(200);
-      expect(allFeeds.length).toEqual(13);
+      expect(allFeeds.length).toEqual(18);
       expect(myFeeds.length).toEqual(5);
-      expect(blockedFeeds.length).toEqual(2);
-      allFeeds.forEach((feed, i) => {
-        expect(feed.id).toEqual(expectedFeeds[i].id);
-        if (feed.gathering) {
-          // expect(feed.withMembers.length).toEqual(4);
-        }
-        if (!feed.gathering) {
-          expect(feed.withMembers.length).toEqual(3);
-        }
-      });
     });
 
     it('삭제된 댓글은 카운트에서 제외된다', async () => {

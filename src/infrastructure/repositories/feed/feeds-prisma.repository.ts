@@ -201,9 +201,9 @@ export class FeedsPrismaRepository implements FeedsRepository {
           ]),
           eb('g.host_user_id', '=', userIdUuid),
           eb('fv.user_id', '=', userIdUuid),
+          eb('f.writer_id', '=', userIdUuid),
         ]),
       )
-      .where('f.writer_id', '!=', userIdUuid)
       .where('f.created_at', '>=', new Date(minDate))
       .where('f.created_at', '<=', new Date(maxDate))
       .where((eb) =>

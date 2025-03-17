@@ -55,12 +55,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
   ) {
     if (process.env.NODE_ENV === 'test') return;
 
-    if (status !== HttpStatus.INTERNAL_SERVER_ERROR) {
-      this.logger.warn({ ...message, errorBody });
+    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error({ ...message, errorBody });
       return;
     }
 
-    this.logger.error({ ...message, errorBody });
+    this.logger.warn({ ...message, errorBody });
   }
 
   private getHttpStatusFromException(exception: Error): HttpStatus {

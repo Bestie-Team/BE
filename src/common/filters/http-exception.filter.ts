@@ -34,8 +34,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const message = this.generateMessage(req);
 
-    process.env.NODE_ENV !== 'test' &&
-      this.logger.warn({ ...message, errorBody: responseBody });
+    this.logging(status, message, responseBody);
 
     const body = {
       ...(status === 500
@@ -49,9 +48,24 @@ export class HttpExceptionFilter implements ExceptionFilter {
     res.status(status).json(body);
   }
 
-  private getHttpStatusFromException(exception: Error): number {
+  private logging(
+    status: HttpStatus,
+    message: ReturnType<typeof this.generateMessage>,
+    errorBody: string | object,
+  ) {
+    if (process.env.NODE_ENV === 'test') return;
+
+    if (status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.warn({ ...message, errorBody });
+      return;
+    }
+
+    this.logger.error({ ...message, errorBody });
+  }
+
+  private getHttpStatusFromException(exception: Error): HttpStatus {
     if (exception instanceof HttpException) {
-      return exception.getStatus();
+      return exception.getStatus() as HttpStatus;
     }
     if (exception instanceof NotFoundException) {
       return HttpStatus.NOT_FOUND;

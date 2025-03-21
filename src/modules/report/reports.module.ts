@@ -12,6 +12,8 @@ import { FeedsComponentModule } from 'src/modules/feed/feeds.component.module';
 import { BlockedFeedsModule } from 'src/modules/feed/blocked-feeds.module';
 import { FriendsComponentModule } from 'src/modules/friend/friends-componenet.module';
 import { GroupParticipationsModule } from 'src/modules/group/group-participations.module';
+import { BlockedFeedCommentRepository } from 'src/domain/interface/feed-comment/blocked-feed-comment.repository';
+import { BlockedFeedCommentPrismaRepository } from 'src/infrastructure/repositories/feed-comment/blocked-feed-comment-prisma.repository';
 
 @Module({
   imports: [
@@ -29,6 +31,10 @@ import { GroupParticipationsModule } from 'src/modules/group/group-participation
     FeedReportsWriteService,
     FeedCommentReportsWriteService,
     { provide: ReportsRepository, useClass: ReportsPrismaRepository },
+    {
+      provide: BlockedFeedCommentRepository,
+      useClass: BlockedFeedCommentPrismaRepository,
+    },
   ],
 })
 export class ReportsModule {}

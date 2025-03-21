@@ -38,6 +38,7 @@ describe('ReportsController (e2e)', () => {
   });
 
   afterEach(async () => {
+    await prisma.blockedFeedComment.deleteMany();
     await prisma.report.deleteMany();
     await prisma.gatheringParticipation.deleteMany();
     await prisma.gathering.deleteMany();

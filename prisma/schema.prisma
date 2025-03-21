@@ -92,6 +92,7 @@ model User {
   notifications          Notification[]
   reports                Report[]
   refreshTokens          RefreshToken[]
+  blockedFeedComments    BlockedFeedComment[]
 
   @@unique([email, deletedAt])
   @@unique([accountId, deletedAt])
@@ -233,8 +234,9 @@ model FeedComment {
   createdAt DateTime  @map("created_at")
   deletedAt DateTime? @map("deleted_at")
 
-  feed   Feed @relation(fields: [feedId], references: [id])
-  writer User @relation(fields: [writerId], references: [id])
+  feed   Feed                 @relation(fields: [feedId], references: [id])
+  writer User                 @relation(fields: [writerId], references: [id])
+  bocked BlockedFeedComment[]
 
   @@index([feedId])
   @@index([writerId])
@@ -369,4 +371,17 @@ model RefreshToken {
 
   @@id([userId, deviceId])
   @@map("refresh_token")
+}
+
+model BlockedFeedComment {
+  userId    String   @map("user_id") @db.Uuid
+  commentId String   @map("comment_id") @db.Uuid
+  createdAt DateTime @map("created_at")
+
+  user    User        @relation(fields: [userId], references: [id])
+  comment FeedComment @relation(fields: [commentId], references: [id])
+
+  @@unique([userId, commentId])
+  @@index([commentId])
+  @@map("blocked_feed_comment")
 }

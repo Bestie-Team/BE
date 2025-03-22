@@ -82,6 +82,9 @@ describe('GroupsReader', () => {
       const { groups } = result;
 
       expect(groups.length).toBe(myGroupParticipations.length - 1);
+      groups.forEach((group) => {
+        expect(group.id).not.toBe(myGroupParticipations[0].groupId);
+      });
     });
   });
 });

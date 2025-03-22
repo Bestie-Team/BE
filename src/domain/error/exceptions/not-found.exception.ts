@@ -1,5 +1,6 @@
 import { DomainException } from 'src/domain/error/exceptions/domain.exception';
 import {
+  NOT_FOUND_COMMENT_MESSAGE,
   NOT_FOUND_FEED_MESSAGE,
   NOT_FOUND_FRIEND_MESSAGE,
   NOT_FOUND_GATHERING_MESSAGE,
@@ -57,5 +58,11 @@ export class UserNotRegisteredException extends NotFoundException {
   constructor(data: UserInfo) {
     super('required register');
     this.body = data;
+  }
+}
+
+export class CommentNotFoundException extends NotFoundException {
+  constructor() {
+    super(NOT_FOUND_COMMENT_MESSAGE);
   }
 }

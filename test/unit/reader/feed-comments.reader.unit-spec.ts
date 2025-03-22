@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ClsModule } from 'nestjs-cls';
 import { clsOptions } from 'src/configs/cls/cls-options';
 import { FeedCommentsReader } from 'src/domain/components/feed-comment/feed-comment-reader';
-import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { PrismaModule } from 'src/infrastructure/prisma/prisma.module';
 import { PrismaService } from 'src/infrastructure/prisma/prisma.service';
 import { FeedCommentsComponentModule } from 'src/modules/feed-comment/feed-comments-component.module';
@@ -13,7 +12,7 @@ import {
   generateUserEntity,
 } from 'test/helpers/generators';
 
-describe('FeedsReader', () => {
+describe('FeedCommentsReader', () => {
   let feedCommentsReader: FeedCommentsReader;
   let db: PrismaService;
 

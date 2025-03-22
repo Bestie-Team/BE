@@ -11,7 +11,11 @@ import type {
 } from 'src/domain/types/user.types';
 import { SearchInput } from 'src/infrastructure/types/user.types';
 import { sql } from 'kysely';
-import { FriendStatus, GatheringParticipationStatus } from '@prisma/client';
+import {
+  FriendStatus,
+  GatheringParticipationStatus,
+  GroupParticipationStatus,
+} from '@prisma/client';
 import { FriendRequestStatus } from 'src/shared/types';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { TransactionHost } from '@nestjs-cls/transactional';
@@ -254,6 +258,11 @@ export class UsersPrismaRepository implements UsersRepository {
           .innerJoin('group as g', 'gp.group_id', 'g.id')
           .innerJoin('active_user as u', 'g.owner_id', 'u.id')
           .where('gp.participant_id', '=', idUuid)
+          .where(
+            'gp.status',
+            '=',
+            sql<GroupParticipationStatus>`${GroupParticipationStatus.ACCEPTED}::"GroupParticipationStatus"`,
+          )
           .select(({ fn }) => fn.countAll().as('group_count'))
           .as('group_count'),
       )

@@ -41,11 +41,14 @@ export class LoggingInterceptor implements NestInterceptor {
     const { ip, path, body, params, query, method } = req;
     const agent = req.header('user-agent') || 'unknown';
     const referer = req.header('referer') || 'unknown';
+    const forwarded = req.header('x-forwarded-for') || 'unknown';
+    const forwardedIp = forwarded ? forwarded.split(',')[0].trim() : req.ip;
+
     const status = res.statusCode;
 
     return {
       agent,
-      ip,
+      ip: process.env.NODE_ENV === 'production' ? forwardedIp : ip,
       request: `${method} ${path}`,
       referer,
       body,

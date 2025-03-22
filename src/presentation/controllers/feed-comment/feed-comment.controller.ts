@@ -20,6 +20,7 @@ import {
 import { FeedCommentCreationUseCase } from 'src/application/use-cases/feed-comment/feed-comment.use-case';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
+import { FeedCommentsReader } from 'src/domain/components/feed-comment/feed-comment-reader';
 import { FeedCommentsService } from 'src/domain/services/feed-comments/feed-comments.service';
 import { FeedCommentConverter } from 'src/presentation/converters/feed-comment/feed-comment.converters';
 import { CreateFeedCommentRequest } from 'src/presentation/dto/comment/request/create-feed-comment.request';
@@ -34,6 +35,7 @@ export class FeedCommentController {
   constructor(
     private readonly feedCommentService: FeedCommentsService,
     private readonly feedCommentCreationUseCase: FeedCommentCreationUseCase,
+    private readonly feedCommentReader: FeedCommentsReader,
   ) {}
 
   @ApiOperation({ summary: '피드 댓글 작성 ' })
@@ -55,8 +57,9 @@ export class FeedCommentController {
   @Get()
   async getComments(
     @Query('feedId', ParseUUIDPipe) feedId: string,
+    @CurrentUser() userId: string,
   ): Promise<FeedCommentResponse[]> {
-    const domain = await this.feedCommentService.readAll(feedId);
+    const domain = await this.feedCommentReader.readAll(feedId, userId);
     return FeedCommentConverter.toListDto(domain);
   }
 

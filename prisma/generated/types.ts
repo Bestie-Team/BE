@@ -104,6 +104,11 @@ export type BlockedFeed = {
   feed_id: string;
   created_at: Timestamp;
 };
+export type BlockedFeedComment = {
+  user_id: string;
+  comment_id: string;
+  created_at: Timestamp;
+};
 export type Feed = {
   id: string;
   writer_id: string;
@@ -230,6 +235,7 @@ export type DB = {
   active_gathering: ActiveGathering;
   active_user: ActiveUser;
   blocked_feed: BlockedFeed;
+  blocked_feed_comment: BlockedFeedComment;
   feed: Feed;
   feed_comment: FeedComment;
   feed_image: FeedImage;

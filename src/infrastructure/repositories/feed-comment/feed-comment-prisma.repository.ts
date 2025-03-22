@@ -17,7 +17,18 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
     });
   }
 
-  async findByFeedId(feedId: string): Promise<FeedComment[]> {
+  async findByFeedId(feedId: string, userId: string): Promise<FeedComment[]> {
+    const blockedComments = await this.txHost.tx.blockedFeedComment.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        commentId: true,
+      },
+    });
+
+    const blockedCommentIds = blockedComments.map((bc) => bc.commentId);
+
     return await this.txHost.tx.feedComment.findMany({
       select: {
         id: true,
@@ -35,6 +46,12 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
       where: {
         feedId,
         deletedAt: null,
+        writer: {
+          deletedAt: null,
+        },
+        id: {
+          notIn: blockedCommentIds,
+        },
       },
       orderBy: {
         createdAt: 'desc',

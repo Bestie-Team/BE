@@ -16,6 +16,7 @@ import { FriendFeedVisibilityEntity } from 'src/domain/entities/feed/friend-feed
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedCommentEntity } from 'src/domain/entities/feed-comment/feed-comment.entity';
 import { NotificationEntity } from 'src/domain/entities/notification/notification.entity';
+import { BlockedFeedCommentEntity } from 'src/domain/entities/feed-comment/blocked-feed-comment.entity';
 
 export const generateUserEntity = (
   email: string,
@@ -38,7 +39,7 @@ export const generateUserEntity = (
     },
     v4,
     stdDate,
-    updatedAt ? updatedAt : undefined,
+    updatedAt ? updatedAt : stdDate,
   );
 
 export const generateFriendEntity = (
@@ -163,4 +164,12 @@ export const generateNotificationEntity = (
     v4,
     stdDate,
   );
+};
+
+export const generateBlockedComment = (
+  commentId: string,
+  userId: string,
+  stdDate = new Date(),
+) => {
+  return BlockedFeedCommentEntity.create({ commentId, userId }, stdDate);
 };

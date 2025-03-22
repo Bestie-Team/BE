@@ -26,10 +26,6 @@ export class FeedCommentsService {
     await this.feedCommentRepository.save(comment);
   }
 
-  async readAll(feedId: string) {
-    return await this.feedCommentRepository.findByFeedId(feedId);
-  }
-
   async delete(id: string, userId: string) {
     const comment = await this.feedCommentRepository.findOneById(id);
     if (!comment) {

@@ -3,7 +3,7 @@ import { FeedComment } from 'src/domain/types/feed-comment.types';
 
 export interface FeedCommentRepository {
   save(data: FeedCommentEntity): Promise<void>;
-  findByFeedId(feedId: string): Promise<FeedComment[]>;
+  findByFeedId(feedId: string, userId: string): Promise<FeedComment[]>;
   findOneById(id: string): Promise<{ writerId: string } | null>;
   delete(id: string): Promise<void>;
 }

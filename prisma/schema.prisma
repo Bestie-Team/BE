@@ -234,9 +234,9 @@ model FeedComment {
   createdAt DateTime  @map("created_at")
   deletedAt DateTime? @map("deleted_at")
 
-  feed   Feed                 @relation(fields: [feedId], references: [id])
-  writer User                 @relation(fields: [writerId], references: [id])
-  bocked BlockedFeedComment[]
+  feed    Feed                 @relation(fields: [feedId], references: [id])
+  writer  User                 @relation(fields: [writerId], references: [id])
+  blocked BlockedFeedComment[]
 
   @@index([feedId])
   @@index([writerId])

@@ -275,7 +275,7 @@ model BlockedFeed {
   user User @relation(fields: [userId], references: [id])
   feed Feed @relation(fields: [feedId], references: [id])
 
-  @@unique([userId, feedId])
+  @@id([userId, feedId])
   @@index([feedId])
   @@map("blocked_feed")
 }
@@ -381,7 +381,7 @@ model BlockedFeedComment {
   user    User        @relation(fields: [userId], references: [id])
   comment FeedComment @relation(fields: [commentId], references: [id])
 
-  @@unique([userId, commentId])
+  @@id([userId, commentId])
   @@index([commentId])
   @@map("blocked_feed_comment")
 }

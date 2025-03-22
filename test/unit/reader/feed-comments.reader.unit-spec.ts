@@ -12,7 +12,7 @@ import {
   generateUserEntity,
 } from 'test/helpers/generators';
 
-describe('FeedsReader', () => {
+describe('FeedCommentsReader', () => {
   let feedCommentsReader: FeedCommentsReader;
   let db: PrismaService;
 

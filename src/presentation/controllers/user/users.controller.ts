@@ -8,11 +8,13 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -45,6 +47,7 @@ import { UsersReader } from 'src/domain/components/user/users-reader';
 import { UsersService } from 'src/domain/services/user/users.service';
 import { S3PresignedManager } from 'src/infrastructure/aws/s3/s3-presigned-manager';
 import { PresignedUrlResponse } from 'src/presentation/dto/file/response/presigned-url.response';
+import { cookieOptions } from 'src/configs/cookie/refresh-token-cookie.config';
 
 @ApiTags('/users')
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
@@ -224,11 +227,7 @@ export class UsersController {
     await this.usersWriter.updateNotificationToken(dto.token, userId);
   }
 
-  @ApiOperation({
-    summary: '탈퇴',
-    description:
-      '아직 실행은 하면 안 돼여, 삭제 정책 다른 곳에 반영 안 했어요~~',
-  })
+  @ApiOperation({ summary: '탈퇴' })
   @ApiResponse({
     status: 204,
     description: '탈퇴 성공',
@@ -237,7 +236,11 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
-  async withdraw(@CurrentUser() userId: string) {
+  async withdraw(
+    @CurrentUser() userId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     await this.usersService.withdraw(userId);
+    res.clearCookie('refresh_token', cookieOptions);
   }
 }

@@ -17,6 +17,7 @@ import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedCommentEntity } from 'src/domain/entities/feed-comment/feed-comment.entity';
 import { NotificationEntity } from 'src/domain/entities/notification/notification.entity';
 import { BlockedFeedCommentEntity } from 'src/domain/entities/feed-comment/blocked-feed-comment.entity';
+import { BlockedUserEntity } from 'src/domain/entities/user/blocked-user.entity';
 
 export const generateUserEntity = (
   email: string,
@@ -172,4 +173,12 @@ export const generateBlockedComment = (
   stdDate = new Date(),
 ) => {
   return BlockedFeedCommentEntity.create({ commentId, userId }, stdDate);
+};
+
+export const generateBlockedUser = (
+  blockerId: string,
+  blockedId: string,
+  stdDate = new Date(),
+) => {
+  return BlockedUserEntity.create({ blockerId, blockedId }, stdDate);
 };

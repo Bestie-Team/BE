@@ -166,6 +166,12 @@ export class UsersPrismaRepository implements UsersRepository {
         ELSE 'NONE'
       END`.as('status'), // 요청 상태 추가
       ])
+      .where('u.id', 'not in', (qb) =>
+        qb
+          .selectFrom('blocked_user')
+          .select('blocked_id')
+          .where('blocker_id', '=', userIdUuid),
+      )
       .where('u.account_id', 'like', `%${search}%`)
       .where('u.id', '!=', userIdUuid)
       .where(({ eb, or, and }) =>

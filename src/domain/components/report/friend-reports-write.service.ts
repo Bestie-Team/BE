@@ -8,12 +8,15 @@ import { ReportPrototype } from 'src/domain/types/report.types';
 import { GatheringInvitationsWriter } from 'src/domain/components/gathering/gathering-invitations-writer';
 import { FriendsReader } from 'src/domain/components/friend/friends-reader';
 import { FriendsWriter } from 'src/domain/components/friend/friends-writer';
+import { BlockedUsersRepository } from 'src/domain/interface/user/blocked-users.repository';
 
 @Injectable()
 export class FriendReportsWriteSerivce {
   constructor(
     @Inject(ReportsRepository)
     private readonly reportsRepository: ReportsRepository,
+    @Inject(BlockedUsersRepository)
+    private readonly blockedUsersRepository: BlockedUsersRepository,
     private readonly friendsReader: FriendsReader,
     private readonly friendsWriter: FriendsWriter,
     private readonly gatheringParticipationsWriter: GatheringInvitationsWriter,
@@ -29,20 +32,20 @@ export class FriendReportsWriteSerivce {
       throw new NotFoundException(IS_NOT_FRIEND_RELATION_MESSAGE);
     }
 
-    await this.reportTransaction(prototype, friendRelation.id);
+    await this.reportTransaction(prototype);
   }
 
   @Transactional()
-  private async reportTransaction(
-    prototype: ReportPrototype,
-    friendRelationId: string,
-  ) {
+  private async reportTransaction(prototype: ReportPrototype) {
     const { reportedId, reporterId } = prototype;
     await this.deleteAllPendingGatheringInvitation(reporterId, reportedId);
     await this.saveReport(prototype);
-    await this.friendsWriter.updateById(friendRelationId, {
-      status: 'REPORTED',
+    await this.blockedUsersRepository.save({
+      blockerId: reporterId,
+      blockedId: reportedId,
+      createdAt: new Date(),
     });
+    await this.friendsWriter.delete(reporterId, reportedId);
   }
 
   private async saveReport(prototype: ReportPrototype) {

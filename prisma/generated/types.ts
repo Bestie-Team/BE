@@ -109,6 +109,11 @@ export type BlockedFeedComment = {
   comment_id: string;
   created_at: Timestamp;
 };
+export type BlockedUser = {
+  blocker_id: string;
+  blocked_id: string;
+  created_at: Timestamp;
+};
 export type Feed = {
   id: string;
   writer_id: string;
@@ -236,6 +241,7 @@ export type DB = {
   active_user: ActiveUser;
   blocked_feed: BlockedFeed;
   blocked_feed_comment: BlockedFeedComment;
+  blocked_user: BlockedUser;
   feed: Feed;
   feed_comment: FeedComment;
   feed_image: FeedImage;

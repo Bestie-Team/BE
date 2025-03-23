@@ -14,6 +14,8 @@ import { FriendsComponentModule } from 'src/modules/friend/friends-componenet.mo
 import { GroupParticipationsModule } from 'src/modules/group/group-participations.module';
 import { BlockedFeedCommentRepository } from 'src/domain/interface/feed-comment/blocked-feed-comment.repository';
 import { BlockedFeedCommentPrismaRepository } from 'src/infrastructure/repositories/feed-comment/blocked-feed-comment-prisma.repository';
+import { BlockedUsersRepository } from 'src/domain/interface/user/blocked-users.repository';
+import { BlockedUsersPrismaRepository } from 'src/infrastructure/repositories/user/blocked-users-prisma.repository';
 
 @Module({
   imports: [
@@ -34,6 +36,10 @@ import { BlockedFeedCommentPrismaRepository } from 'src/infrastructure/repositor
     {
       provide: BlockedFeedCommentRepository,
       useClass: BlockedFeedCommentPrismaRepository,
+    },
+    {
+      provide: BlockedUsersRepository,
+      useClass: BlockedUsersPrismaRepository,
     },
   ],
 })

@@ -237,7 +237,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
-  async delete(@CurrentUser() userId: string) {
-    await this.usersWriter.delete(userId);
+  async withdraw(@CurrentUser() userId: string) {
+    await this.usersService.withdraw(userId);
   }
 }

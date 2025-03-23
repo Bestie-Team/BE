@@ -20,4 +20,8 @@ export class RefreshTokenWriter {
   async delete(userId: string, deviceId: string) {
     await this.refreshTokenRepository.delete(userId, deviceId);
   }
+
+  async deleteAll(userId: string) {
+    await this.refreshTokenRepository.deleteAll(userId);
+  }
 }

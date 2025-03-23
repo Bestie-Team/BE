@@ -1,4 +1,6 @@
+import { Transactional } from '@nestjs-cls/transactional';
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { RefreshTokenWriter } from 'src/domain/components/token/refresh-token-writer';
 import { UsersReader } from 'src/domain/components/user/users-reader';
 import { UsersWriter } from 'src/domain/components/user/users-writer';
 import { DuplicateAccountIdException } from 'src/domain/error/exceptions/conflice.exception';
@@ -11,6 +13,7 @@ export class UsersService {
   constructor(
     private readonly usersReader: UsersReader,
     private readonly usersWriter: UsersWriter,
+    private readonly refreshTokenWriter: RefreshTokenWriter,
   ) {}
 
   async changeProfileImage(userId: string, profileImageUrl: string) {
@@ -58,5 +61,11 @@ export class UsersService {
       }
       throw e;
     }
+  }
+
+  @Transactional()
+  async withdraw(userId: string) {
+    await this.usersWriter.delete(userId);
+    await this.refreshTokenWriter.deleteAll(userId);
   }
 }

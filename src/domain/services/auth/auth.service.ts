@@ -281,13 +281,19 @@ export class AuthService {
           throw new UserNotRegisteredException(oauthUserInfo);
         }
         if (user.provider !== provider) {
-          throw new RegisterdOtherPlatformException(oauthUserInfo);
+          throw new RegisterdOtherPlatformException({
+            ...oauthUserInfo,
+            provider: user.provider,
+          });
         }
         return user;
       }
 
       if (user.provider !== provider) {
-        throw new RegisterdOtherPlatformException(oauthUserInfo);
+        throw new RegisterdOtherPlatformException({
+          ...oauthUserInfo,
+          provider: user.provider,
+        });
       }
       return user;
     } catch (e: unknown) {

@@ -3,6 +3,7 @@ import {
   IsEmail,
   IsIn,
   IsNotEmpty,
+  IsString,
   IsUrl,
   Length,
   ValidateIf,
@@ -13,7 +14,7 @@ import { Provider } from '../../shared';
 
 export class RegisterRequest {
   @ApiProperty({ example: 'lighty@gmail.com' })
-  @IsEmail({}, { message: '이메일 형식이 아닙니다.' })
+  @IsString()
   readonly email: string;
 
   @ApiProperty({ example: '재은최' })

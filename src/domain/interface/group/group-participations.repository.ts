@@ -5,6 +5,7 @@ export interface GroupParticipationsRepository {
   save(data: GroupParticipationEntity): Promise<void>;
   saveMany(data: GroupParticipationEntity[]): Promise<void>;
   findByUserIds(
+    groupId: string,
     userIds: string[],
   ): Promise<{ id: string; status: GroupParticipationStatus }[]>;
   /**

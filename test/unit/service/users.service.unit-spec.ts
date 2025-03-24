@@ -1,8 +1,11 @@
 import { UnprocessableEntityException } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClsModule } from 'nestjs-cls';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { clsOptions } from 'src/configs/cls/cls-options';
+import { validationSchema } from 'src/configs/config-module/validation';
 import { RefreshTokenEntity } from 'src/domain/entities/token/refresh-token.entity';
 import { DuplicateAccountIdException } from 'src/domain/error/exceptions/conflice.exception';
 import { ACCOUNT_ID_CHANGE_COOLDOWN_MESSAGE } from 'src/domain/error/messages';
@@ -22,6 +25,20 @@ describe('UsersService', () => {
       imports: [
         UsersComponentModule,
         UsersModule,
+        // TODO 다른 클래스로 관련 기능 위임 후 제거
+        ConfigModule.forRoot({
+          isGlobal: true,
+          validationSchema,
+        }),
+        JwtModule.registerAsync({
+          global: true,
+          inject: [ConfigService],
+          useFactory: (config: ConfigService) => {
+            return {
+              secret: config.get<string>('JWT_SECRET_KEY'),
+            };
+          },
+        }),
         ClsModule.forRoot(clsOptions),
         PrismaModule,
       ],

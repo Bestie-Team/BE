@@ -63,7 +63,7 @@ export class GroupsService {
     participantIds: string[],
   ) {
     await this.friendsChecker.checkIsFriendAll(inviterId, participantIds);
-    await this.checkExisting(participantIds);
+    await this.checkExisting(groupId, participantIds);
     await this.checkMemberCount(groupId, participantIds.length);
 
     const stdDate = new Date();
@@ -81,8 +81,9 @@ export class GroupsService {
     }
   }
 
-  private async checkExisting(userIds: string[]) {
+  private async checkExisting(groupId: string, userIds: string[]) {
     const participations = await this.groupParticipationsReader.readMulti(
+      groupId,
       userIds,
     );
     participations.forEach((participation) => {

@@ -28,6 +28,7 @@ export class GroupParticipationsPrismaRepository
   }
 
   async findByUserIds(
+    groupId: string,
     userIds: string[],
   ): Promise<{ id: string; status: GroupParticipationStatus }[]> {
     return await this.txHost.tx.groupParticipation.findMany({
@@ -36,6 +37,7 @@ export class GroupParticipationsPrismaRepository
         status: true,
       },
       where: {
+        groupId,
         participantId: {
           in: userIds,
         },

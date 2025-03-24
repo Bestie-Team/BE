@@ -329,37 +329,39 @@ describe('GroupsController (e2e)', () => {
         },
       });
 
-      const users: User[] = [];
-      const friendRelations: Friend[] = [];
-      for (let i = 0; i < 10; i++) {
-        const user = await prisma.user.create({
-          data: generateUserEntity(
-            `test${i}@test.com`,
-            `account${i}_id`,
-            `이민수${i}`,
-          ),
-        });
-        users.push(user);
-      }
-      for (let i = 0; i < 10; i++) {
-        const friendRelation = await prisma.friend.create({
-          data: generateFriendEntity(loginedUser!.id, users[i].id, 'ACCEPTED'),
-        });
-        friendRelations.push(friendRelation);
-      }
-      const group = await prisma.group.create({
+      const users = Array.from({ length: 10 }, (_, i) =>
+        generateUserEntity(`test${i}@test.com`, `account${i}_id`, `이민수${i}`),
+      );
+      await prisma.user.createMany({ data: users });
+
+      const friendRelations = Array.from({ length: 10 }, (_, i) =>
+        generateFriendEntity(loginedUser!.id, users[i].id, 'ACCEPTED'),
+      );
+      await prisma.friend.createMany({ data: friendRelations });
+
+      const group1 = await prisma.group.create({
         data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹'),
+      });
+      const group2 = await prisma.group.create({
+        data: generateGroupEntity(loginedUser!.id, '멋쟁이 그룹2'),
       });
       const group1Participation1 = await prisma.groupParticipation.create({
         data: generateGroupParticipationEntity(
-          group.id,
+          group1.id,
           users[9].id,
+          new Date(),
+        ),
+      });
+      const group1Participation2 = await prisma.groupParticipation.create({
+        data: generateGroupParticipationEntity(
+          group2.id,
+          users[0].id,
           new Date(),
         ),
       });
       users.pop();
 
-      const groupId = group.id;
+      const groupId = group1.id;
       const newMemberIds = users.map((user) => user.id);
       const dto: AddGroupMemberRequest = {
         userIds: newMemberIds,

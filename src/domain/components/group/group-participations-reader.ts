@@ -8,8 +8,8 @@ export class GroupParticipationsReader {
     private readonly groupParticipationsRepository: GroupParticipationsRepository,
   ) {}
 
-  async readMulti(userIds: string[]) {
-    return this.groupParticipationsRepository.findByUserIds(userIds);
+  async readMulti(groupId: string, userIds: string[]) {
+    return this.groupParticipationsRepository.findByUserIds(groupId, userIds);
   }
 
   async readParticipants(groupId: string) {

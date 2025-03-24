@@ -23,7 +23,7 @@ export class AppleStrategy implements OauthStrategy {
     const verifedData = await this.verifyToken(token, key);
 
     return {
-      email: verifedData.email,
+      email: verifedData.sub,
       name: '',
       provider: 'APPLE',
     };

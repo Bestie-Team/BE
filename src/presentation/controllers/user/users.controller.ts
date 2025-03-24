@@ -48,6 +48,7 @@ import { UsersService } from 'src/domain/services/user/users.service';
 import { S3PresignedManager } from 'src/infrastructure/aws/s3/s3-presigned-manager';
 import { PresignedUrlResponse } from 'src/presentation/dto/file/response/presigned-url.response';
 import { cookieOptions } from 'src/configs/cookie/refresh-token-cookie.config';
+import { WithdrawRequest } from 'src/presentation/dto/user/request/withdraw.request';
 
 @ApiTags('/users')
 @ApiResponse({ status: 400, description: '입력값 검증 실패' })
@@ -238,9 +239,11 @@ export class UsersController {
   @Delete()
   async withdraw(
     @CurrentUser() userId: string,
+    @Body() dto: WithdrawRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    await this.usersService.withdraw(userId);
+    const { authorizationCode } = dto;
+    await this.usersService.withdraw(userId, authorizationCode);
     res.clearCookie('refresh_token', cookieOptions);
   }
 }

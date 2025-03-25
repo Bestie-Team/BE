@@ -90,7 +90,13 @@ describe('AuthService', () => {
           provider: 'GOOGLE',
           providerAccessToken: 'token',
         }),
-      ).rejects.toThrow(new RegisterdOtherPlatformException(mockUserInfo));
+      ).rejects.toThrow(
+        new RegisterdOtherPlatformException({
+          email: user.email,
+          name: user.name,
+          provider: user.provider,
+        }),
+      );
     });
 
     it('탈퇴한지 30일 이내에 로그인을 하는 경우 자동으로 복구하고 로그인한다.', async () => {

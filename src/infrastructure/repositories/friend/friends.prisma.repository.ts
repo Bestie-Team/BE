@@ -93,6 +93,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     }));
   }
 
+  // NOTE 현재 사용 X, 사용 시 쿼리 수정 필요.
   async findFriendsByAccountIdAndNameContaining(
     userId: string,
     searchInput: SearchInput,

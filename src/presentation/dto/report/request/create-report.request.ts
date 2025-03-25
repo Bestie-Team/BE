@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsUUID, Length } from 'class-validator';
+import { IsIn, IsUUID, Length, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ReportTypes } from '../../shared';
 
@@ -13,7 +13,7 @@ export class CreateReportRequest {
   readonly reportedId: string;
 
   @ApiProperty({ example: '자꾸 욕하고 조롱함.' })
-  @Length(2, 200, { message: '신고 사유는 2 ~ 200자만 가능합니다.' })
+  @MaxLength(200, { message: '신고 사유는 최대 200자까지 가능합니다.' })
   readonly reason: string;
 
   @ApiProperty({

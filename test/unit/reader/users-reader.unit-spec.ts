@@ -85,5 +85,21 @@ describe('UsersReader', () => {
 
       expect(searchedUsers.length).toBe(users.length);
     });
+
+    it('탈퇴한 회원은 검색되지 않는다.', async () => {
+      const deletedUser = users[0];
+      await db.user.update({
+        data: { deletedAt: new Date() },
+        where: { id: deletedUser.id },
+      });
+
+      const result = await usersReader.search(me.id, {
+        search: 'test',
+        paginationInput: { cursor: { name: '가', accountId: 'a' }, limit: 10 },
+      });
+      const { users: searchedUsers } = result;
+
+      expect(searchedUsers.length).toBe(users.length - 1);
+    });
   });
 });

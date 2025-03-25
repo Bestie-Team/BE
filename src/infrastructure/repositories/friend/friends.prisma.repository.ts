@@ -293,7 +293,14 @@ export class FriendsPrismaRepository implements FriendsRepository {
     return await this.txHost.tx.friend.count({
       where: {
         status: 'PENDING',
-        OR: [{ senderId: userId }, { receiverId: userId }],
+        OR: [
+          {
+            AND: [{ senderId: userId }, { receiver: { deletedAt: null } }],
+          },
+          {
+            AND: [{ receiverId: userId }, { sender: { deletedAt: null } }],
+          },
+        ],
       },
     });
   }

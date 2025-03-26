@@ -93,6 +93,7 @@ export class FriendsPrismaRepository implements FriendsRepository {
     }));
   }
 
+  // NOTE 현재 사용 X, 사용 시 쿼리 수정 필요.
   async findFriendsByAccountIdAndNameContaining(
     userId: string,
     searchInput: SearchInput,
@@ -293,7 +294,14 @@ export class FriendsPrismaRepository implements FriendsRepository {
     return await this.txHost.tx.friend.count({
       where: {
         status: 'PENDING',
-        OR: [{ senderId: userId }, { receiverId: userId }],
+        OR: [
+          {
+            AND: [{ senderId: userId }, { receiver: { deletedAt: null } }],
+          },
+          {
+            AND: [{ receiverId: userId }, { sender: { deletedAt: null } }],
+          },
+        ],
       },
     });
   }

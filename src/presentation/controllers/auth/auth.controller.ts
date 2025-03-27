@@ -134,11 +134,11 @@ export class AuthController {
   ): Promise<RefreshAccessResponse> {
     const deviceId = req.header('Device-ID') || null;
     const refreshToken = req.cookies['refresh_token'];
-    const data = await this.authService.refreshAccessToken(
+    const tokens = await this.authService.refreshAccessToken(
       refreshToken,
       deviceId,
     );
-    const { accessToken, refreshToken: newRefreshToken } = data;
+    const { accessToken, refreshToken: newRefreshToken } = tokens;
 
     res.cookie('refresh_token', newRefreshToken, cookieOptions);
 
@@ -157,5 +157,16 @@ export class AuthController {
   async logout(@CurrentUser() userId: string, @Req() req: Request) {
     const deviceId = req.header('Device-ID') || null;
     await this.authService.logout(userId, deviceId);
+  }
+
+  @Get('token')
+  async token() {
+    return this.authService.generateToken(
+      {
+        userId: '074a8268-5257-4f28-a4cd-e3698273cf93',
+        deviceId: 'test',
+      },
+      '30 days',
+    );
   }
 }

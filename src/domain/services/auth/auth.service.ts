@@ -306,6 +306,12 @@ export class AuthService {
 
   async logout(userId: string, deviceId: string | null) {
     this.validateDeviceId(deviceId);
+    await this.logoutTransaction(userId, deviceId);
+  }
+
+  @Transactional()
+  async logoutTransaction(userId: string, deviceId: string) {
     await this.refreshTokenWriter.delete(userId, deviceId);
+    await this.usersWriter.clearNotificationToken(userId);
   }
 }

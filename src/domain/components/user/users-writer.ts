@@ -37,6 +37,10 @@ export class UsersWriter {
     await this.usersRepository.update({ id, deletedAt: null });
   }
 
+  async clearNotificationToken(id: string) {
+    await this.usersRepository.update({ id, notificationToken: null });
+  }
+
   async delete(id: string) {
     await this.usersRepository.delete(id);
   }

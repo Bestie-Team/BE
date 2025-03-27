@@ -381,6 +381,7 @@ export class UsersPrismaRepository implements UsersRepository {
     await this.txHost.tx.user.update({
       data: {
         deletedAt: new Date(),
+        notificationToken: null,
       },
       where: {
         id,

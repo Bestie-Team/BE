@@ -161,7 +161,11 @@ describe('AuthController (e2e)', () => {
 
   describe('(DELETE) /auth/logout - 로그아웃', () => {
     it('로그아웃 정상 동작 ', async () => {
-      const { accessToken, deviceId } = await login(app);
+      const { accessToken, deviceId, accountId } = await login(app);
+      await prisma.user.updateMany({
+        data: { notificationToken: 'test token' },
+        where: { accountId },
+      });
 
       const response = await request(app.getHttpServer())
         .delete('/auth/logout')
@@ -170,9 +174,11 @@ describe('AuthController (e2e)', () => {
       const { status } = response;
 
       const token = await prisma.refreshToken.findMany();
+      const logoutUser = await prisma.user.findFirst({ where: { accountId } });
 
       expect(status).toEqual(204);
       expect(token.length).toEqual(0);
+      expect(logoutUser?.notificationToken).toBeNull();
     });
   });
 });

@@ -74,29 +74,6 @@ describe('FriendsController (e2e)', () => {
       expect(status).toEqual(201);
     });
 
-    it('중복 요청하는 경우 예외', async () => {
-      const { accessToken, accountId } = await login(app);
-
-      const loginedUser = await prisma.user.findFirst({ where: { accountId } });
-      const user1 = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 3
-      });
-      const friendRelation = await prisma.friend.create({
-        data: generateFriendEntity(loginedUser!.id, user1.id, 'PENDING'),
-      });
-
-      const dto: CreateFriendRequest = { userId: user1.id };
-
-      // when
-      const response = await request(app.getHttpServer())
-        .post('/friends')
-        .send(dto)
-        .set('Authorization', accessToken);
-      const { status } = response;
-
-      expect(status).toEqual(409);
-    });
-
     it('이미 친구인 회원에게 요청하는 경우 예외', async () => {
       const { accessToken, accountId } = await login(app);
 

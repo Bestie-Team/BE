@@ -99,6 +99,11 @@ export type ActiveUser = {
   updated_at: Timestamp;
   deleted_at: Timestamp | null;
 };
+export type Admin = {
+  id: string;
+  username: string;
+  password: string;
+};
 export type BlockedFeed = {
   user_id: string;
   feed_id: string;
@@ -239,6 +244,7 @@ export type DB = {
   active_feed_comment: ActiveFeedComment;
   active_gathering: ActiveGathering;
   active_user: ActiveUser;
+  admin: Admin;
   blocked_feed: BlockedFeed;
   blocked_feed_comment: BlockedFeedComment;
   blocked_user: BlockedUser;

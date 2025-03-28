@@ -105,6 +105,8 @@ model Admin {
   id       String @id @db.Uuid
   username String
   password String
+
+  @@map("admin")
 }
 
 view ActiveUser {

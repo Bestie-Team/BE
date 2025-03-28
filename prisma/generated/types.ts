@@ -244,7 +244,7 @@ export type DB = {
   active_feed_comment: ActiveFeedComment;
   active_gathering: ActiveGathering;
   active_user: ActiveUser;
-  Admin: Admin;
+  admin: Admin;
   blocked_feed: BlockedFeed;
   blocked_feed_comment: BlockedFeedComment;
   blocked_user: BlockedUser;

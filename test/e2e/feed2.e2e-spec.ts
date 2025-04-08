@@ -25,6 +25,7 @@ import { ResponseResult } from 'test/helpers/types';
 import { FeedListResponse } from 'src/presentation/dto/feed/response/feed-list.response';
 import { ListenersModule } from 'src/infrastructure/event/listeners/listeners.module';
 import { EmptyModule } from 'test/helpers/empty.module';
+import { FeedDetailResponse } from 'src/presentation/dto/feed/response/feed-detail.response';
 
 describe('FeedsController (e2e)', () => {
   let app: INestApplication;
@@ -562,6 +563,120 @@ describe('FeedsController (e2e)', () => {
 
       expect(status).toEqual(200);
       expect(feeds.length).toEqual(1);
+    });
+  });
+
+  describe('(GET) /feeds/:id - 피드 상세 조회', () => {
+    const users = Array.from({ length: 5 }, (_, i) =>
+      generateUserEntity(`test${i}@test.com`, `account${i}`),
+    );
+    const feedImages = Array.from({ length: 3 }, (_, i) =>
+      generateFeedImageEntity(i, `http://test${i}.com`),
+    );
+
+    let accessToken: string;
+    let accountId: string;
+    let loginedUser: any;
+
+    beforeEach(async () => {
+      await prisma.user.createMany({ data: users });
+
+      const loginResult = await login(app);
+      accessToken = loginResult.accessToken;
+      accountId = loginResult.accountId;
+      loginedUser = await prisma.user.findFirst({ where: { accountId } });
+    });
+
+    it('친구 피드 상세 조회 정상 동작', async () => {
+      const feed = generateFeedEntity(loginedUser!.id, null);
+
+      const visibilities = users.map((user) =>
+        generateFriendFeedVisibilityEntity(feed.id, user.id),
+      );
+
+      await prisma.feed.create({ data: feed });
+      await prisma.feedImage.createMany({
+        data: feedImages.map((image) => ({ feedId: feed.id, ...image })),
+      });
+      await prisma.friendFeedVisibility.createMany({ data: visibilities });
+
+      const response = (await request(app.getHttpServer())
+        .get(`/feeds/${feed.id}`)
+        .set(
+          'Authorization',
+          accessToken,
+        )) as ResponseResult<FeedDetailResponse>;
+      const { status, body } = response;
+      const { writer, withMembers, images } = body;
+
+      expect(status).toEqual(200);
+      expect(body.id).toEqual(feed.id);
+      expect(body.content).toEqual(feed.content);
+      expect(body.createdAt).toEqual(feed.createdAt.toISOString());
+      expect(body.gathering).toBeNull();
+
+      expect(writer.id).toEqual(loginedUser!.id);
+      expect(writer.name).toEqual(loginedUser!.name);
+      expect(writer.accountId).toEqual(loginedUser!.accountId);
+      expect(writer.profileImageUrl).toEqual(loginedUser!.profileImageUrl);
+
+      expect(images.length).toEqual(images.length);
+      expect(withMembers.length).toEqual(visibilities.length);
+    });
+
+    it('모임 피드 상세 조회 정상 동작', async () => {
+      const gathering = generateGatheringEntity(users[1].id);
+      const myParticipation = generateGatheringParticipationEntity(
+        gathering.id,
+        loginedUser!.id,
+        'ACCEPTED',
+      );
+      const gatheringParticipations = users.map((user) =>
+        generateGatheringParticipationEntity(gathering.id, user.id, 'ACCEPTED'),
+      );
+      const feed = generateFeedEntity(loginedUser!.id, gathering.id);
+
+      await prisma.gathering.create({ data: gathering });
+      await prisma.gatheringParticipation.createMany({
+        data: [...gatheringParticipations, myParticipation],
+      });
+      await prisma.feed.create({ data: feed });
+      await prisma.feedImage.createMany({
+        data: feedImages.map((image) => ({ feedId: feed.id, ...image })),
+      });
+
+      const response = (await request(app.getHttpServer())
+        .get(`/feeds/${feed.id}`)
+        .set(
+          'Authorization',
+          accessToken,
+        )) as ResponseResult<FeedDetailResponse>;
+      const { status, body } = response;
+      const { writer, withMembers, images, gathering: resGathering } = body;
+
+      expect(status).toEqual(200);
+      expect(body.id).toEqual(feed.id);
+      expect(body.content).toEqual(feed.content);
+      expect(body.createdAt).toEqual(feed.createdAt.toISOString());
+
+      expect(resGathering?.id).toEqual(gathering.id);
+      expect(resGathering?.name).toEqual(gathering.name);
+      expect(resGathering?.description).toEqual(gathering.description);
+      expect(resGathering?.invitationImageUrl).toEqual(
+        gathering.invitationImageUrl,
+      );
+      expect(resGathering?.gatheringDate).toEqual(
+        gathering.gatheringDate.toISOString(),
+      );
+
+      expect(writer.id).toEqual(loginedUser!.id);
+      expect(writer.name).toEqual(loginedUser!.name);
+      expect(writer.accountId).toEqual(loginedUser!.accountId);
+      expect(writer.profileImageUrl).toEqual(loginedUser!.profileImageUrl);
+
+      expect(images.length).toEqual(images.length);
+      expect(withMembers.length).toEqual(gatheringParticipations.length);
+      expect(withMembers.some((m: any) => m.id === writer.id)).toBeFalsy();
     });
   });
 

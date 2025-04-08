@@ -6,6 +6,7 @@ export interface FriendFeedVisibilitiesRepository {
   findVisibleUsersByFeedIds(feedIds: string[]): Promise<{
     [feedId: string]: User[];
   }>;
+  findVisibleUsersByFeedId(feedId: string): Promise<User[]>;
 }
 
 export const FriendFeedVisibilitiesRepository = Symbol(

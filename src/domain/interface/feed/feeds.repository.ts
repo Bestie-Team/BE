@@ -1,12 +1,17 @@
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
-import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
+import {
+  Feed,
+  FeedPaginationInput,
+  FeedDetail,
+} from 'src/domain/types/feed.types';
 import { DateIdPaginationInput } from 'src/shared/types';
 
 export interface FeedsRepository {
   save(data: FeedEntity, images: FeedImageEntity[]): Promise<void>;
   update(id: string, data: Partial<FeedEntity>): Promise<void>;
-  findOneById(id: string): Promise<{ writerId: string } | null>;
+  findDetailById(id: string): Promise<FeedDetail | null>;
+  findOneById(id: string): Promise<{ id: string; writerId: string } | null>;
   findOneByIdAndWriter(
     feedId: string,
     writerId: string,

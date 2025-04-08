@@ -55,4 +55,24 @@ export class FriendFeedVisibilitiesPrismaRepository
 
     return result;
   }
+
+  async findVisibleUsersByFeedId(feedId: string): Promise<User[]> {
+    const result = await this.txHost.tx.friendFeedVisibility.findMany({
+      select: {
+        user: {
+          select: {
+            id: true,
+            accountId: true,
+            name: true,
+            profileImageUrl: true,
+          },
+        },
+      },
+      where: {
+        feedId,
+      },
+    });
+
+    return result.map((data) => data.user);
+  }
 }

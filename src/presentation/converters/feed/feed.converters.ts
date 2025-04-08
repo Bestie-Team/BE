@@ -5,10 +5,10 @@ import { FeedListResponse } from 'src/presentation/dto/feed/response/feed-list.r
 
 export const feedConverter = {
   toDetailDto: (feed: FeedDetail, withMembers: User[]): FeedDetailResponse => {
-    const { gathering, createdAt } = feed;
+    const { gathering, createdAt, gatheringId, ...rest } = feed;
 
     return {
-      ...feed,
+      ...rest,
       withMembers: withMembers.filter((member) => member.id !== feed.writer.id),
       gathering: gathering
         ? { ...gathering, gatheringDate: gathering.gatheringDate.toISOString() }

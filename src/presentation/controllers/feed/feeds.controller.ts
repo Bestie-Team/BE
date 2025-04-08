@@ -30,6 +30,8 @@ import { CreateFeedImageMulterOptions } from 'src/configs/multer-s3/multer-optio
 import { BlockedFeedsService } from 'src/domain/components/feed/blocked-feeds.service';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
 import { FeedsWriter } from 'src/domain/components/feed/feeds-writer';
+import { FriendFeedVisibilityReader } from 'src/domain/components/friend-feed-visibility/friend-feed-visibility-reader';
+import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
 import { FeedsService } from 'src/domain/services/feed/feeds.service';
 import { S3PresignedManager } from 'src/infrastructure/aws/s3/s3-presigned-manager';
 import { feedConverter } from 'src/presentation/converters/feed/feed.converters';
@@ -38,6 +40,7 @@ import { CreateFriendFeedRequest } from 'src/presentation/dto/feed/request/creat
 import { CreateGatheringFeedRequest } from 'src/presentation/dto/feed/request/create-gathering-feed.request';
 import { FeedListRequest } from 'src/presentation/dto/feed/request/feed-list.request';
 import { UpdateFeedRequest } from 'src/presentation/dto/feed/request/update-feed.request';
+import { FeedDetailResponse } from 'src/presentation/dto/feed/response/feed-detail.response';
 import { FeedListResponse } from 'src/presentation/dto/feed/response/feed-list.response';
 import { FileListRequest } from 'src/presentation/dto/file/request/file-list.request';
 import { PresignedUrlResponse } from 'src/presentation/dto/file/response/presigned-url.response';
@@ -51,9 +54,11 @@ import { UploadImageListResponse } from 'src/presentation/dto/file/response/uplo
 export class FeedsController {
   constructor(
     private readonly feedsWriteService: FeedsWriter,
-    private readonly feedsReadService: FeedsReader,
+    private readonly feedsReader: FeedsReader,
     private readonly feedsService: FeedsService,
+    private readonly friendFeedVisibilityReader: FriendFeedVisibilityReader,
     private readonly blockedFeedsService: BlockedFeedsService,
+    private readonly gatheringsParticipationReader: GatheringInvitationsReader,
     private readonly s3PresignedManager: S3PresignedManager,
   ) {}
 
@@ -163,20 +168,6 @@ export class FeedsController {
     );
   }
 
-  @ApiOperation({ summary: '피드 목록 조회' })
-  @ApiResponse({
-    status: 200,
-    type: FeedListResponse,
-  })
-  @Get()
-  async getFeeds(
-    @Query() dto: FeedListRequest,
-    @CurrentUser() userId: string,
-  ): Promise<FeedListResponse> {
-    const domain = await this.feedsReadService.readAll(userId, dto);
-    return feedConverter.toListDto(domain);
-  }
-
   @ApiOperation({ summary: '자신이 작성한 피드 목록 조회' })
   @ApiResponse({
     status: 200,
@@ -187,7 +178,21 @@ export class FeedsController {
     @Query() dto: FeedListRequest,
     @CurrentUser() userId: string,
   ): Promise<FeedListResponse> {
-    const domain = await this.feedsReadService.readOwn(userId, dto);
+    const domain = await this.feedsReader.readOwn(userId, dto);
+    return feedConverter.toListDto(domain);
+  }
+
+  @ApiOperation({ summary: '피드 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    type: FeedListResponse,
+  })
+  @Get()
+  async getFeeds(
+    @Query() dto: FeedListRequest,
+    @CurrentUser() userId: string,
+  ): Promise<FeedListResponse> {
+    const domain = await this.feedsReader.readAll(userId, dto);
     return feedConverter.toListDto(domain);
   }
 
@@ -255,6 +260,23 @@ export class FeedsController {
   @Post(':feedId/block')
   async block(@Param('feedId') feedId: string, @CurrentUser() userId: string) {
     await this.blockedFeedsService.block(userId, feedId);
+  }
+
+  @ApiOperation({ summary: '피드 상세 조회' })
+  @ApiResponse({
+    status: 200,
+    type: FeedDetailResponse,
+  })
+  @Get(':id')
+  async getDetail(@Param('id') id: string): Promise<FeedDetailResponse> {
+    const feed = await this.feedsReader.readDetail(id);
+    const { gatheringId } = feed;
+
+    const withMembers = gatheringId
+      ? await this.gatheringsParticipationReader.readParticipants(gatheringId)
+      : await this.friendFeedVisibilityReader.readMembers(feed.id);
+
+    return feedConverter.toDetailDto(feed, withMembers);
   }
 
   @ApiOperation({ summary: '피드 숨김 해제' })

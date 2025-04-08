@@ -7,6 +7,7 @@ import { FriendsCheckerModule } from 'src/modules/friend/friends-chcker.module';
 import { GatheringsComponentModule } from 'src/modules/gathering/gatherings-component.module';
 import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
 import { S3Module } from 'src/infrastructure/aws/s3/s3.module';
+import { FriendFeedVisibilityComponentModule } from 'src/modules/friend-feed-visibility/friend-feed-visibility.component.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { S3Module } from 'src/infrastructure/aws/s3/s3.module';
     FriendsCheckerModule,
     GatheringsComponentModule,
     GatheringParticipationModules,
+    FriendFeedVisibilityComponentModule,
   ],
   controllers: [FeedsController],
   providers: [FeedsService],

@@ -26,6 +26,15 @@ export class FeedsReader {
     return feed;
   }
 
+  async readDetail(id: string) {
+    const feed = await this.feedsRepository.findDetailById(id);
+    if (!feed) {
+      throw new FeedNotFoundException();
+    }
+
+    return feed;
+  }
+
   async readOneByGatheringIdAndWriterId(gatheringId: string, writerId: string) {
     const feed = await this.feedsRepository.findOneByGatheringIdAndWriterId(
       gatheringId,

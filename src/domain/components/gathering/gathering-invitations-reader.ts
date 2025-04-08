@@ -65,4 +65,10 @@ export class GatheringInvitationsReader {
 
     return participation;
   }
+
+  async readParticipants(gatheringId: string) {
+    return await this.gatheringParticipationsRepository.findParticipants(
+      gatheringId,
+    );
+  }
 }

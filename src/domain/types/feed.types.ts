@@ -13,6 +13,24 @@ export interface CreateGatheringFeedInput {
   readonly gatheringId: string;
 }
 
+export interface FeedDetail {
+  readonly id: string;
+  readonly content: string;
+  readonly writer: User;
+  readonly gatheringId: string | null;
+  readonly createdAt: Date;
+  readonly images: string[];
+
+  readonly gathering: {
+    readonly id: string;
+    readonly name: string;
+    readonly gatheringDate: Date;
+    readonly description: string;
+    readonly invitationImageUrl: string;
+  } | null;
+  readonly commentCount: number;
+}
+
 export interface Feed {
   readonly id: string;
   readonly content: string;

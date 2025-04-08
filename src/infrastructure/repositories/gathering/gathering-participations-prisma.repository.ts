@@ -9,6 +9,7 @@ import {
   ReceivedGatheringInvitation,
   SentGatheringInvitation,
 } from 'src/domain/types/gathering.types';
+import { User } from 'src/domain/types/user.types';
 import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 import {
   GatheringParticipationStatus as SharedGatheringParticipationStatus,
@@ -215,6 +216,26 @@ export class GatheringParticipationsPrismaRepository
         participantId,
       },
     });
+  }
+
+  async findParticipants(gatheringId: string): Promise<User[]> {
+    const result = await this.txHost.tx.gatheringParticipation.findMany({
+      select: {
+        participant: {
+          select: {
+            id: true,
+            accountId: true,
+            name: true,
+            profileImageUrl: true,
+          },
+        },
+      },
+      where: {
+        gatheringId,
+      },
+    });
+
+    return result.map((data) => data.participant);
   }
 
   async updateStatus(

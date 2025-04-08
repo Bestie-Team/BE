@@ -6,7 +6,11 @@ import { SelectQueryBuilder, sql } from 'kysely';
 import { FeedImageEntity } from 'src/domain/entities/feed/feed-image.entity';
 import { FeedEntity } from 'src/domain/entities/feed/feed.entity';
 import { FeedsRepository } from 'src/domain/interface/feed/feeds.repository';
-import { Feed, FeedPaginationInput } from 'src/domain/types/feed.types';
+import {
+  Feed,
+  FeedPaginationInput,
+  FeedDetail,
+} from 'src/domain/types/feed.types';
 import { getKyselyUuid } from 'src/infrastructure/prisma/get-kysely-uuid';
 import { DateIdPaginationInput, Order } from 'src/shared/types';
 
@@ -38,9 +42,62 @@ export class FeedsPrismaRepository implements FeedsRepository {
     });
   }
 
-  async findOneById(id: string): Promise<{ writerId: string } | null> {
+  async findDetailById(id: string): Promise<FeedDetail | null> {
+    const result = await this.txHost.tx.feed.findUnique({
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        gatheringId: true,
+        _count: { select: { comments: true } },
+        writer: {
+          select: {
+            id: true,
+            name: true,
+            accountId: true,
+            profileImageUrl: true,
+          },
+        },
+        images: {
+          select: {
+            url: true,
+          },
+          orderBy: { index: 'asc' },
+        },
+        gathering: {
+          select: {
+            id: true,
+            name: true,
+            gatheringDate: true,
+            description: true,
+            invitationImageUrl: true,
+          },
+          where: { deletedAt: null },
+        },
+      },
+      where: { id, deletedAt: null },
+    });
+
+    if (!result) return null;
+
+    const { _count, ...feed } = result;
+
+    const images =
+      result.images.length === 0 ? [] : result.images.map((image) => image.url);
+    const commentCount = _count.comments;
+
+    return {
+      ...feed,
+      images,
+      commentCount,
+    };
+  }
+
+  async findOneById(
+    id: string,
+  ): Promise<{ id: string; writerId: string } | null> {
     return await this.txHost.tx.activeFeed.findUnique({
-      select: { writerId: true },
+      select: { id: true, writerId: true },
       where: { id },
     });
   }

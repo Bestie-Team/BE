@@ -3,6 +3,7 @@ import {
   ReceivedGatheringInvitation,
   SentGatheringInvitation,
 } from 'src/domain/types/gathering.types';
+import { User } from 'src/domain/types/user.types';
 import {
   GatheringParticipationStatus,
   PaginatedDateRangeInput,
@@ -27,6 +28,7 @@ export interface GatheringParticipationsRepository {
     gatheringId: string,
     participantId: string,
   ): Promise<{ id: string; status: GatheringParticipationStatus } | null>;
+  findParticipants(gatheringId: string): Promise<User[]>;
   updateStatus(
     invitationId: string,
     status: GatheringParticipationStatus,

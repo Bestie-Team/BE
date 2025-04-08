@@ -265,7 +265,7 @@ export class FeedsController {
   @ApiOperation({ summary: '피드 상세 조회' })
   @ApiResponse({
     status: 200,
-    type: FeedListResponse,
+    type: FeedDetailResponse,
   })
   @Get(':id')
   async getDetail(@Param('id') id: string): Promise<FeedDetailResponse> {

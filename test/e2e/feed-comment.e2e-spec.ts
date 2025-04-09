@@ -74,6 +74,29 @@ describe('FeedCommentController (e2e)', () => {
 
       expect(status).toEqual(201);
     });
+
+    it('자신을 맨션하는 경우 예외가 발생한다.', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const loginedUser = await prisma.user.findFirst({
+        where: { accountId },
+      });
+
+      const dto: CreateFeedCommentRequest = {
+        feedId: feed.id,
+        content: '난 댓글이야',
+        mentionedUserId: loginedUser!.id,
+      };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post(`/feed-comments`)
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(422);
+    });
   });
 
   describe('(GET) /feed-comments - 피드 댓글 목록 조회', () => {

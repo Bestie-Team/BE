@@ -1,6 +1,7 @@
 import { DomainException } from 'src/domain/error/exceptions/domain.exception';
 import {
   CANT_INVITE_REPORTED_USER,
+  CANT_MENTIONED_SELF,
   CANT_REQUEST_REPORTED_FRIEND_MESSAGE,
   FEED_CREATION_PERIOD_EXCEEDED_MESSAGE,
   GATHERING_CREATION_PAST_DATE_MESSAGE,
@@ -61,5 +62,11 @@ export class FeedCreationPeriodExceededException extends UnprocessableException 
 export class GatheringCreationPastDateException extends UnprocessableException {
   constructor() {
     super(GATHERING_CREATION_PAST_DATE_MESSAGE);
+  }
+}
+
+export class CannotMentionSelfException extends UnprocessableException {
+  constructor() {
+    super(CANT_MENTIONED_SELF);
   }
 }

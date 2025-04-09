@@ -7,6 +7,7 @@ import { FeedCommentsWriter } from 'src/domain/components/feed-comment/feed-comm
 import { FeedCommentsReader } from 'src/domain/components/feed-comment/feed-comment-reader';
 import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
 import { UsersReader } from 'src/domain/components/user/users-reader';
+import { CannotMentionSelfException } from 'src/domain/error/exceptions/unprocessable.exception';
 
 @Injectable()
 export class FeedCommentsService {
@@ -21,6 +22,7 @@ export class FeedCommentsService {
     const { feedId, writerId, mentionedUserId } = prototype;
 
     if (mentionedUserId) {
+      if (writerId === mentionedUserId) throw new CannotMentionSelfException();
       await this.usersReader.readOne(mentionedUserId);
     }
 

@@ -61,9 +61,7 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
           notIn: blockedCommentIds,
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
     });
   }
 

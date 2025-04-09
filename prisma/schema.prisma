@@ -54,6 +54,7 @@ enum NotificationTypes {
   FRIEND_REQUEST
   FRIEND_REQUEST_ACCEPTED
   FEED_COMMENT
+  FEED_COMMENT_MENTIONED
 }
 
 enum ReportTypes {
@@ -84,7 +85,8 @@ model User {
   feeds                  Feed[]
   ownedGroups            Group[]
   groupParticipation     GroupParticipation[]
-  feedComments           FeedComment[]
+  feedComments           FeedComment[]            @relation("WriterUser")
+  mentionedComment       FeedComment[]            @relation("MentionedUser")
   blockedFeeds           BlockedFeed[]
   sentFriendRequest      Friend[]                 @relation("SenderUser")
   receivedFriendRequests Friend[]                 @relation("ReceiverUser")
@@ -237,19 +239,22 @@ model FeedImage {
 }
 
 model FeedComment {
-  id        String    @id @db.Uuid
-  feedId    String    @map("feed_id") @db.Uuid
-  writerId  String    @map("writer_id") @db.Uuid
-  content   String
-  createdAt DateTime  @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
+  id              String    @id @db.Uuid
+  feedId          String    @map("feed_id") @db.Uuid
+  writerId        String    @map("writer_id") @db.Uuid
+  content         String
+  mentionedUserId String?   @map("mentioned_user_id") @db.Uuid
+  createdAt       DateTime  @map("created_at")
+  deletedAt       DateTime? @map("deleted_at")
 
-  feed    Feed                 @relation(fields: [feedId], references: [id])
-  writer  User                 @relation(fields: [writerId], references: [id])
-  blocked BlockedFeedComment[]
+  feed          Feed                 @relation(fields: [feedId], references: [id])
+  writer        User                 @relation(name: "WriterUser", fields: [writerId], references: [id])
+  mentionedUser User?                @relation(name: "MentionedUser", fields: [mentionedUserId], references: [id])
+  blocked       BlockedFeedComment[]
 
   @@index([feedId])
   @@index([writerId])
+  @@index([mentionedUserId])
   @@map("feed_comment")
 }
 

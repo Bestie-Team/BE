@@ -43,7 +43,7 @@ describe('FeedCommentsReader', () => {
     const feed = generateFeedEntity(commentWriter.id);
 
     const comments = Array.from({ length: 10 }, (_, i) =>
-      generateFeedCommentEntity(feed.id, commentWriter.id, `hi ${i}`),
+      generateFeedCommentEntity(feed.id, commentWriter.id, null, `hi ${i}`),
     );
 
     beforeEach(async () => {

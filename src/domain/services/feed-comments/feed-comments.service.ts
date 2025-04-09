@@ -5,18 +5,36 @@ import { FeedCommentPrototype } from 'src/domain/types/feed-comment.types';
 import { FORBIDDEN_MESSAGE } from 'src/domain/error/messages';
 import { FeedCommentsWriter } from 'src/domain/components/feed-comment/feed-comments-writer';
 import { FeedCommentsReader } from 'src/domain/components/feed-comment/feed-comment-reader';
+import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
+import { UsersReader } from 'src/domain/components/user/users-reader';
+import { CannotMentionSelfException } from 'src/domain/error/exceptions/unprocessable.exception';
 
 @Injectable()
 export class FeedCommentsService {
   constructor(
     private readonly feedCommentsWriter: FeedCommentsWriter,
     private readonly feedCommentsReader: FeedCommentsReader,
+    private readonly usersReader: UsersReader,
+    private readonly notifyManager: NotificationsManager,
   ) {}
 
   async create(prototype: FeedCommentPrototype) {
+    const { feedId, writerId, mentionedUserId } = prototype;
+
+    if (mentionedUserId) {
+      if (writerId === mentionedUserId) throw new CannotMentionSelfException();
+      await this.usersReader.readOne(mentionedUserId);
+    }
+
     const stdDate = new Date();
     const comment = FeedCommentEntity.create(prototype, v4, stdDate);
     await this.feedCommentsWriter.create(comment);
+
+    this.notifyManager.notifyFeedCommentAndMention(
+      feedId,
+      writerId,
+      mentionedUserId,
+    );
   }
 
   async delete(id: string, userId: string) {

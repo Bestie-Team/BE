@@ -42,3 +42,4 @@ export const GATHERING_CREATION_PAST_DATE_MESSAGE =
 export const MUST_HAVE_DEVICE_ID_MESSAGE = '디바이스 식별 값이 없습니다.';
 export const GROUP_MEMBER_LIMIT_EXCEEDED_MESSAGE =
   '그룹 멤버는 최대 10명까지 가능합니다.';
+export const CANT_MENTIONED_SELF = '자신을 맨션할 수 없습니다.';

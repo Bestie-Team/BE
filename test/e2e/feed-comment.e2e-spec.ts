@@ -48,19 +48,21 @@ describe('FeedCommentController (e2e)', () => {
   });
 
   describe('(POST) /feed-comments - 피드 댓글 작성', () => {
+    const user = generateUserEntity('test1@test.com', 'lighty_1', '김민수');
+    const feed = generateFeedEntity(user.id, null);
+
+    beforeEach(async () => {
+      await prisma.user.create({ data: user });
+      await prisma.feed.create({ data: feed });
+    });
+
     it('댓글 작성 정상 동작', async () => {
       const { accessToken } = await login(app);
-
-      const user = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 4
-      });
-      const feed = await prisma.feed.create({
-        data: generateFeedEntity(user.id, null),
-      });
 
       const dto: CreateFeedCommentRequest = {
         feedId: feed.id,
         content: '난 댓글이야',
+        mentionedUserId: user.id,
       };
 
       // when
@@ -72,37 +74,62 @@ describe('FeedCommentController (e2e)', () => {
 
       expect(status).toEqual(201);
     });
-  });
 
-  describe('(GET) /feed-comments - 피드 댓글 목록 조회', () => {
-    it('댓글 목록 조회 정상 동작', async () => {
+    it('자신을 맨션하는 경우 예외가 발생한다.', async () => {
       const { accessToken, accountId } = await login(app);
 
       const loginedUser = await prisma.user.findFirst({
-        where: {
-          accountId,
-        },
+        where: { accountId },
       });
-      const user = await prisma.user.create({
-        data: generateUserEntity('test1@test.com', 'lighty_1', '김민수'), // 4
+
+      const dto: CreateFeedCommentRequest = {
+        feedId: feed.id,
+        content: '난 댓글이야',
+        mentionedUserId: loginedUser!.id,
+      };
+
+      // when
+      const response = await request(app.getHttpServer())
+        .post(`/feed-comments`)
+        .send(dto)
+        .set('Authorization', accessToken);
+      const { status } = response;
+
+      expect(status).toEqual(422);
+    });
+  });
+
+  describe('(GET) /feed-comments - 피드 댓글 목록 조회', () => {
+    const users = Array.from({ length: 3 }, (_, i) =>
+      generateUserEntity(`test${i}@test.com`, `lighty_${i}`, '김민수'),
+    );
+    const feed = generateFeedEntity(users[0].id, null);
+
+    const comments = users.map((user, i) =>
+      generateFeedCommentEntity(
+        feed.id,
+        user.id,
+        user.id,
+        '댓글',
+        new Date(Date.now() + i),
+      ),
+    );
+
+    beforeEach(async () => {
+      await prisma.user.createMany({ data: users });
+      await prisma.feed.create({ data: feed });
+      await prisma.feedComment.createMany({ data: comments });
+    });
+
+    it('댓글 목록 조회 정상 동작', async () => {
+      const { accessToken, accountId } = await login(app);
+
+      const expectedComment = comments.sort((a, b) => {
+        if (a.createdAt > b.createdAt) return -1;
+        if (a.createdAt < b.createdAt) return 1;
+
+        return a.id.localeCompare(b.id);
       });
-      const feed = await prisma.feed.create({
-        data: generateFeedEntity(user.id, null),
-      });
-      const comments: FeedComment[] = [];
-      for (let i = 0; i < 10; i++) {
-        const comment = await prisma.feedComment.create({
-          data: generateFeedCommentEntity(
-            feed.id,
-            loginedUser!.id,
-            `난 댓글${i}`,
-            new Date(
-              `2025-01-${String(30 - i).padStart(2, '0')}T00:00:00.000Z`,
-            ),
-          ),
-        });
-        comments.push(comment);
-      }
 
       // when
       const response = await request(app.getHttpServer())
@@ -112,10 +139,13 @@ describe('FeedCommentController (e2e)', () => {
 
       expect(status).toEqual(200);
       body.forEach((comment, i) => {
-        expect(comment.id).toEqual(comments[i].id);
-        expect(comment.content).toEqual(comments[i].content);
-        expect(comment.createdAt).toEqual(comments[i].createdAt.toISOString());
-        expect(comment.writer.id).toEqual(loginedUser!.id);
+        expect(comment.id).toEqual(expectedComment[i].id);
+        expect(comment.content).toEqual(expectedComment[i].content);
+        expect(comment.createdAt).toEqual(
+          expectedComment[i].createdAt.toISOString(),
+        );
+        expect(comment.writer.id).toEqual(expectedComment[i].writerId);
+        expect(comment.writer.id).toEqual(comment.mentionedUser?.id);
       });
     });
   });

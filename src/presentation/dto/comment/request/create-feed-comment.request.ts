@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, Length } from 'class-validator';
+import { IsOptional, IsUUID, Length, ValidateIf } from 'class-validator';
 
 export class CreateFeedCommentRequest {
   @ApiProperty({ example: 'uuid' })
@@ -9,4 +9,10 @@ export class CreateFeedCommentRequest {
   @ApiProperty({ example: '나야 댓글' })
   @Length(1, 255, { message: 'content는 1 ~ 255자만 가능합니다.' })
   readonly content: string;
+
+  @ApiProperty({ example: 'uuid' })
+  @IsUUID(4)
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  readonly mentionedUserId: string | null;
 }

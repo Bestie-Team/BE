@@ -7,9 +7,18 @@ import { NotificationsController } from 'src/presentation/controllers/notificati
 import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
 import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
 import { NotificationsComponentModule } from 'src/modules/notification/notifications-component.module';
+import { FeedCommentsComponentModule } from 'src/modules/feed-comment/feed-comments-component.module';
+import { FeedsComponentModule } from 'src/modules/feed/feeds.component.module';
 
 @Module({
-  imports: [EventModule, UsersComponentModule, NotificationsComponentModule],
+  imports: [
+    EventModule,
+    UsersComponentModule,
+    NotificationsComponentModule,
+    // TODO use case 제거하면 다 뺴야함
+    FeedCommentsComponentModule,
+    FeedsComponentModule,
+  ],
   controllers: [NotificationsController],
   providers: [
     NotificationsService,

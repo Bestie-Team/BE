@@ -147,10 +147,15 @@ export const generateFriendFeedVisibilityEntity = (
 export const generateFeedCommentEntity = (
   feedId: string,
   writerId: string,
+  mentionedUserId: string | null = null,
   content = '안녕하세요? 안녕하세요! 안녕하세요; 안녕하세요 안녕',
   stdDate = new Date(),
 ): FeedCommentEntity =>
-  FeedCommentEntity.create({ content, feedId, writerId }, v4, stdDate);
+  FeedCommentEntity.create(
+    { content, feedId, writerId, mentionedUserId },
+    v4,
+    stdDate,
+  );
 
 export const generateNotificationEntity = (
   userId: string,

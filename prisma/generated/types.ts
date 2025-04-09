@@ -41,6 +41,7 @@ export const NotificationTypes = {
   FRIEND_REQUEST: 'FRIEND_REQUEST',
   FRIEND_REQUEST_ACCEPTED: 'FRIEND_REQUEST_ACCEPTED',
   FEED_COMMENT: 'FEED_COMMENT',
+  FEED_COMMENT_MENTIONED: 'FEED_COMMENT_MENTIONED',
 } as const;
 export type NotificationTypes =
   (typeof NotificationTypes)[keyof typeof NotificationTypes];
@@ -133,6 +134,7 @@ export type FeedComment = {
   feed_id: string;
   writer_id: string;
   content: string;
+  mentioned_user_id: string | null;
   created_at: Timestamp;
   deleted_at: Timestamp | null;
 };

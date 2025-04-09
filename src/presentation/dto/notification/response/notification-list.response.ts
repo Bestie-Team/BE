@@ -7,7 +7,8 @@ export type NotificationTypes =
   | 'GROUP_INVITATION'
   | 'FRIEND_REQUEST'
   | 'FRIEND_REQUEST_ACCEPTED'
-  | 'FEED_COMMENT';
+  | 'FEED_COMMENT'
+  | 'FEED_COMMENT_MENTIONED';
 
 export class Notification {
   @ApiProperty({ example: 'uuid' })

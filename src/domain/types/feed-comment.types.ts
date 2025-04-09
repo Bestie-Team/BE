@@ -4,6 +4,7 @@ export interface FeedCommentPrototype {
   readonly writerId: string;
   readonly feedId: string;
   readonly content: string;
+  readonly mentionedUserId: string | null;
 }
 
 export interface FeedComment {
@@ -11,4 +12,5 @@ export interface FeedComment {
   readonly writer: User;
   readonly content: string;
   readonly createdAt: Date;
+  readonly mentionedUser: User | null;
 }

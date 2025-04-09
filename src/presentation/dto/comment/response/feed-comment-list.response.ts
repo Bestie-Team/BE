@@ -13,4 +13,7 @@ export class FeedCommentResponse {
 
   @ApiProperty({ example: '2025-01-01T00:00:00.000Z' })
   readonly createdAt: string;
+
+  @ApiProperty({ type: User, description: '멘션된 사용자 정보' })
+  readonly mentionedUser: User | null;
 }

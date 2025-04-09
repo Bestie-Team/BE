@@ -42,6 +42,14 @@ export class FeedCommentPrismaRepository implements FeedCommentRepository {
             profileImageUrl: true,
           },
         },
+        mentionedUser: {
+          select: {
+            id: true,
+            accountId: true,
+            name: true,
+            profileImageUrl: true,
+          },
+        },
       },
       where: {
         feedId,

@@ -6,6 +6,7 @@ export class FeedCommentEntity {
     readonly writerId: string,
     readonly feedId: string,
     readonly content: string,
+    readonly mentionedUserId: string | null,
     readonly createdAt: Date,
   ) {}
 
@@ -19,6 +20,7 @@ export class FeedCommentEntity {
       proto.writerId,
       proto.feedId,
       proto.content,
+      proto.mentionedUserId,
       stdDate,
     );
   }

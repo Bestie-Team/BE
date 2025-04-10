@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClsModule } from 'nestjs-cls';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -44,6 +45,7 @@ describe('FeedsService', () => {
         FriendsCheckerModule,
         GatheringsComponentModule,
         GatheringParticipationModules,
+        EventEmitterModule.forRoot(),
         ClsModule.forRoot(clsOptions),
         PrismaModule,
       ],

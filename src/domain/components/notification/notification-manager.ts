@@ -85,11 +85,24 @@ export class NotificationsManager {
     try {
       const feed = await this.feedsReader.readOne(feedId);
 
-      // 자기 피드에 자기 댓글이면 무시
-      if (feed.writerId !== writerId) {
-        const feedWriter = await this.usersReader.readOne(feed.writerId);
-        const commentWriter = await this.usersReader.readOne(writerId);
+      const feedWriter = await this.usersReader.readOne(feed.writerId);
+      const commentWriter = await this.usersReader.readOne(writerId);
 
+      if (mentionUserId) {
+        const mentionedUser = await this.usersReader.readOne(mentionUserId);
+
+        await this.create({
+          message: `${commentWriter.name}님이 회원님을 멘션했어요!`,
+          type: 'FEED_COMMENT_MENTIONED',
+          title: '멘션',
+          userId: mentionedUser.id,
+          token: mentionedUser.notificationToken,
+          serviceNotificationConsent: mentionedUser.serviceNotificationConsent,
+          relatedId: feedId,
+        });
+      }
+
+      if (feed.writerId !== mentionUserId && feed.writerId !== writerId) {
         await this.create({
           message: `${commentWriter.name}님이 회원님의 피드에 댓글을 달았어요!`,
           type: 'FEED_COMMENT',
@@ -97,21 +110,6 @@ export class NotificationsManager {
           userId: feedWriter.id,
           token: feedWriter.notificationToken,
           serviceNotificationConsent: feedWriter.serviceNotificationConsent,
-          relatedId: feedId,
-        });
-      }
-
-      if (mentionUserId && mentionUserId !== writerId) {
-        const mentionedUser = await this.usersReader.readOne(mentionUserId);
-        const commentWriter = await this.usersReader.readOne(writerId);
-
-        await this.create({
-          message: `${commentWriter.name}님이 회원님을 댓글에서 멘션했어요!`,
-          type: 'FEED_COMMENT_MENTIONED',
-          title: '멘션',
-          userId: mentionedUser.id,
-          token: mentionedUser.notificationToken,
-          serviceNotificationConsent: mentionedUser.serviceNotificationConsent,
           relatedId: feedId,
         });
       }

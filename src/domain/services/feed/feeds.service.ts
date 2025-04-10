@@ -24,6 +24,7 @@ import {
   GatheringNotCompletedException,
 } from 'src/domain/error/exceptions/unprocessable.exception';
 import { DuplicateFeedException } from 'src/domain/error/exceptions/conflice.exception';
+import { NotificationsManager } from 'src/domain/components/notification/notification-manager';
 
 @Injectable()
 export class FeedsService {
@@ -33,6 +34,7 @@ export class FeedsService {
     private readonly friendsChecker: FriendsChecker,
     private readonly gatheringsReader: GatheringsReader,
     private readonly gatheringParticipationReader: GatheringInvitationsReader,
+    private readonly notifyManager: NotificationsManager,
   ) {}
 
   async createGatheringFeed(
@@ -74,6 +76,12 @@ export class FeedsService {
     );
 
     await this.friendFeedTransaction(feed, images, visibilities);
+
+    this.notifyManager.notifyFriendFeedCreation(
+      feed.id,
+      feed.writerId,
+      visibilities.map((visibilitie) => visibilitie.userId),
+    );
   }
 
   @Transactional()

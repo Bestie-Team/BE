@@ -8,6 +8,7 @@ import { GatheringsComponentModule } from 'src/modules/gathering/gatherings-comp
 import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
 import { S3Module } from 'src/infrastructure/aws/s3/s3.module';
 import { FriendFeedVisibilityComponentModule } from 'src/modules/friend-feed-visibility/friend-feed-visibility.component.module';
+import { NotificationsManagerModule } from 'src/modules/notification/notifications-manager.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { FriendFeedVisibilityComponentModule } from 'src/modules/friend-feed-vis
     GatheringsComponentModule,
     GatheringParticipationModules,
     FriendFeedVisibilityComponentModule,
+    NotificationsManagerModule,
   ],
   controllers: [FeedsController],
   providers: [FeedsService],

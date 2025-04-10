@@ -85,8 +85,10 @@ export class NotificationsManager {
     try {
       const feed = await this.feedsReader.readOne(feedId);
 
-      const feedWriter = await this.usersReader.readOne(feed.writerId);
-      const commentWriter = await this.usersReader.readOne(writerId);
+      const [feedWriter, commentWriter] = await Promise.all([
+        await this.usersReader.readOne(feed.writerId),
+        await this.usersReader.readOne(writerId),
+      ]);
 
       if (mentionUserId) {
         const mentionedUser = await this.usersReader.readOne(mentionUserId);
@@ -123,4 +125,48 @@ export class NotificationsManager {
       }
     }
   }
+
+  async notifyFriendFeedCreation(
+    feedId: string,
+    writerId: string,
+    taggedUserIds: string[],
+  ) {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
+
+    try {
+      if (taggedUserIds.length === 0) {
+        return;
+      }
+
+      const [writer, taggedUsers] = await Promise.all([
+        this.usersReader.readOne(writerId),
+        this.usersReader.readMulti(taggedUserIds),
+      ]);
+
+      const notificationPromises = taggedUsers.map(async (taggedUser) => {
+        await this.create({
+          message: `${writer.name} 님이 추억 피드를 올렸어요!`,
+          type: 'FRIEND_FEED_WRITEN',
+          title: '피드',
+          userId: taggedUser.id,
+          token: taggedUser.notificationToken,
+          serviceNotificationConsent: taggedUser.serviceNotificationConsent,
+          relatedId: feedId,
+        });
+      });
+
+      await Promise.all(notificationPromises);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        this.logger.error({
+          message: `피드 태그 알림 에러: ${e.message}`,
+          stack: e.stack,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  }
+  // async notifyGatheringFeedCreation() {}
 }

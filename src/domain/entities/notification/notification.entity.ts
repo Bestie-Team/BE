@@ -1,4 +1,4 @@
-import { NotificationTypes } from 'src/common/constant';
+import { NotificationTypes } from 'src/constants/notification-types';
 import { NotificationPrototype } from 'src/domain/types/notification.types';
 
 export class NotificationEntity {

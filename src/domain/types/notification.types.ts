@@ -1,4 +1,4 @@
-import { NotificationTypes } from 'src/common/constant';
+import { NotificationTypes } from 'src/constants/notification-types';
 
 export interface NotificationPrototype {
   readonly userId: string;

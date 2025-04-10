@@ -29,6 +29,13 @@ export interface GatheringParticipationsRepository {
     participantId: string,
   ): Promise<{ id: string; status: GatheringParticipationStatus } | null>;
   findParticipants(gatheringId: string): Promise<User[]>;
+  findParticipantsWithNoticeInfo(gatheringId: string): Promise<
+    (User & {
+      serviceNotificationConsent: boolean;
+      marketingNotificationConsent: boolean;
+      notificationToken: string | null;
+    })[]
+  >;
   updateStatus(
     invitationId: string,
     status: GatheringParticipationStatus,

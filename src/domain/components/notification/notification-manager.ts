@@ -6,6 +6,7 @@ import { EventPublisher } from 'src/infrastructure/event/publishers/interface/ev
 import { UsersReader } from 'src/domain/components/user/users-reader';
 import { NotificationsWriter } from 'src/domain/components/notification/notifications-writer';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
+import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
 
 @Injectable()
 export class NotificationsManager {
@@ -17,6 +18,7 @@ export class NotificationsManager {
     private readonly notificationsWriter: NotificationsWriter,
     private readonly usersReader: UsersReader,
     private readonly feedsReader: FeedsReader,
+    private readonly gatheringParticipationReader: GatheringInvitationsReader,
   ) {}
 
   async create(
@@ -168,5 +170,53 @@ export class NotificationsManager {
       }
     }
   }
-  // async notifyGatheringFeedCreation() {}
+
+  async notifyGatheringFeedCreation(
+    feedId: string,
+    writerId: string,
+    gatheringId: string,
+  ) {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
+
+    try {
+      const gatheringMembers =
+        await this.gatheringParticipationReader.readParticipantsWithNoticeInfo(
+          gatheringId,
+        );
+      const membersWithoutWriter = gatheringMembers.filter(
+        (member) => member.id !== writerId,
+      );
+
+      if (membersWithoutWriter.length === 0) {
+        return;
+      }
+
+      const writer = await this.usersReader.readOne(writerId);
+
+      const notificationPromises = membersWithoutWriter.map(async (member) => {
+        await this.create({
+          // TODO 친구, 모임 구분 필요
+          message: `${writer.name}님이 추억 피드를 올렸어요!`,
+          type: 'GATHERING_FEED_WRITEN',
+          title: '피드',
+          userId: member.id,
+          token: member.notificationToken,
+          serviceNotificationConsent: member.serviceNotificationConsent,
+          relatedId: feedId,
+        });
+      });
+
+      await Promise.all(notificationPromises);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        this.logger.error({
+          message: `모임 피드 알림 에러: ${e.message}`,
+          stack: e.stack,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  }
 }

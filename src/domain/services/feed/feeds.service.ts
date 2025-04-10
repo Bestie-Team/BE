@@ -56,6 +56,12 @@ export class FeedsService {
     );
 
     await this.feedsWriter.create(feed, images);
+
+    this.notifyManager.notifyGatheringFeedCreation(
+      feed.id,
+      feed.writerId,
+      gatheringId,
+    );
   }
 
   async createFriendFeed(

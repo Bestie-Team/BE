@@ -238,6 +238,35 @@ export class GatheringParticipationsPrismaRepository
     return result.map((data) => data.participant);
   }
 
+  async findParticipantsWithNoticeInfo(gatheringId: string): Promise<
+    (User & {
+      serviceNotificationConsent: boolean;
+      marketingNotificationConsent: boolean;
+      notificationToken: string | null;
+    })[]
+  > {
+    const result = await this.txHost.tx.gatheringParticipation.findMany({
+      select: {
+        participant: {
+          select: {
+            id: true,
+            accountId: true,
+            name: true,
+            profileImageUrl: true,
+            notificationToken: true,
+            serviceNotificationConsent: true,
+            marketingNotificationConsent: true,
+          },
+        },
+      },
+      where: {
+        gatheringId,
+      },
+    });
+
+    return result.map((data) => data.participant);
+  }
+
   async updateStatus(
     invitationId: string,
     status: SharedGatheringParticipationStatus,

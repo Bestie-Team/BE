@@ -71,4 +71,10 @@ export class GatheringInvitationsReader {
       gatheringId,
     );
   }
+
+  async readParticipantsWithNoticeInfo(gatheringId: string) {
+    return await this.gatheringParticipationsRepository.findParticipantsWithNoticeInfo(
+      gatheringId,
+    );
+  }
 }

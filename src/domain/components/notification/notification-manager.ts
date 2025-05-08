@@ -149,7 +149,7 @@ export class NotificationsManager {
 
       const notificationPromises = taggedUsers.map(async (taggedUser) => {
         await this.create({
-          message: `${writer.name} 님이 추억 피드를 올렸어요!`,
+          message: `${writer.name}님이 추억 피드를 올렸어요!`,
           type: 'FRIEND_FEED_WRITEN',
           title: '피드',
           userId: taggedUser.id,
@@ -197,8 +197,7 @@ export class NotificationsManager {
 
       const notificationPromises = membersWithoutWriter.map(async (member) => {
         await this.create({
-          // TODO 친구, 모임 구분 필요
-          message: `${writer.name}님이 추억 피드를 올렸어요!`,
+          message: `${writer.name}님이 약속 추억 피드를 올렸어요!`,
           type: 'GATHERING_FEED_WRITEN',
           title: '피드',
           userId: member.id,

@@ -42,6 +42,8 @@ export const NotificationTypes = {
   FRIEND_REQUEST_ACCEPTED: 'FRIEND_REQUEST_ACCEPTED',
   FEED_COMMENT: 'FEED_COMMENT',
   FEED_COMMENT_MENTIONED: 'FEED_COMMENT_MENTIONED',
+  FRIEND_FEED_WRITEN: 'FRIEND_FEED_WRITEN',
+  GATHERING_FEED_WRITEN: 'GATHERING_FEED_WRITEN',
 } as const;
 export type NotificationTypes =
   (typeof NotificationTypes)[keyof typeof NotificationTypes];

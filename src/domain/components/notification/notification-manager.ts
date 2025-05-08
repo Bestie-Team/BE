@@ -6,6 +6,7 @@ import { EventPublisher } from 'src/infrastructure/event/publishers/interface/ev
 import { UsersReader } from 'src/domain/components/user/users-reader';
 import { NotificationsWriter } from 'src/domain/components/notification/notifications-writer';
 import { FeedsReader } from 'src/domain/components/feed/feeds-reader';
+import { GatheringInvitationsReader } from 'src/domain/components/gathering/gathering-invitations-reader';
 
 @Injectable()
 export class NotificationsManager {
@@ -17,6 +18,7 @@ export class NotificationsManager {
     private readonly notificationsWriter: NotificationsWriter,
     private readonly usersReader: UsersReader,
     private readonly feedsReader: FeedsReader,
+    private readonly gatheringParticipationReader: GatheringInvitationsReader,
   ) {}
 
   async create(
@@ -85,11 +87,26 @@ export class NotificationsManager {
     try {
       const feed = await this.feedsReader.readOne(feedId);
 
-      // 자기 피드에 자기 댓글이면 무시
-      if (feed.writerId !== writerId) {
-        const feedWriter = await this.usersReader.readOne(feed.writerId);
-        const commentWriter = await this.usersReader.readOne(writerId);
+      const [feedWriter, commentWriter] = await Promise.all([
+        await this.usersReader.readOne(feed.writerId),
+        await this.usersReader.readOne(writerId),
+      ]);
 
+      if (mentionUserId) {
+        const mentionedUser = await this.usersReader.readOne(mentionUserId);
+
+        await this.create({
+          message: `${commentWriter.name}님이 회원님을 멘션했어요!`,
+          type: 'FEED_COMMENT_MENTIONED',
+          title: '멘션',
+          userId: mentionedUser.id,
+          token: mentionedUser.notificationToken,
+          serviceNotificationConsent: mentionedUser.serviceNotificationConsent,
+          relatedId: feedId,
+        });
+      }
+
+      if (feed.writerId !== mentionUserId && feed.writerId !== writerId) {
         await this.create({
           message: `${commentWriter.name}님이 회원님의 피드에 댓글을 달았어요!`,
           type: 'FEED_COMMENT',
@@ -100,25 +117,102 @@ export class NotificationsManager {
           relatedId: feedId,
         });
       }
-
-      if (mentionUserId && mentionUserId !== writerId) {
-        const mentionedUser = await this.usersReader.readOne(mentionUserId);
-        const commentWriter = await this.usersReader.readOne(writerId);
-
-        await this.create({
-          message: `${commentWriter.name}님이 회원님을 댓글에서 멘션했어요!`,
-          type: 'FEED_COMMENT_MENTIONED',
-          title: '멘션',
-          userId: mentionedUser.id,
-          token: mentionedUser.notificationToken,
-          serviceNotificationConsent: mentionedUser.serviceNotificationConsent,
-          relatedId: feedId,
-        });
-      }
     } catch (e: unknown) {
       if (e instanceof Error) {
         this.logger.log({
           message: `댓글 알림 에러: ${e.message}`,
+          stack: e.stack,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
+  async notifyFriendFeedCreation(
+    feedId: string,
+    writerId: string,
+    taggedUserIds: string[],
+  ) {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
+
+    try {
+      if (taggedUserIds.length === 0) {
+        return;
+      }
+
+      const [writer, taggedUsers] = await Promise.all([
+        this.usersReader.readOne(writerId),
+        this.usersReader.readMulti(taggedUserIds),
+      ]);
+
+      const notificationPromises = taggedUsers.map(async (taggedUser) => {
+        await this.create({
+          message: `${writer.name} 님이 추억 피드를 올렸어요!`,
+          type: 'FRIEND_FEED_WRITEN',
+          title: '피드',
+          userId: taggedUser.id,
+          token: taggedUser.notificationToken,
+          serviceNotificationConsent: taggedUser.serviceNotificationConsent,
+          relatedId: feedId,
+        });
+      });
+
+      await Promise.all(notificationPromises);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        this.logger.error({
+          message: `피드 태그 알림 에러: ${e.message}`,
+          stack: e.stack,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  }
+
+  async notifyGatheringFeedCreation(
+    feedId: string,
+    writerId: string,
+    gatheringId: string,
+  ) {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
+
+    try {
+      const gatheringMembers =
+        await this.gatheringParticipationReader.readParticipantsWithNoticeInfo(
+          gatheringId,
+        );
+      const membersWithoutWriter = gatheringMembers.filter(
+        (member) => member.id !== writerId,
+      );
+
+      if (membersWithoutWriter.length === 0) {
+        return;
+      }
+
+      const writer = await this.usersReader.readOne(writerId);
+
+      const notificationPromises = membersWithoutWriter.map(async (member) => {
+        await this.create({
+          // TODO 친구, 모임 구분 필요
+          message: `${writer.name}님이 추억 피드를 올렸어요!`,
+          type: 'GATHERING_FEED_WRITEN',
+          title: '피드',
+          userId: member.id,
+          token: member.notificationToken,
+          serviceNotificationConsent: member.serviceNotificationConsent,
+          relatedId: feedId,
+        });
+      });
+
+      await Promise.all(notificationPromises);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        this.logger.error({
+          message: `모임 피드 알림 에러: ${e.message}`,
           stack: e.stack,
           timestamp: new Date().toISOString(),
         });

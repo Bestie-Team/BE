@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { FeedCommentCreationUseCase } from 'src/application/use-cases/feed-comment/feed-comment.use-case';
 import { FeedCommentsService } from 'src/domain/services/feed-comments/feed-comments.service';
 import { FeedCommentsComponentModule } from 'src/modules/feed-comment/feed-comments-component.module';
 import { FeedsComponentModule } from 'src/modules/feed/feeds.component.module';
@@ -17,6 +16,6 @@ import { FeedCommentController } from 'src/presentation/controllers/feed-comment
     FeedCommentsComponentModule,
   ],
   controllers: [FeedCommentController],
-  providers: [FeedCommentCreationUseCase, FeedCommentsService],
+  providers: [FeedCommentsService],
 })
 export class FeedCommentsModule {}

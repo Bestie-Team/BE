@@ -8,7 +8,9 @@ export type NotificationTypes =
   | 'FRIEND_REQUEST'
   | 'FRIEND_REQUEST_ACCEPTED'
   | 'FEED_COMMENT'
-  | 'FEED_COMMENT_MENTIONED';
+  | 'FEED_COMMENT_MENTIONED'
+  | 'FRIEND_FEED_WRITEN'
+  | 'GATHERING_FEED_WRITEN';
 
 export class Notification {
   @ApiProperty({ example: 'uuid' })
@@ -27,6 +29,8 @@ export class Notification {
       'FRIEND_REQUEST',
       'FRIEND_REQUEST_ACCEPTED',
       'FEED_COMMENT',
+      'FRIEND_FEED_WRITEN',
+      'GATHERING_FEED_WRITEN',
     ],
   })
   readonly type: NotificationTypes;

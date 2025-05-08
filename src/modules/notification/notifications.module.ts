@@ -9,15 +9,18 @@ import { UsersComponentModule } from 'src/modules/user/usesr.component.module';
 import { NotificationsComponentModule } from 'src/modules/notification/notifications-component.module';
 import { FeedCommentsComponentModule } from 'src/modules/feed-comment/feed-comments-component.module';
 import { FeedsComponentModule } from 'src/modules/feed/feeds.component.module';
+import { GatheringParticipationModules } from 'src/modules/gathering/gathering-participation.module';
 
 @Module({
   imports: [
     EventModule,
     UsersComponentModule,
     NotificationsComponentModule,
+
     // TODO use case 제거하면 다 뺴야함
     FeedCommentsComponentModule,
     FeedsComponentModule,
+    GatheringParticipationModules,
   ],
   controllers: [NotificationsController],
   providers: [

@@ -17,7 +17,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { FeedCommentCreationUseCase } from 'src/application/use-cases/feed-comment/feed-comment.use-case';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { FeedCommentsReader } from 'src/domain/components/feed-comment/feed-comment-reader';
@@ -34,7 +33,6 @@ import { FeedCommentResponse } from 'src/presentation/dto/comment/response/feed-
 export class FeedCommentController {
   constructor(
     private readonly feedCommentService: FeedCommentsService,
-    private readonly feedCommentCreationUseCase: FeedCommentCreationUseCase,
     private readonly feedCommentReader: FeedCommentsReader,
   ) {}
 
@@ -45,7 +43,7 @@ export class FeedCommentController {
     @Body() dto: CreateFeedCommentRequest,
     @CurrentUser() userId: string,
   ) {
-    await this.feedCommentCreationUseCase.execute({ ...dto, writerId: userId });
+    await this.feedCommentService.create({ ...dto, writerId: userId });
   }
 
   @ApiOperation({ summary: '피드 댓글 조회' })

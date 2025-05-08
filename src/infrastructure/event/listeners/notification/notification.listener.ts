@@ -30,6 +30,14 @@ export class NotificationListener {
           body,
         },
       })
+      .then(() => {
+        this.logger.log({
+          message: '알림 전송 완료',
+          title,
+          body,
+          timestamp: new Date().toISOString(),
+        });
+      })
       .catch((e) => {
         this.logger.log({
           message: `알림 전송 실패: ${e.message}`,
